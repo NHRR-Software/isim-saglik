@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "İsim Sağlık",
+    "slug": "isim-saglik",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/logo.png",
+    "scheme": "isim-saglik",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    
+
+    "splash": {
+      "backgroundColor": "#ffffff",
+      "resizeMode": "contain",
+      "image": null
+    },
+    
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sirket.isimsaglik"
+    },
+    "android": {
+      "package": "com.sirket.isimsaglik",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/logo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/logo.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
