@@ -1,0 +1,6 @@
+@IsimSaglik.API_HostAddress = http://localhost:5187
+
+GET {{IsimSaglik.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
