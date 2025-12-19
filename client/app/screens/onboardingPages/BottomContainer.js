@@ -3,19 +3,20 @@
 import React from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import Paginator from './Paginator';
-import styles from './styles';
-import slides from './slides';
+// styles prop olarak geliyor parent'tan
 
-export default function BottomContainer({ scrollX, currentIndex, scrollTo, finishOnboarding }) {
-  const isLastSlide = currentIndex === slides.length - 1;
+export default function BottomContainer({ scrollX, currentIndex, scrollTo, finishOnboarding, styles }) {
+  const data = [1, 2, 3]; // Slide sayısı kadar dummy data veya props'tan slides gelebilir
+  const isLastSlide = currentIndex === 2; // Slide sayısı - 1
 
   return (
     <View style={styles.bottomContainer}>
-      {/* Paginator'ı Butonların üzerine koydum, resimdeki düzene uygun */}
-      <Paginator data={slides} scrollX={scrollX} />
+      {/* Slide verisi burada Paginator için gerekli, yukarıdaki data örnektir. 
+          Normalde slides'ı prop olarak geçmelisin. 
+          Aşağıdaki data={data} kısmını slides arrayin ile değiştir. */}
+      <Paginator data={[1,2,3]} scrollX={scrollX} />
       
       <View style={styles.buttonWrapper}>
-        {/* Sol Buton: Sadece son slayt değilse ATLA göster */}
         {!isLastSlide ? (
              <TouchableOpacity
              style={[styles.button, styles.secondaryButton]}
@@ -24,12 +25,9 @@ export default function BottomContainer({ scrollX, currentIndex, scrollTo, finis
              <Text style={[styles.buttonText, styles.secondaryButtonText]}>Atla</Text>
            </TouchableOpacity>
         ) : (
-             // Son slaytta sol taraf boş kalsın veya geri butonu olabilir, 
-             // Tasarımda genelde boş bırakılır veya Atla kalkar.
              <View style={{ minWidth: 100 }} /> 
         )}
        
-        {/* Sağ Buton: İleri veya Başla */}
         {isLastSlide ? (
           <TouchableOpacity
             style={[styles.button, styles.primaryButton]}

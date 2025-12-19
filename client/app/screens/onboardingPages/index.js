@@ -1,13 +1,17 @@
 // app/screens/onboardingPages/index.js
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { View, FlatList, Animated } from 'react-native';
 import slides from './slides';
-import styles from './styles';
+import { createOnboardingStyles } from './styles'; // Fonksiyonu import ettik
 import OnboardingItem from './OnboardingItem';
 import BottomContainer from './BottomContainer';
+import { useTheme } from '../../context/ThemeContext'; // Tema Hook'u
 
-const OnboardingScreen = ({ onFinish }) => { // onFinish prop'u navigation için önemli
+const OnboardingScreen = ({ onFinish }) => {
+  const { colors } = useTheme(); // Renkleri çek
+  const styles = useMemo(() => createOnboardingStyles(colors), [colors]); // Stilleri oluştur
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
   const slidesRef = useRef(null);
@@ -27,11 +31,9 @@ const OnboardingScreen = ({ onFinish }) => { // onFinish prop'u navigation için
   };
 
   const finishOnboarding = () => {
-    console.log("Onboarding Bitti");
     if (onFinish) {
       onFinish();
     }
-    // Burada router.replace('/home') gibi bir işlem de yapılabilir.
   };
 
   return (
@@ -43,7 +45,8 @@ const OnboardingScreen = ({ onFinish }) => { // onFinish prop'u navigation için
             <OnboardingItem 
               item={item} 
               index={index} 
-              currentIndex={currentIndex} 
+              currentIndex={currentIndex}
+              styles={styles} // Stilleri prop olarak geçiyoruz
             />
           )}
           keyExtractor={(item) => item.id}
@@ -67,6 +70,7 @@ const OnboardingScreen = ({ onFinish }) => { // onFinish prop'u navigation için
         currentIndex={currentIndex}
         scrollTo={scrollTo}
         finishOnboarding={finishOnboarding}
+        styles={styles} // Stilleri prop olarak geçiyoruz
       />
     </View>
   );

@@ -8,19 +8,19 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-  Dimensions, // Ekran boyutunu almak için ekledik
+  Dimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
 import AuthInput from "../../components/ui/AuthInput";
-import { colors } from "../../app/styles/theme/colors";
+import { useTheme } from "../../app/context/ThemeContext"; // Hook
 
 const { height } = Dimensions.get("window");
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { colors } = useTheme(); // Renkler
 
   const handleLogin = () => {
-    // Giriş başarılı, profil oluşturma sayfasına git
     router.replace("/setup/user-info");
   };
 
@@ -30,20 +30,22 @@ export default function LoginScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={styles.scrollContainer}
+      contentContainerStyle={[
+        styles.scrollContainer,
+        { backgroundColor: colors.background.default },
+      ]}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.container}>
-        {/* Üst Kısım: Resim - BÜYÜTÜLDÜ */}
         <Image
           source={require("../../assets/images/onboarding/slide1.png")}
           style={styles.image}
         />
 
-        {/* Başlık */}
-        <Text style={styles.title}>Giriş Yap</Text>
+        <Text style={[styles.title, { color: colors.primary.main }]}>
+          Giriş Yap
+        </Text>
 
-        {/* Form Alanları */}
         <View style={styles.form}>
           <AuthInput
             iconName="mail-outline"
@@ -57,17 +59,26 @@ export default function LoginScreen() {
             secureTextEntry
           />
 
-          {/* Giriş Butonu */}
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Giriş Yap</Text>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: colors.primary.main }]}
+            onPress={handleLogin}
+          >
+            <Text
+              style={[styles.buttonText, { color: colors.primary.contrast }]}
+            >
+              Giriş Yap
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Alt Footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Bir firmanız mı var? </Text>
+          <Text style={[styles.footerText, { color: colors.text.secondary }]}>
+            Bir firmanız mı var?{" "}
+          </Text>
           <TouchableOpacity onPress={handleRegisterRoute}>
-            <Text style={styles.linkText}>Firma Hesabı Oluşturun</Text>
+            <Text style={[styles.linkText, { color: colors.primary.main }]}>
+              Firma Hesabı Oluşturun
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -78,7 +89,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
-    backgroundColor: colors.background.default,
   },
   container: {
     flex: 1,
@@ -88,7 +98,6 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    // YENİ: Ekran yüksekliğinin %40'ı kadar yer kaplasın (Baya büyük)
     height: height * 0.4,
     resizeMode: "contain",
     marginBottom: 10,
@@ -97,26 +106,22 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "bold",
-    color: colors.primary.main,
     marginBottom: 30,
   },
   form: {
     width: "100%",
   },
   button: {
-    backgroundColor: colors.primary.main,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
     marginTop: 10,
-    shadowColor: colors.primary.main,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 5,
   },
   buttonText: {
-    color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
   },
@@ -127,11 +132,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   footerText: {
-    color: colors.text.secondary,
     fontSize: 16,
   },
   linkText: {
-    color: colors.primary.main,
     fontWeight: "bold",
     fontSize: 16,
   },

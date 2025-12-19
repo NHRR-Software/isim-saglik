@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+// app/setup/user-info.tsx
+
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -8,11 +10,10 @@ import {
   ScrollView,
   Modal,
   FlatList,
-  TouchableWithoutFeedback,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { colors } from "../../app/styles/theme/colors";
+import { useTheme } from "../../app/context/ThemeContext"; // YENİ: Theme Hook
 
 // Kan Grubu Seçenekleri
 const BLOOD_TYPES = [
@@ -28,25 +29,24 @@ const BLOOD_TYPES = [
 
 export default function UserInfoScreen() {
   const router = useRouter();
+  const { colors } = useTheme(); // Renkleri çekiyoruz
+  const styles = useMemo(() => createStyles(colors), [colors]); // Stilleri oluşturuyoruz
 
   // State'ler
   const [bloodType, setBloodType] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
-  const [hasDisease, setHasDisease] = useState<boolean | null>(null); // null: seçilmedi, true: evet, false: hayır
+  const [hasDisease, setHasDisease] = useState<boolean | null>(null);
   const [diseaseDescription, setDiseaseDescription] = useState("");
-
-  // Dropdown Modal Kontrolü
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleContinue = () => {
-    // Burada verileri kaydedebilirsin
-    console.log({ bloodType, height, weight, hasDisease, diseaseDescription });
+    // İşçi Ana Sayfasına Yönlendir
+    router.replace("/(worker)");
   };
 
-  // --- BİLEŞENLER (Kod tekrarını önlemek için) ---
+  // --- BİLEŞENLER ---
 
-  // 1. Özel Input Bileşeni (Label Üstte)
   const LabelInput = ({
     label,
     placeholder,
@@ -60,7 +60,7 @@ export default function UserInfoScreen() {
       <TextInput
         style={[styles.input, multiline && styles.textArea]}
         placeholder={placeholder}
-        placeholderTextColor={colors.text.secondary}
+        placeholderTextColor={colors.text.secondary} // Dinamik placeholder rengi
         value={value}
         onChangeText={onChangeText}
         keyboardType={keyboardType}
@@ -69,7 +69,6 @@ export default function UserInfoScreen() {
     </View>
   );
 
-  // 2. Radio Button Bileşeni
   const RadioOption = ({ label, selected, onSelect }: any) => (
     <TouchableOpacity
       style={styles.radioContainer}
@@ -151,8 +150,7 @@ export default function UserInfoScreen() {
           </View>
         </View>
 
-        {/* --- CONDITIONAL RENDERING (Şartlı Alan) --- */}
-        {/* Sadece "Evet" seçilirse bu alan gözükür */}
+        {/* --- CONDITIONAL RENDERING --- */}
         {hasDisease === true && (
           <View style={styles.fadeContainer}>
             <TextInput
@@ -172,7 +170,7 @@ export default function UserInfoScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* --- DROPDOWN MODAL (Liste Seçimi) --- */}
+      {/* --- DROPDOWN MODAL --- */}
       <Modal
         visible={isDropdownOpen}
         transparent={true}
@@ -225,165 +223,166 @@ export default function UserInfoScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  mainContainer: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  scrollContainer: {
-    padding: 24,
-    paddingTop: 60, // Üstten biraz boşluk
-    paddingBottom: 40,
-  },
-  pageTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: colors.primary.main,
-    marginBottom: 30,
-  },
+// Stilleri fonksiyon haline getirdik
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    mainContainer: {
+      flex: 1,
+      backgroundColor: colors.background.default, // Dinamik
+    },
+    scrollContainer: {
+      padding: 24,
+      paddingTop: 60,
+      paddingBottom: 40,
+    },
+    pageTitle: {
+      fontSize: 24,
+      fontWeight: "bold",
+      color: colors.primary.main, // Dinamik
+      marginBottom: 30,
+    },
 
-  // Input Grupları
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    color: colors.text.secondary, // Gri Label
-    fontWeight: "600",
-    marginBottom: 12,
-    marginLeft: 4,
-  },
-  input: {
-    backgroundColor: colors.neutral.input, // Resimdeki açık mavi arka plan (#E7EFFF)
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: colors.text.main,
-    borderWidth: 1,
-    borderColor: "transparent", // İstersen çok hafif border verebilirsin
-  },
-  textArea: {
-    height: 200,
-    textAlignVertical: "top", // Android'de yazı üstten başlasın
-    paddingTop: 14,
-  },
+    // Input Grupları
+    inputGroup: {
+      marginBottom: 20,
+    },
+    label: {
+      fontSize: 16,
+      color: colors.text.secondary, // Dinamik
+      fontWeight: "600",
+      marginBottom: 12,
+      marginLeft: 4,
+    },
+    input: {
+      backgroundColor: colors.neutral.input, // Dinamik (Dark modda koyu gri)
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      fontSize: 16,
+      color: colors.text.main, // Dinamik yazı rengi
+      borderWidth: 1,
+      borderColor:
+        colors.mode === "dark" ? colors.neutral.border : "transparent",
+    },
+    textArea: {
+      height: 120, // Biraz kısalttım, 200 çok uzun olabilir
+      textAlignVertical: "top",
+      paddingTop: 14,
+    },
 
-  // Dropdown Stilleri
-  dropdownButton: {
-    backgroundColor: colors.neutral.input,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  dropdownText: {
-    fontSize: 16,
-    color: colors.text.main,
-  },
+    // Dropdown Stilleri
+    dropdownButton: {
+      backgroundColor: colors.neutral.input, // Dinamik
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      borderWidth: 1,
+      borderColor:
+        colors.mode === "dark" ? colors.neutral.border : "transparent",
+    },
+    dropdownText: {
+      fontSize: 16,
+      color: colors.text.main, // Dinamik
+    },
 
-  // Radio Button Stilleri
-  radioGroup: {
-    flexDirection: "row",
-    gap: 20,
-  },
-  radioContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  radioCircle: {
-    height: 24,
-    width: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: colors.text.secondary,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-  radioCircleSelected: {
-    borderColor: colors.primary.main, // Seçilince Mavi/Turuncu olsun
-  },
-  radioInnerCircle: {
-    height: 12,
-    width: 12,
-    borderRadius: 6,
-    backgroundColor: colors.primary.main,
-  },
-  radioText: {
-    fontSize: 16,
-    color: colors.text.main,
-  },
+    // Radio Button Stilleri
+    radioGroup: {
+      flexDirection: "row",
+      gap: 20,
+    },
+    radioContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    radioCircle: {
+      height: 24,
+      width: 24,
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: colors.text.secondary, // Dinamik
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 8,
+    },
+    radioCircleSelected: {
+      borderColor: colors.primary.main,
+    },
+    radioInnerCircle: {
+      height: 12,
+      width: 12,
+      borderRadius: 6,
+      backgroundColor: colors.primary.main,
+    },
+    radioText: {
+      fontSize: 16,
+      color: colors.text.main, // Dinamik
+    },
 
-  // Ekstra Bilgi Metni
-  infoText: {
-    fontSize: 15,
-    color: colors.text.secondary,
-    marginBottom: 8,
-    marginTop: -10,
-    marginLeft: 4,
-  },
-  fadeContainer: {
-    marginTop: 10,
-  },
+    // Ekstra
+    fadeContainer: {
+      marginTop: 10,
+    },
 
-  // Buton
-  button: {
-    backgroundColor: colors.primary.main,
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: "center",
-    marginTop: 30,
-    shadowColor: colors.primary.main,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
+    // Buton
+    button: {
+      backgroundColor: colors.primary.main,
+      paddingVertical: 16,
+      borderRadius: 12,
+      alignItems: "center",
+      marginTop: 30,
+      shadowColor: colors.primary.main,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 5,
+      elevation: 5,
+    },
+    buttonText: {
+      color: colors.primary.contrast,
+      fontSize: 18,
+      fontWeight: "bold",
+    },
 
-  // Modal Stilleri
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center", // Ortada çıksın
-    alignItems: "center",
-  },
-  modalContent: {
-    width: "80%",
-    maxHeight: "50%",
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 15,
-    color: colors.primary.main,
-    textAlign: "center",
-  },
-  modalItem: {
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.gray[100],
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  modalItemText: {
-    fontSize: 16,
-    color: colors.text.main,
-  },
-});
+    // Modal Stilleri
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.6)", // Dark modda daha iyi görünür
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalContent: {
+      width: "80%",
+      maxHeight: "50%",
+      backgroundColor: colors.background.card, // Dinamik Kart Rengi
+      borderRadius: 20,
+      padding: 20,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+      borderWidth: 1,
+      borderColor: colors.neutral.border,
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      marginBottom: 15,
+      color: colors.primary.main,
+      textAlign: "center",
+    },
+    modalItem: {
+      paddingVertical: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.neutral.border, // Dinamik border
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    modalItemText: {
+      fontSize: 16,
+      color: colors.text.main, // Dinamik
+    },
+  });

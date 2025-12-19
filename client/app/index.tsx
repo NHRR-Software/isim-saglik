@@ -1,18 +1,19 @@
+// app/index.tsx
+
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Image, Text, Animated } from "react-native";
+import { View, StyleSheet, Image, Animated } from "react-native";
 import OnboardingScreen from "./screens/onboardingPages";
 import { useRouter } from "expo-router";
-import { colors } from "./styles/theme/colors";
+import { useTheme } from "./context/ThemeContext";
 
 export default function Index() {
   const [showSplash, setShowSplash] = useState(true);
-  const fadeAnim = useState(new Animated.Value(1))[0]; // Opaklık animasyonu için
+  const fadeAnim = useState(new Animated.Value(1))[0];
   const router = useRouter();
+  const { colors } = useTheme();
 
   useEffect(() => {
-    // 2 saniye bekle, sonra splash'i kapat
     const timer = setTimeout(() => {
-      // Yavaşça kaybolma efekti (Opsiyonel, şık durur)
       Animated.timing(fadeAnim, {
         toValue: 0,
         duration: 500,
@@ -25,26 +26,30 @@ export default function Index() {
     return () => clearTimeout(timer);
   }, []);
 
- const handleFinish = () => {
-    // Onboarding bitince Login sayfasına git
-    router.replace('/auth/login'); 
-  }
+  const handleFinish = () => {
+    router.replace("/auth/login");
+  };
 
-  // --- CUSTOM SPLASH SCREEN TASARIMI ---
   if (showSplash) {
     return (
-      <Animated.View style={[styles.splashContainer, { opacity: fadeAnim }]}>
+      <Animated.View
+        style={[
+          styles.splashContainer,
+          { opacity: fadeAnim, backgroundColor: colors.background.default },
+        ]}
+      >
         <Image
-          source={require("../assets/images/logo.png")} // Logo yolun
+          source={require("../assets/images/logo.png")}
           style={styles.logo}
         />
       </Animated.View>
     );
   }
 
-  // --- ONBOARDING EKRANI ---
   return (
-    <View style={styles.container}>
+    <View
+      style={[styles.container, { backgroundColor: colors.background.default }]}
+    >
       <OnboardingScreen onFinish={handleFinish} />
     </View>
   );
@@ -53,25 +58,15 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
   },
-  // Splash Screen Stilleri
   splashContainer: {
     flex: 1,
-    backgroundColor: "#ffffff", // Arka plan bembeyaz
     justifyContent: "center",
     alignItems: "center",
   },
   logo: {
-    width: 150, // Logonun boyutu
+    width: 150,
     height: 150,
     resizeMode: "contain",
-    marginBottom: 20,
-  },
-  brandName: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: colors.primary.main, // Senin Mavi rengin
-    letterSpacing: 1,
   },
 });

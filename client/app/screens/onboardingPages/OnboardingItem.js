@@ -2,10 +2,9 @@
 
 import React, { useEffect, useRef } from 'react';
 import { View, Text, useWindowDimensions, Animated } from 'react-native';
-import styles from './styles';
-import { colors } from '../../styles/theme/colors';
 
-const OnboardingItem = ({ item, index, currentIndex }) => {
+// styles prop olarak geliyor
+const OnboardingItem = ({ item, index, currentIndex, styles }) => {
   const { width } = useWindowDimensions();
   const animValue = useRef(new Animated.Value(0)).current;
 
@@ -14,7 +13,7 @@ const OnboardingItem = ({ item, index, currentIndex }) => {
   useEffect(() => {
     if (isActive) {
       animValue.setValue(0);
-      Animated.spring(animValue, { // Spring daha doğal durur
+      Animated.spring(animValue, {
         toValue: 1,
         friction: 8,
         tension: 40,
@@ -32,7 +31,7 @@ const OnboardingItem = ({ item, index, currentIndex }) => {
 
   const translateY = animValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [50, 0], // Aşağıdan yukarı gelir
+    outputRange: [50, 0],
   });
 
   const animatedStyle = {
@@ -42,13 +41,11 @@ const OnboardingItem = ({ item, index, currentIndex }) => {
 
   return (
     <View style={[styles.itemContainer, { width }]}>
-      {/* Resim Sabit Kalabilir veya hafif scale olabilir */}
       <Animated.Image
         source={item.image}
         style={[styles.image]}
       />
 
-      {/* Metinler animasyonla gelir */}
       <Animated.View style={[styles.textContainer, animatedStyle]}>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.description}>{item.description}</Text>
