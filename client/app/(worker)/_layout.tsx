@@ -33,7 +33,7 @@ export default function WorkerLayout() {
       {/* ORTA BUTON ROUTE'U */}
       <Tabs.Screen name="alert" options={{ title: "" }} />
 
-      <Tabs.Screen name="progress" options={{ title: "İlerlemem" }} />
+      <Tabs.Screen name="progress" options={{ title: "İstatistikler" }} />
       <Tabs.Screen name="profile" options={{ title: "Hesabım" }} />
     </Tabs>
   );

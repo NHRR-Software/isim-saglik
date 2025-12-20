@@ -23,12 +23,11 @@ const CARD_GAP = 16;
 const CARD_WIDTH = (width - 48 - CARD_GAP) / 2;
 
 export default function WorkerHomeScreen() {
-  const { colors, theme } = useTheme(); // Tema verilerini çek
-  const styles = useMemo(() => createStyles(colors, theme), [colors, theme]); // Stilleri oluştur
+  const { colors, theme } = useTheme();
+  const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
 
   return (
     <View style={styles.container}>
-      {/* Status Bar Dinamik */}
       <StatusBar
         barStyle={theme === "dark" ? "light-content" : "dark-content"}
       />
@@ -48,7 +47,7 @@ export default function WorkerHomeScreen() {
         <TouchableOpacity style={styles.notificationBtn}>
           <Ionicons
             name="notifications"
-            size={24}
+            size={28} // Header ikonu da hafif büyüdü
             color={theme === "dark" ? "#FFF" : colors.text.secondary}
           />
           <View style={styles.badge} />
@@ -59,10 +58,10 @@ export default function WorkerHomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* QUICK STATS (Nabız, SpO2, Stres) */}
+        {/* QUICK STATS (BÜYÜTÜLDÜ) */}
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <Ionicons name="heart" size={30} color={colors.dashboard.red} />
+            <Ionicons name="heart" size={42} color={colors.dashboard.red} />
             <Text style={[styles.statValue, { color: colors.dashboard.red }]}>
               90
             </Text>
@@ -73,7 +72,7 @@ export default function WorkerHomeScreen() {
           <View style={styles.statItem}>
             <MaterialCommunityIcons
               name="water-percent"
-              size={32}
+              size={44}
               color={colors.primary.main}
             />
             <Text style={[styles.statValue, { color: colors.primary.main }]}>
@@ -86,7 +85,7 @@ export default function WorkerHomeScreen() {
           <View style={styles.statItem}>
             <MaterialCommunityIcons
               name="lightning-bolt"
-              size={30}
+              size={42}
               color={colors.secondary.main}
             />
             <Text style={[styles.statValue, { color: colors.secondary.main }]}>
@@ -104,7 +103,6 @@ export default function WorkerHomeScreen() {
           >
             <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>NEM</Text>
-              {/* Dark modda neon, light modda koyu yazı */}
               <Text
                 style={[
                   styles.cardValue,
@@ -293,7 +291,7 @@ export default function WorkerHomeScreen() {
           </View>
         </View>
 
-        {/* GÖREVLER KARTI */}
+        {/* GÖREVLER KARTI (BÜYÜTÜLDÜ) */}
         <View style={styles.taskCard}>
           <View style={styles.taskIconContainer}>
             <Image
@@ -303,17 +301,19 @@ export default function WorkerHomeScreen() {
           </View>
           <View style={styles.taskTextContainer}>
             <Text style={styles.taskTitle}>Görevler</Text>
-            <Text style={styles.taskDesc}>Aktif ve tamamlanan görevler</Text>
+            <Text style={styles.taskDesc}>
+              Aktif ve tamamlanan görevlerinizi buradan takip edebilirsiniz.
+            </Text>
           </View>
           <Ionicons
             name="chevron-forward"
-            size={24}
+            size={28}
             color={colors.text.secondary}
           />
         </View>
 
         {/* Bottom Bar Boşluğu */}
-        <View style={{ height: 100 }} />
+        <View style={{ height: 110 }} />
       </ScrollView>
     </View>
   );
@@ -324,7 +324,7 @@ const createStyles = (colors: any, theme: string) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: colors.background.default, // Dinamik
+      backgroundColor: colors.background.default,
       paddingTop: 50,
     },
     scrollContent: {
@@ -338,65 +338,62 @@ const createStyles = (colors: any, theme: string) =>
       justifyContent: "space-between",
       alignItems: "center",
       paddingHorizontal: 24,
-      marginBottom: 30,
+      marginBottom: 35, // Boşluk arttı
     },
     userInfo: {
       flexDirection: "row",
       alignItems: "center",
     },
     avatar: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
-      marginRight: 12,
+      width: 54, // Hafif büyüdü
+      height: 54,
+      borderRadius: 27,
+      marginRight: 14,
       borderWidth: 2,
-      borderColor: colors.neutral.border, // Dinamik
+      borderColor: colors.neutral.border,
     },
     userName: {
-      fontSize: 16,
+      fontSize: 17,
       fontWeight: "bold",
-      color: colors.text.main, // Dinamik
+      color: colors.text.main,
     },
     userRole: {
-      fontSize: 12,
-      color: colors.text.secondary, // Dinamik
+      fontSize: 13,
+      color: colors.text.secondary,
     },
     notificationBtn: {
-      width: 40,
-      height: 40,
-      backgroundColor: colors.background.card, // Dinamik (Light'ta beyaz, Dark'ta gri)
-      borderRadius: 20,
+      width: 44, // Hafif büyüdü
+      height: 44,
+      backgroundColor: colors.background.card,
+      borderRadius: 22,
       justifyContent: "center",
       alignItems: "center",
       borderWidth: 1,
-      borderColor: colors.neutral.border, // Dinamik
+      borderColor: colors.neutral.border,
     },
     badge: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
+      width: 10,
+      height: 10,
+      borderRadius: 5,
       backgroundColor: colors.dashboard.red,
       position: "absolute",
       top: 8,
       right: 10,
     },
 
-    // Stats Row
+    // Stats Row (BÜYÜTÜLDÜ)
     statsRow: {
       flexDirection: "row",
       justifyContent: "space-between",
-      backgroundColor: colors.background.card, // Dinamik
-      borderRadius: 20,
-      padding: 20,
-      marginBottom: 24,
+      backgroundColor: colors.background.card,
+      borderRadius: 24, // Radius arttı
+      paddingVertical: 18, // Dikey boşluk ciddi oranda arttı (Eskisi 20)
+      paddingHorizontal: 20,
+      marginBottom: 30, // Alt boşluk arttı
       borderWidth: 1,
-      borderColor: colors.neutral.border, // Dinamik
-      // Light mode için gölge
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.05,
-      shadowRadius: 10,
-      elevation: theme === "light" ? 2 : 0,
+      borderColor: colors.neutral.border,
+
+      elevation: theme === "light" ? 4 : 0,
     },
     statItem: {
       alignItems: "center",
@@ -404,20 +401,20 @@ const createStyles = (colors: any, theme: string) =>
     },
     statLine: {
       width: 1,
-      height: "80%",
-      backgroundColor: colors.neutral.border, // Dinamik
+      height: "70%",
+      backgroundColor: colors.neutral.border,
       alignSelf: "center",
     },
     statValue: {
-      fontSize: 20,
-      fontWeight: "bold",
-      marginTop: 8,
+      fontSize: 28, // Font Büyüdü (Eskisi 20)
+      fontWeight: "800",
+      marginTop: 10,
     },
     statLabel: {
-      fontSize: 12,
-      color: colors.text.secondary, // Dinamik
-      fontWeight: "500",
-      marginTop: 4,
+      fontSize: 14, // Font Büyüdü (Eskisi 12)
+      color: colors.text.secondary,
+      fontWeight: "600",
+      marginTop: 6,
     },
 
     // Grid Cards
@@ -425,87 +422,88 @@ const createStyles = (colors: any, theme: string) =>
       flexDirection: "row",
       flexWrap: "wrap",
       gap: CARD_GAP,
-      marginBottom: 24,
+      marginBottom: 30, // Alt boşluk arttı
     },
     card: {
       width: CARD_WIDTH,
-      height: 130,
-      // Background Color inline style olarak veriliyor
+      height: 135, // Hafif büyüdü
       borderRadius: 24,
-      padding: 16,
+      padding: 18,
       position: "relative",
       borderWidth: 1,
-      borderColor: theme === "dark" ? colors.neutral.border : "transparent", // Dark modda border olsun
+      borderColor: theme === "dark" ? colors.neutral.border : "transparent",
     },
     cardContent: {
       zIndex: 2,
-      marginTop: 10,
+      marginTop: 8,
     },
     cardTitle: {
-      fontSize: 13,
-      fontWeight: "600",
-      color: theme === "dark" ? "#AAAAAA" : "#333333", // Başlık Rengi
-      marginBottom: 4,
+      fontSize: 14,
+      fontWeight: "700",
+      color: theme === "dark" ? "#AAAAAA" : "#333333",
+      marginBottom: 6,
     },
     cardValue: {
-      fontSize: 26,
+      fontSize: 28,
       fontWeight: "bold",
-      // Renk inline style olarak veriliyor
     },
     bgIcon: {
       position: "absolute",
-      right: -10,
-      bottom: -10,
+      right: 2,
+      bottom: 2,
       zIndex: 1,
     },
     iconBadge: {
       position: "absolute",
-      top: 12,
-      right: 12,
-      width: 32,
-      height: 32,
-      borderRadius: 10,
+      top: 14,
+      right: 14,
+      width: 36,
+      height: 36,
+      borderRadius: 12,
       justifyContent: "center",
       alignItems: "center",
     },
 
-    // Task Card
+    // Task Card (BÜYÜTÜLDÜ)
     taskCard: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: colors.background.card, // Dinamik
-      borderRadius: 24,
-      padding: 16,
+      backgroundColor: colors.background.card,
+      borderRadius: 28, // Radius arttı
+      paddingVertical: 25, // Dikey padding arttı (Eskisi 16)
+      paddingHorizontal: 20,
       borderWidth: 1,
-      borderColor: colors.neutral.border, // Dinamik
+      borderColor: colors.neutral.border,
     },
     taskIconContainer: {
-      width: 70,
-      height: 70,
-      backgroundColor: theme === "dark" ? "#2C2C2C" : colors.primary.light, // Dinamik
-      borderRadius: 16,
+      width: 85, // Büyüdü (Eskisi 70)
+      height: 85, // Büyüdü
+      backgroundColor: theme === "dark" ? "#2C2C2C" : colors.primary.light,
+      borderRadius: 20,
       justifyContent: "center",
       alignItems: "center",
-      marginRight: 16,
+      marginRight: 20,
       borderWidth: 1,
       borderColor: colors.neutral.border,
     },
     taskIconImage: {
-      width: 55,
-      height: 55,
+      width: 60, // Büyüdü
+      height: 60,
       resizeMode: "contain",
     },
     taskTextContainer: {
       flex: 1,
     },
     taskTitle: {
-      fontSize: 16,
+      fontSize: 20, // Font Büyüdü (Eskisi 16)
       fontWeight: "bold",
-      color: colors.text.main, // Dinamik
-      marginBottom: 4,
+      color: colors.text.main,
+      marginBottom: 6,
     },
     taskDesc: {
-      fontSize: 12,
-      color: colors.text.secondary, // Dinamik
+      fontSize: 14, // Font Büyüdü (Eskisi 12)
+      color: colors.text.secondary,
+      lineHeight: 20,
+      paddingRight: 10,
     },
   });

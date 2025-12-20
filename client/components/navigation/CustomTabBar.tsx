@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { useTheme } from "../../app/context/ThemeContext"; // YENİ: Hook
+import { useTheme } from "../../app/context/ThemeContext";
 
 // --- CONFIG VE PROPS ---
 interface TabBarConfig {
@@ -83,8 +83,15 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
         // --- NORMAL TABLAR ---
         let iconName: keyof typeof Ionicons.glyphMap = "square";
 
+        // 1. Ana Sayfa (Ortak)
         if (route.name === "index")
           iconName = isFocused ? "home" : "home-outline";
+        // 2. OHS Rotaları (YENİ EKLENDİ)
+        else if (route.name === "personnel")
+          iconName = isFocused ? "people" : "people-outline";
+        else if (route.name === "reports")
+          iconName = isFocused ? "document-text" : "document-text-outline";
+        // 3. Worker Rotaları
         else if (route.name.includes("tips"))
           iconName = isFocused ? "bulb" : "bulb-outline";
         else if (
@@ -92,8 +99,10 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
           route.name.includes("stats")
         )
           iconName = isFocused ? "stats-chart" : "stats-chart-outline";
+        // 4. Profil (Ortak)
         else if (route.name.includes("profile"))
           iconName = isFocused ? "person" : "person-outline";
+        // 5. Diğer (Founder vs.)
         else if (route.name.includes("employees"))
           iconName = isFocused ? "people" : "people-outline";
 

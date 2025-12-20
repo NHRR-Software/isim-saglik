@@ -47,6 +47,7 @@ export const lightColors = {
         cardNoise: '#8FE7A3',
         cardLight: '#FFE57F',
         textValue: '#333333', // Kart içindeki yazı rengi
+        green: '#4CD964'
     },
       profile: {
         card1: '#FFD1D1', // Kırmızımsı (Sağlık)
@@ -93,6 +94,7 @@ export const darkColors = {
         cardHum: '#1E1E1E',
         cardNoise: '#1E1E1E',
         cardLight: '#1E1E1E',
+         green: '#69F0AE',
         textValue: '#FFFFFF', // Neon renkler kod içinde verilecek, burası base yazı
     },
        profile: {
