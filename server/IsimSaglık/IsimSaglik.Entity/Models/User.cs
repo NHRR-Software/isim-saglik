@@ -24,6 +24,6 @@ namespace IsimSaglik.Entity.Models
 
         public required bool IsActive { get; set; } = true;
 
-        public string? CompanyId { get; set; }
+        public Guid? CompanyId { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 {
     public sealed class HealthProfile : BaseEntity
     {
-        public required string UserId { get; set; }
+        public required Guid UserId { get; set; }
 
         public required string BloodGroup { get; set; }
 

@@ -18,10 +18,10 @@ namespace IsimSaglik.Entity.Models
 
         public  Uri? PhotoUrl { get; set; } 
 
-        public required string CompanyId { get; set; }
+        public required Guid CompanyId { get; set; }
 
-        public required string ReporterId { get; set; }
+        public required Guid ReporterId { get; set; }
 
-        public string? ReportedId { get; set; }
+        public Guid? ReportedId { get; set; }
     }
 }
