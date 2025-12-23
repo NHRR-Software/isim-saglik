@@ -1,12 +1,37 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\KOCAK\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{F6FB2A55-FEFF-4D2D-A19A-A08516BE0F90}|IsimSaglik.API\\IsimSaglik.API.csproj|c:\\users\\kocak\\source\\repos\\isim-saglik\\server\\isimsagl\u0131k\\isimsaglik.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F6FB2A55-FEFF-4D2D-A19A-A08516BE0F90}|IsimSaglik.API\\IsimSaglik.API.csproj|solutionrelative:isimsaglik.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\KOCAK\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.API\\Program.cs",
+              "RelativeDocumentMoniker": "IsimSaglik.API\\Program.cs",
+              "ToolTip": "C:\\Users\\KOCAK\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.API\\Program.cs",
+              "RelativeToolTip": "IsimSaglik.API\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-19T00:20:32.582Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }
