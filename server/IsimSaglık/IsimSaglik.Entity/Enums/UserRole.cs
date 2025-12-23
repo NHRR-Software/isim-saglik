@@ -2,7 +2,9 @@
 {
     public enum UserRole
     {
-        Worker,
-        Expert
+        Admin,
+        Company,
+        Expert,
+        Worker
     }
 }

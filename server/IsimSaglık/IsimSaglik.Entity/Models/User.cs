@@ -14,7 +14,7 @@ namespace IsimSaglik.Entity.Models
 
         public required UserRole Role { get; set; }
 
-        public required string JobTitle { get; set; }
+        public string? JobTitle { get; set; }
 
         public required string PhoneNumber { get; set; }
 
@@ -22,6 +22,8 @@ namespace IsimSaglik.Entity.Models
 
         public required Uri Photo { get; set; }
 
-        public required bool IsActive { get; set; }
+        public required bool IsActive { get; set; } = true;
+
+        public string? CompanyId { get; set; }
     }
 }
