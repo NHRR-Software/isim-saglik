@@ -14,14 +14,14 @@ namespace IsimSaglik.Entity.Models
 
         public required string Description { get; set; }
 
-        public required DateTime ClosedDate { get; set; }
+        public DateTime ClosedDate { get; set; }
 
-        public required Uri Photo { get; set; }
+        public  Uri? PhotoUrl { get; set; } 
 
         public required string CompanyId { get; set; }
 
         public required string ReporterId { get; set; }
 
-        public required string ReportedId { get; set; }
+        public string? ReportedId { get; set; }
     }
 }

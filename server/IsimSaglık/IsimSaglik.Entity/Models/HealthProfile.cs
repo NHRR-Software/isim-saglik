@@ -6,7 +6,7 @@
 
         public required string BloodGroup { get; set; }
 
-        public string ChronicDisease { get; set; } = string.Empty;
+        public string? ChronicDisease { get; set; }
 
         public required double Height { get; set; }
 
