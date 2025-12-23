@@ -1,40 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}|IsimSaglik.Entity\\IsimSaglik.Entity.csproj|c:\\users\\rabia\\source\\repos\\isim-saglik\\server\\isimsagl\u0131k\\isimsaglik.entity\\models\\notification.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}|IsimSaglik.Entity\\IsimSaglik.Entity.csproj|solutionrelative:isimsaglik.entity\\models\\notification.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}|IsimSaglik.Entity\\IsimSaglik.Entity.csproj|c:\\users\\rabia\\source\\repos\\isim-saglik\\server\\isimsagl\u0131k\\isimsaglik.entity\\models\\assignment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}|IsimSaglik.Entity\\IsimSaglik.Entity.csproj|solutionrelative:isimsaglik.entity\\models\\assignment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}|IsimSaglik.Entity\\IsimSaglik.Entity.csproj|c:\\users\\rabia\\source\\repos\\isim-saglik\\server\\isimsagl\u0131k\\isimsaglik.entity\\models\\safetyfinding.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}|IsimSaglik.Entity\\IsimSaglik.Entity.csproj|solutionrelative:isimsaglik.entity\\models\\safetyfinding.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}|IsimSaglik.Entity\\IsimSaglik.Entity.csproj|c:\\users\\rabia\\source\\repos\\isim-saglik\\server\\isimsagl\u0131k\\isimsaglik.entity\\models\\healthprofile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}|IsimSaglik.Entity\\IsimSaglik.Entity.csproj|solutionrelative:isimsaglik.entity\\models\\healthprofile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}|IsimSaglik.Entity\\IsimSaglik.Entity.csproj|c:\\users\\rabia\\source\\repos\\isim-saglik\\server\\isimsagl\u0131k\\isimsaglik.entity\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}|IsimSaglik.Entity\\IsimSaglik.Entity.csproj|solutionrelative:isimsaglik.entity\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}|IsimSaglik.Entity\\IsimSaglik.Entity.csproj|c:\\users\\rabia\\source\\repos\\isim-saglik\\server\\isimsagl\u0131k\\isimsaglik.entity\\models\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}|IsimSaglik.Entity\\IsimSaglik.Entity.csproj|solutionrelative:isimsaglik.entity\\models\\baseentity.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}|IsimSaglik.Entity\\IsimSaglik.Entity.csproj|c:\\users\\rabia\\source\\repos\\isim-saglik\\server\\isimsagl\u0131k\\isimsaglik.entity\\enums\\userrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}|IsimSaglik.Entity\\IsimSaglik.Entity.csproj|solutionrelative:isimsaglik.entity\\enums\\userrole.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F6FB2A55-FEFF-4D2D-A19A-A08516BE0F90}|IsimSaglik.API\\IsimSaglik.API.csproj|c:\\users\\rabia\\source\\repos\\isim-saglik\\server\\isimsagl\u0131k\\isimsaglik.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F6FB2A55-FEFF-4D2D-A19A-A08516BE0F90}|IsimSaglik.API\\IsimSaglik.API.csproj|solutionrelative:isimsaglik.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -42,8 +9,12 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": -1,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
@@ -55,103 +26,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Notification.cs",
-              "DocumentMoniker": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.Entity\\Models\\Notification.cs",
-              "RelativeDocumentMoniker": "IsimSaglik.Entity\\Models\\Notification.cs",
-              "ToolTip": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.Entity\\Models\\Notification.cs",
-              "RelativeToolTip": "IsimSaglik.Entity\\Models\\Notification.cs",
-              "ViewState": "AgIAAAUAAAAAAAAAAAAAwAgAAAA4AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-23T15:46:06.177Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Assignment.cs",
-              "DocumentMoniker": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.Entity\\Models\\Assignment.cs",
-              "RelativeDocumentMoniker": "IsimSaglik.Entity\\Models\\Assignment.cs",
-              "ToolTip": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.Entity\\Models\\Assignment.cs",
-              "RelativeToolTip": "IsimSaglik.Entity\\Models\\Assignment.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAiAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-23T15:44:59.642Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "HealthProfile.cs",
-              "DocumentMoniker": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.Entity\\Models\\HealthProfile.cs",
-              "RelativeDocumentMoniker": "IsimSaglik.Entity\\Models\\HealthProfile.cs",
-              "ToolTip": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.Entity\\Models\\HealthProfile.cs",
-              "RelativeToolTip": "IsimSaglik.Entity\\Models\\HealthProfile.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-23T15:22:18.138Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "User.cs",
-              "DocumentMoniker": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.Entity\\Models\\User.cs",
-              "RelativeDocumentMoniker": "IsimSaglik.Entity\\Models\\User.cs",
-              "ToolTip": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.Entity\\Models\\User.cs",
-              "RelativeToolTip": "IsimSaglik.Entity\\Models\\User.cs",
-              "ViewState": "AgIAABMAAAAAAAAAAAAwwBoAAAAXAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-20T13:24:23.864Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "SafetyFinding.cs",
-              "DocumentMoniker": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.Entity\\Models\\SafetyFinding.cs",
-              "RelativeDocumentMoniker": "IsimSaglik.Entity\\Models\\SafetyFinding.cs",
-              "ToolTip": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.Entity\\Models\\SafetyFinding.cs",
-              "RelativeToolTip": "IsimSaglik.Entity\\Models\\SafetyFinding.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAYwBgAAAAWAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-20T13:30:52.204Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "BaseEntity.cs",
-              "DocumentMoniker": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.Entity\\Models\\BaseEntity.cs",
-              "RelativeDocumentMoniker": "IsimSaglik.Entity\\Models\\BaseEntity.cs",
-              "ToolTip": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.Entity\\Models\\BaseEntity.cs",
-              "RelativeToolTip": "IsimSaglik.Entity\\Models\\BaseEntity.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-20T13:30:43.714Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "UserRole.cs",
-              "DocumentMoniker": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.Entity\\Enums\\UserRole.cs",
-              "RelativeDocumentMoniker": "IsimSaglik.Entity\\Enums\\UserRole.cs",
-              "ToolTip": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.Entity\\Enums\\UserRole.cs",
-              "RelativeToolTip": "IsimSaglik.Entity\\Enums\\UserRole.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-20T11:27:46.403Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.API\\Program.cs",
-              "RelativeDocumentMoniker": "IsimSaglik.API\\Program.cs",
-              "ToolTip": "C:\\Users\\Rabia\\source\\repos\\isim-saglik\\server\\IsimSagl\u0131k\\IsimSaglik.API\\Program.cs",
-              "RelativeToolTip": "IsimSaglik.API\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-19T13:08:49.192Z"
             }
           ]
         }
