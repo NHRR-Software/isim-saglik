@@ -3,33 +3,33 @@ using IsimSaglik.Repository.Abstract;
 
 namespace IsimSaglik.Repository.Concrete
 {
-    public class AssignmentRepository : RepositoryBase<Assignment>, IAssignmentRepository
+    public class NotificationRepository : RepositoryBase<Notification>, INotificationRepository
     {
-
-        public async Task<IEnumerable<Assignment>> GetAssignmentsByUserIdAsync(Guid userId)
-        {
-            throw new NotImplementedException();
-        }
-        public override async Task<IEnumerable<Assignment>> GetAllAsync()
+        public override Task<IEnumerable<Notification>> GetAllAsync()
         {
             throw new NotImplementedException();
         }
 
-        public override async Task<Assignment?> GetByIdAsync(Guid id)
+        public override async Task<Notification?> GetByIdAsync(Guid id)
         {
             throw new NotImplementedException();
         }
 
-        public override async Task CreateAsync(Assignment entity)
+        public async Task<IEnumerable<Notification>> GetNotificationsByUserIdAsync(Guid userId)
+        {
+            throw new NotImplementedException();
+        }
+        public override async Task CreateAsync(Notification entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override async Task UpdateAsync(Notification entity)
         {
             throw new NotImplementedException();
         }
 
         public override async Task DeleteAsync(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-        public override async Task UpdateAsync(Assignment entity)
         {
             throw new NotImplementedException();
         }
