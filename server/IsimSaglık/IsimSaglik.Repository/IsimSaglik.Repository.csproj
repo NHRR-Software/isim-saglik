@@ -6,17 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Settings\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.3" />
-    <PackageReference Include="Npgsql" Version="10.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\IsimSaglik.Entity\IsimSaglik.Entity.csproj" />
-  </ItemGroup>
-
 </Project>
