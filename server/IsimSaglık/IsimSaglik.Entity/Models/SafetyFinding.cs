@@ -16,7 +16,7 @@ namespace IsimSaglik.Entity.Models
 
         public DateTime ClosedDate { get; set; }
 
-        public  Uri? PhotoUrl { get; set; } 
+        public Uri? PhotoUrl { get; set; } 
 
         public required Guid CompanyId { get; set; }
 

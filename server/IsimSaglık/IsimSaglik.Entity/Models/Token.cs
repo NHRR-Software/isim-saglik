@@ -6,11 +6,10 @@
 
         public required Guid UserId { get; set; }
 
-        public string CreatedIp { get; set; } = string.Empty;
+        public string? CreatedIp { get; set; }
 
-        public string UserAgent { get; set; } = string.Empty;
+        public string? UserAgent { get; set; }
 
         public required DateTime ExpiresDate { get; set; }
-
     }
 }
