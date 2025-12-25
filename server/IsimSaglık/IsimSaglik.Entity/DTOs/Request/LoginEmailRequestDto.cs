@@ -2,7 +2,7 @@
 
 namespace IsimSaglik.Entity.DTOs.Request
 {
-    public sealed record LoginEmailRequestDto
+    public sealed record LogInEmailRequestDto
     {
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email format")]

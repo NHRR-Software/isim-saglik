@@ -28,6 +28,5 @@ namespace IsimSaglik.Entity.DTOs.Request
         [Required(ErrorMessage = "Please confirm your password again.")]
         [Compare("Password", ErrorMessage = "passwords do not match.")]
         public string PasswordAgain { get; init; } = string.Empty;
-
     }
 }

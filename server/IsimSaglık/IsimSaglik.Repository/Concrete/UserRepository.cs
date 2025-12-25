@@ -171,5 +171,11 @@ namespace IsimSaglik.Repository.Concrete
 
             return user;
         }
+
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

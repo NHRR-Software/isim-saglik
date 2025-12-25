@@ -39,5 +39,11 @@ namespace IsimSaglik.Repository.Concrete
         {
             throw new NotImplementedException();
         }
+
+
+        public Task<Token> GetTokenByRefreshTokenAsync(string refreshToken)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
