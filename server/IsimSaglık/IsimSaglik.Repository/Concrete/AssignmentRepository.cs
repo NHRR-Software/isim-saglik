@@ -123,7 +123,8 @@ namespace IsimSaglik.Repository.Concrete
             {
                 CommandType = CommandType.StoredProcedure
             };
-
+            command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
+            command.Parameters.AddWithValue("p_updated_date", entity.UpdatedDate);
             command.Parameters.AddWithValue("p_status", (short)entity.Status);
             command.Parameters.AddWithValue("p_severity", (short)entity.Severity);
             command.Parameters.AddWithValue("p_description", entity.Description);
@@ -144,6 +145,8 @@ namespace IsimSaglik.Repository.Concrete
             };
 
             command.Parameters.AddWithValue("p_id", entity.Id);
+            command.Parameters.AddWithValue("p_updated_date", entity.UpdatedDate);
+            command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
             command.Parameters.AddWithValue("p_status", (short)entity.Status);
             command.Parameters.AddWithValue("p_severity", (short)entity.Severity);
             command.Parameters.AddWithValue("p_description", entity.Description);
