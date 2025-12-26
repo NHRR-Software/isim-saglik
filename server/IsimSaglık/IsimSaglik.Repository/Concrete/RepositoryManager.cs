@@ -2,7 +2,7 @@
 
 namespace IsimSaglik.Repository.Concrete
 {
-    public class RepositoryManager
+    public class RepositoryManager : IRepositoryManager
     {
         private readonly IAssignmentRepository _assignmentRepository;
         private readonly IHealthProfileRepository _healthProfileRepository;

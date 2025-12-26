@@ -2,7 +2,7 @@
 
 namespace IsimSaglik.Service.Concrete
 {
-    internal class ServiceManager : IServiceManager
+    public class ServiceManager : IServiceManager
     {
         private readonly IAuthService _authService;
         private readonly IUserService _userService;
@@ -17,8 +17,8 @@ namespace IsimSaglik.Service.Concrete
         }
 
 
-        public IAuthService AuthService => _authService;
+        public IAuthService Auth => _authService;
 
-        public IUserService UserService => _userService;
+        public IUserService User => _userService;
     }
 }

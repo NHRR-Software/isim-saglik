@@ -7,6 +7,8 @@
         public const string InvalidCredentials = "AUTH-003";
         public const string AccountInactive = "AUTH-004";
         public const string InvalidOperation = "AUTH-005";
+        public const string TokenNotFound = "AUTH-006";
+        public const string InvalidRefreshToken = "AUTH-007";
 
         public const string ValidationError = "VAL-001";
 

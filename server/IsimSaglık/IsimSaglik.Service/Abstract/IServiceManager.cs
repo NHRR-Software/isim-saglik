@@ -2,8 +2,8 @@
 {
     public interface IServiceManager
     {
-        IAuthService AuthService { get; }
+        IAuthService Auth { get; }
 
-        IUserService UserService { get; }
+        IUserService User { get; }
     }
 }

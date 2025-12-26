@@ -14,9 +14,9 @@ namespace IsimSaglik.Infrastructure.Concrete
 {
     public class TokenGenerator : ITokenGenerator
     {
-        private readonly TokenSettings _tokenSettings;
+        private readonly JwtSettings _tokenSettings;
 
-        public TokenGenerator(IOptions<TokenSettings> tokenSettings)
+        public TokenGenerator(IOptions<JwtSettings> tokenSettings)
         {
             _tokenSettings = tokenSettings.Value;
         }

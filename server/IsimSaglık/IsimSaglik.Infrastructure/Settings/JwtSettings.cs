@@ -1,6 +1,6 @@
 ﻿namespace IsimSaglik.Infrastructure.Settings
 {
-    public class TokenSettings
+    public class JwtSettings
     {
         public string Issuer { get; init; } = null!;
         public string Audience { get; init; } = null!;
