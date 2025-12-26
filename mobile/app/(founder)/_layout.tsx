@@ -1,7 +1,7 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import CustomTabBar from "../../components/navigation/CustomTabBar";
-import { colors } from "../../app/styles/theme/colors";
+import { colors } from "../styles/theme/colors";
 
 export default function FounderLayout() {
   return (

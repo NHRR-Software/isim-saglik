@@ -13,7 +13,7 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import AuthInput from "../../components/ui/AuthInput";
-import { useTheme } from "../../app/context/ThemeContext";
+import { useTheme } from "../context/ThemeContext";
 
 const { height } = Dimensions.get("window");
 

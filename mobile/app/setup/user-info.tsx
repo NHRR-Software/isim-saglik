@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "../../app/context/ThemeContext"; // YENİ: Theme Hook
+import { useTheme } from "../context/ThemeContext"; // YENİ: Theme Hook
 
 // Kan Grubu Seçenekleri
 const BLOOD_TYPES = [

@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import AuthInput from "../../components/ui/AuthInput";
-import { useTheme } from "../../app/context/ThemeContext"; // Hook
+import { useTheme } from "../context/ThemeContext"; // Hook
 
 const { height } = Dimensions.get("window");
 
