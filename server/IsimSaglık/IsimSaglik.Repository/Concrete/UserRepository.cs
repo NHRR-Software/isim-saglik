@@ -156,7 +156,9 @@ namespace IsimSaglik.Repository.Concrete
                 {
                     Id = reader.GetGuid(reader.GetOrdinal("id")),
                     CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     FullName = reader.GetString(reader.GetOrdinal("full_name")),
                     Email = reader.GetString(reader.GetOrdinal("email")),
                     Password = reader.GetString(reader.GetOrdinal("password")),
@@ -181,7 +183,48 @@ namespace IsimSaglik.Repository.Concrete
 
         public async Task<User?> GetByEmailAsync(string email)
         {
-            throw new NotImplementedException();
+            User? user = null;
+
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            await using var command = new NpgsqlCommand("sp_get_user_by_email", connection)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            command.Parameters.AddWithValue("p_email", email);
+
+            await using var reader = await command.ExecuteReaderAsync();
+
+            if (await reader.ReadAsync())
+            {
+                user = new User
+                {
+                    Id = reader.GetGuid(reader.GetOrdinal("id")),
+                    CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    FullName = reader.GetString(reader.GetOrdinal("full_name")),
+                    Email = reader.GetString(reader.GetOrdinal("email")),
+                    Password = reader.GetString(reader.GetOrdinal("password")),
+                    PhoneNumber = reader.GetString(reader.GetOrdinal("phone_number")),
+                    Role = (UserRole)reader.GetInt16(reader.GetOrdinal("role")),
+                    Gender = (Gender)reader.GetInt16(reader.GetOrdinal("gender")),
+                    IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
+                    CompanyId = reader.IsDBNull(reader.GetOrdinal("parent_company_id"))
+                        ? null
+                        : reader.GetGuid(reader.GetOrdinal("parent_company_id")),
+                    JobTitle = reader.IsDBNull(reader.GetOrdinal("job_title"))
+                        ? null
+                        : reader.GetString(reader.GetOrdinal("job_title")),
+                    BirthDate = reader.GetDateTime(reader.GetOrdinal("birth_date")),
+                    PhotoUrl = new Uri(reader.GetString(reader.GetOrdinal("photo_url")))
+                };
+            }
+
+            return user;
         }
     }
 }
