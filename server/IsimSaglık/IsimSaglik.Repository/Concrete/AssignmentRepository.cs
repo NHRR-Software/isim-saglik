@@ -36,7 +36,9 @@ namespace IsimSaglik.Repository.Concrete
                 {
                     Id = reader.GetGuid(reader.GetOrdinal("id")),
                     CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     Status = (StatusType)reader.GetInt16(reader.GetOrdinal("status")),
                     Severity = (SeverityType)reader.GetInt16(reader.GetOrdinal("severity")),
                     Description = reader.GetString(reader.GetOrdinal("description")),
@@ -68,7 +70,9 @@ namespace IsimSaglik.Repository.Concrete
                 {
                     Id = reader.GetGuid(reader.GetOrdinal("id")),
                     CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     Status = (StatusType)reader.GetInt16(reader.GetOrdinal("status")),
                     Severity = (SeverityType)reader.GetInt16(reader.GetOrdinal("severity")),
                     Description = reader.GetString(reader.GetOrdinal("description")),
@@ -102,7 +106,9 @@ namespace IsimSaglik.Repository.Concrete
                 {
                     Id = reader.GetGuid(reader.GetOrdinal("id")),
                     CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     Status = (StatusType)reader.GetInt16(reader.GetOrdinal("status")),
                     Severity = (SeverityType)reader.GetInt16(reader.GetOrdinal("severity")),
                     Description = reader.GetString(reader.GetOrdinal("description")),
@@ -124,7 +130,7 @@ namespace IsimSaglik.Repository.Concrete
                 CommandType = CommandType.StoredProcedure
             };
             command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
-            command.Parameters.AddWithValue("p_updated_date", entity.UpdatedDate);
+            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
             command.Parameters.AddWithValue("p_status", (short)entity.Status);
             command.Parameters.AddWithValue("p_severity", (short)entity.Severity);
             command.Parameters.AddWithValue("p_description", entity.Description);
@@ -145,7 +151,7 @@ namespace IsimSaglik.Repository.Concrete
             };
 
             command.Parameters.AddWithValue("p_id", entity.Id);
-            command.Parameters.AddWithValue("p_updated_date", entity.UpdatedDate);
+            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
             command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
             command.Parameters.AddWithValue("p_status", (short)entity.Status);
             command.Parameters.AddWithValue("p_severity", (short)entity.Severity);

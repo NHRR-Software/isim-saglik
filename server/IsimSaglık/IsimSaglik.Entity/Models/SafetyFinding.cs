@@ -14,7 +14,7 @@ namespace IsimSaglik.Entity.Models
 
         public required string Description { get; set; }
 
-        public DateTime ClosedDate { get; set; }
+        public DateTime? ClosedDate { get; set; }
 
         public Uri? PhotoUrl { get; set; } 
 

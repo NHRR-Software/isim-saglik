@@ -34,7 +34,9 @@ namespace IsimSaglik.Repository.Concrete
                 {
                     Id = reader.GetGuid(reader.GetOrdinal("id")),
                     CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     FullName = reader.GetString(reader.GetOrdinal("full_name")),
                     Email = reader.GetString(reader.GetOrdinal("email")),
                     Password = reader.GetString(reader.GetOrdinal("password")),
@@ -49,7 +51,7 @@ namespace IsimSaglik.Repository.Concrete
                         ? null
                         : reader.GetString(reader.GetOrdinal("job_title")),
                     BirthDate = reader.GetDateTime(reader.GetOrdinal("birth_date")),
-                    Photo = new Uri(reader.GetString(reader.GetOrdinal("photo")))
+                    PhotoUrl = new Uri(reader.GetString(reader.GetOrdinal("photo_url")))
                 };
 
                 users.Add(user);
@@ -69,6 +71,8 @@ namespace IsimSaglik.Repository.Concrete
                 CommandType = CommandType.StoredProcedure
             };
 
+            command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
+            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
             command.Parameters.AddWithValue("p_full_name", entity.FullName);
             command.Parameters.AddWithValue("p_email", entity.Email);
             command.Parameters.AddWithValue("p_password", entity.Password);
@@ -79,7 +83,7 @@ namespace IsimSaglik.Repository.Concrete
             command.Parameters.AddWithValue("p_parent_company_id", (object)entity.CompanyId ?? DBNull.Value);
             command.Parameters.AddWithValue("p_job_title", (object)entity.JobTitle ?? DBNull.Value);
             command.Parameters.AddWithValue("p_birth_date", entity.BirthDate);
-            command.Parameters.AddWithValue("p_photo", entity.Photo.ToString());
+            command.Parameters.AddWithValue("p_photo_url", entity.PhotoUrl.ToString());
 
             var newId = await command.ExecuteScalarAsync();
         }
@@ -96,6 +100,8 @@ namespace IsimSaglik.Repository.Concrete
             };
 
             command.Parameters.AddWithValue("p_id", entity.Id);
+            command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
+            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
             command.Parameters.AddWithValue("p_full_name", entity.FullName);
             command.Parameters.AddWithValue("p_email", entity.Email);
             command.Parameters.AddWithValue("p_password", entity.Password);
@@ -106,7 +112,7 @@ namespace IsimSaglik.Repository.Concrete
             command.Parameters.AddWithValue("p_parent_company_id", (object)entity.CompanyId ?? DBNull.Value);
             command.Parameters.AddWithValue("p_job_title", (object)entity.JobTitle ?? DBNull.Value);
             command.Parameters.AddWithValue("p_birth_date", entity.BirthDate);
-            command.Parameters.AddWithValue("p_photo", entity.Photo.ToString());
+            command.Parameters.AddWithValue("p_photo_url", entity.PhotoUrl.ToString());
 
             await command.ExecuteNonQueryAsync();
         }
@@ -165,7 +171,7 @@ namespace IsimSaglik.Repository.Concrete
                         ? null
                         : reader.GetString(reader.GetOrdinal("job_title")),
                     BirthDate = reader.GetDateTime(reader.GetOrdinal("birth_date")),
-                    Photo = new Uri(reader.GetString(reader.GetOrdinal("photo")))
+                    PhotoUrl = new Uri(reader.GetString(reader.GetOrdinal("photo_url")))
                 };
             }
 

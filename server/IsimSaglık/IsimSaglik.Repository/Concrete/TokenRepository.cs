@@ -35,7 +35,9 @@ namespace IsimSaglik.Repository.Concrete
                 {
                     Id = reader.GetGuid(reader.GetOrdinal("id")),
                     CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     RefreshToken = reader.GetString(reader.GetOrdinal("refresh_token")),
                     UserId = reader.GetGuid(reader.GetOrdinal("user_id")),
                     CreatedIp = reader.IsDBNull(reader.GetOrdinal("created_ip"))
@@ -72,7 +74,9 @@ namespace IsimSaglik.Repository.Concrete
                 {
                     Id = reader.GetGuid(reader.GetOrdinal("id")),
                     CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     RefreshToken = reader.GetString(reader.GetOrdinal("refresh_token")),
                     UserId = reader.GetGuid(reader.GetOrdinal("user_id")),
                     CreatedIp = reader.IsDBNull(reader.GetOrdinal("created_ip"))
@@ -99,7 +103,7 @@ namespace IsimSaglik.Repository.Concrete
             };
 
             command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
-            command.Parameters.AddWithValue("p_updated_date", entity.UpdatedDate);
+            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
             command.Parameters.AddWithValue("p_refresh_token", entity.RefreshToken);
             command.Parameters.AddWithValue("p_user_id", entity.UserId);
             command.Parameters.AddWithValue("p_created_ip", (object)entity.CreatedIp ?? DBNull.Value);
@@ -122,7 +126,7 @@ namespace IsimSaglik.Repository.Concrete
 
             command.Parameters.AddWithValue("p_id", entity.Id);
             command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
-            command.Parameters.AddWithValue("p_updated_date", entity.UpdatedDate);
+            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
             command.Parameters.AddWithValue("p_refresh_token", entity.RefreshToken);
             command.Parameters.AddWithValue("p_user_id", entity.UserId);
             command.Parameters.AddWithValue("p_created_ip", (object)entity.CreatedIp ?? DBNull.Value);

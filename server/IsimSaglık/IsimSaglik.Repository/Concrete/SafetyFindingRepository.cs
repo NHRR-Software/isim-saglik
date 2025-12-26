@@ -33,7 +33,9 @@ namespace IsimSaglik.Repository.Concrete
                 {
                     Id = reader.GetGuid(reader.GetOrdinal("id")),
                     CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     Title = reader.GetString(reader.GetOrdinal("title")),
                     Status = (FindingStatus)reader.GetInt16(reader.GetOrdinal("status")),
                     Severity = (FindingSeverity)reader.GetInt16(reader.GetOrdinal("severity")),
@@ -77,7 +79,9 @@ namespace IsimSaglik.Repository.Concrete
                 {
                     Id = reader.GetGuid(reader.GetOrdinal("id")),
                     CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     Title = reader.GetString(reader.GetOrdinal("title")),
                     Status = (FindingStatus)reader.GetInt16(reader.GetOrdinal("status")),
                     Severity = (FindingSeverity)reader.GetInt16(reader.GetOrdinal("severity")),
@@ -121,7 +125,9 @@ namespace IsimSaglik.Repository.Concrete
                 {
                     Id = reader.GetGuid(reader.GetOrdinal("id")),
                     CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     Title = reader.GetString(reader.GetOrdinal("title")),
                     Status = (FindingStatus)reader.GetInt16(reader.GetOrdinal("status")),
                     Severity = (FindingSeverity)reader.GetInt16(reader.GetOrdinal("severity")),
@@ -165,7 +171,9 @@ namespace IsimSaglik.Repository.Concrete
                 {
                     Id = reader.GetGuid(reader.GetOrdinal("id")),
                     CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     Title = reader.GetString(reader.GetOrdinal("title")),
                     Status = (FindingStatus)reader.GetInt16(reader.GetOrdinal("status")),
                     Severity = (FindingSeverity)reader.GetInt16(reader.GetOrdinal("severity")),
@@ -198,7 +206,7 @@ namespace IsimSaglik.Repository.Concrete
             };
 
             command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
-            command.Parameters.AddWithValue("p_updated_date", entity.UpdatedDate);
+            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
             command.Parameters.AddWithValue("p_title", entity.Title);
             command.Parameters.AddWithValue("p_status", (short)entity.Status);
             command.Parameters.AddWithValue("p_severity", (short)entity.Severity);
@@ -226,7 +234,7 @@ namespace IsimSaglik.Repository.Concrete
 
             command.Parameters.AddWithValue("p_id", entity.Id);
             command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
-            command.Parameters.AddWithValue("p_updated_date", entity.UpdatedDate);
+            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
             command.Parameters.AddWithValue("p_title", entity.Title);
             command.Parameters.AddWithValue("p_status", (short)entity.Status);
             command.Parameters.AddWithValue("p_severity", (short)entity.Severity);

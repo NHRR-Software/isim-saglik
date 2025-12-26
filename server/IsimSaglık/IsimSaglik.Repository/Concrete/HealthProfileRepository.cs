@@ -35,7 +35,9 @@ namespace IsimSaglik.Repository.Concrete
                 {
                     Id = reader.GetGuid(reader.GetOrdinal("id")),
                     CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     UserId = reader.GetGuid(reader.GetOrdinal("user_id")),
                     BloodGroup = reader.GetString(reader.GetOrdinal("blood_group")),
                     ChronicDisease = reader.IsDBNull(reader.GetOrdinal("chronic_disease"))
@@ -70,7 +72,9 @@ namespace IsimSaglik.Repository.Concrete
                 {
                     Id = reader.GetGuid(reader.GetOrdinal("id")),
                     CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     UserId = reader.GetGuid(reader.GetOrdinal("user_id")),
                     BloodGroup = reader.GetString(reader.GetOrdinal("blood_group")),
                     ChronicDisease = reader.IsDBNull(reader.GetOrdinal("chronic_disease"))
@@ -107,7 +111,9 @@ namespace IsimSaglik.Repository.Concrete
                 {
                     Id = reader.GetGuid(reader.GetOrdinal("id")),
                     CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     UserId = reader.GetGuid(reader.GetOrdinal("user_id")),
                     BloodGroup = reader.GetString(reader.GetOrdinal("blood_group")),
                     ChronicDisease = reader.IsDBNull(reader.GetOrdinal("chronic_disease"))
@@ -133,7 +139,7 @@ namespace IsimSaglik.Repository.Concrete
             };
 
             command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
-            command.Parameters.AddWithValue("p_updated_date", entity.UpdatedDate);
+            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
             command.Parameters.AddWithValue("p_user_id", entity.UserId);
             command.Parameters.AddWithValue("p_blood_group", entity.BloodGroup);
             command.Parameters.AddWithValue("p_chronic_disease", (object)entity.ChronicDisease ?? DBNull.Value);
@@ -156,7 +162,7 @@ namespace IsimSaglik.Repository.Concrete
 
             command.Parameters.AddWithValue("p_id", entity.Id);
             command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
-            command.Parameters.AddWithValue("p_updated_date", entity.UpdatedDate);
+            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
             command.Parameters.AddWithValue("p_user_id", entity.UserId);
             command.Parameters.AddWithValue("p_blood_group", entity.BloodGroup);
             command.Parameters.AddWithValue("p_chronic_disease", (object)entity.ChronicDisease ?? DBNull.Value);

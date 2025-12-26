@@ -20,7 +20,7 @@ namespace IsimSaglik.Entity.Models
 
         public required DateTime BirthDate { get; set; }
 
-        public required Uri Photo { get; set; }
+        public required Uri PhotoUrl { get; set; }
 
         public required bool IsActive { get; set; } = true;
 
