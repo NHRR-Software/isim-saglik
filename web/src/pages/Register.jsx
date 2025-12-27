@@ -99,7 +99,8 @@ const Register = () => {
 
     try {
       // API İsteği
-      await axios.post('https://api.isimsaglik.com/api/auth/register-with-invite', payload);
+      // await axios.post('https://api.isimsaglik.com/api/auth/register-with-invite', payload);
+      await axios.post('https://localhost:7213/api/Auth/RegisterWithInvite', payload);
       
       // Başarılı olursa
       setIsRegistrationComplete(true);
