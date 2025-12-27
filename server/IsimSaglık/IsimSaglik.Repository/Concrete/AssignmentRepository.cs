@@ -21,11 +21,7 @@ namespace IsimSaglik.Repository.Concrete
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            await using var command = new NpgsqlCommand("sp_get_assignments_by_user_id", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
+            await using var command = new NpgsqlCommand("SELECT * FROM sp_get_assignments_by_user_id(@p_user_id)", connection);
             command.Parameters.AddWithValue("p_user_id", userId);
 
             await using var reader = await command.ExecuteReaderAsync();
@@ -57,10 +53,7 @@ namespace IsimSaglik.Repository.Concrete
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            await using var command = new NpgsqlCommand("sp_get_all_assignments", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
+            await using var command = new NpgsqlCommand("SELECT * FROM sp_get_all_assignments()", connection);
 
             await using var reader = await command.ExecuteReaderAsync();
 
@@ -91,11 +84,7 @@ namespace IsimSaglik.Repository.Concrete
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            await using var command = new NpgsqlCommand("sp_get_assignment_by_id", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
+            await using var command = new NpgsqlCommand("SELECT * FROM sp_get_assignment_by_id(@p_id)", connection);
             command.Parameters.AddWithValue("p_id", id);
 
             await using var reader = await command.ExecuteReaderAsync();
@@ -129,14 +118,26 @@ namespace IsimSaglik.Repository.Concrete
             {
                 CommandType = CommandType.StoredProcedure
             };
-            command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
-            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
-            command.Parameters.AddWithValue("p_status", (short)entity.Status);
-            command.Parameters.AddWithValue("p_severity", (short)entity.Severity);
-            command.Parameters.AddWithValue("p_description", entity.Description);
-            command.Parameters.AddWithValue("p_user_id", entity.UserId);
 
-            await command.ExecuteScalarAsync();
+            command.Parameters.AddWithValue("p_created_date", NpgsqlTypes.NpgsqlDbType.TimestampTz, entity.CreatedDate);
+            command.Parameters.AddWithValue("p_updated_date", NpgsqlTypes.NpgsqlDbType.TimestampTz, (object)entity.UpdatedDate ?? DBNull.Value);
+            command.Parameters.AddWithValue("p_status", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Status);
+            command.Parameters.AddWithValue("p_severity", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Severity);
+            command.Parameters.AddWithValue("p_description", NpgsqlTypes.NpgsqlDbType.Text, entity.Description);
+            command.Parameters.AddWithValue("p_user_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.UserId);
+
+            command.Parameters.Add(new NpgsqlParameter("p_id", NpgsqlTypes.NpgsqlDbType.Uuid)
+            {
+                Direction = ParameterDirection.InputOutput,
+                Value = DBNull.Value
+            });
+
+            await command.ExecuteNonQueryAsync();
+
+            if (command.Parameters["p_id"].Value != DBNull.Value)
+            {
+                entity.Id = (Guid)command.Parameters["p_id"].Value;
+            }
         }
 
 
@@ -150,13 +151,13 @@ namespace IsimSaglik.Repository.Concrete
                 CommandType = CommandType.StoredProcedure
             };
 
-            command.Parameters.AddWithValue("p_id", entity.Id);
-            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
-            command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
-            command.Parameters.AddWithValue("p_status", (short)entity.Status);
-            command.Parameters.AddWithValue("p_severity", (short)entity.Severity);
-            command.Parameters.AddWithValue("p_description", entity.Description);
-            command.Parameters.AddWithValue("p_user_id", entity.UserId);
+            command.Parameters.AddWithValue("p_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.Id);
+            command.Parameters.AddWithValue("p_created_date", NpgsqlTypes.NpgsqlDbType.TimestampTz, entity.CreatedDate);
+            command.Parameters.AddWithValue("p_updated_date", NpgsqlTypes.NpgsqlDbType.TimestampTz, (object)entity.UpdatedDate ?? DBNull.Value);
+            command.Parameters.AddWithValue("p_status", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Status);
+            command.Parameters.AddWithValue("p_severity", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Severity);
+            command.Parameters.AddWithValue("p_description", NpgsqlTypes.NpgsqlDbType.Text, entity.Description);
+            command.Parameters.AddWithValue("p_user_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.UserId);
 
             await command.ExecuteNonQueryAsync();
         }
@@ -172,7 +173,7 @@ namespace IsimSaglik.Repository.Concrete
                 CommandType = CommandType.StoredProcedure
             };
 
-            command.Parameters.AddWithValue("p_id", id);
+            command.Parameters.AddWithValue("p_id", NpgsqlTypes.NpgsqlDbType.Uuid, id);
 
             await command.ExecuteNonQueryAsync();
         }
