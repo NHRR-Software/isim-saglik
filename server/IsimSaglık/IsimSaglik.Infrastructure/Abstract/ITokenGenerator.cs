@@ -7,6 +7,6 @@ namespace IsimSaglik.Infrastructure.Abstract
     {
         TokenResponseDto GenerateTokens(User user);
 
-        bool ValidateRefreshToken(Token refreshToken);
+        bool ValidateRefreshToken(RefreshToken refreshToken);
     }
 }

@@ -1,8 +1,8 @@
 ﻿namespace IsimSaglik.Entity.Models
 {
-    public sealed class Token : BaseEntity
+    public sealed class RefreshToken : BaseEntity
     {
-        public required string RefreshToken { get; set; }
+        public required string Token { get; set; }
 
         public required Guid UserId { get; set; }
 

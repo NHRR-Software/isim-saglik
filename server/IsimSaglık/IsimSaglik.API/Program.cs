@@ -1,4 +1,5 @@
 using IsimSaglik.API.Extensions;
+using IsimSaglik.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,9 @@ builder.Services.AddControllers();
 
 // Settings
 builder.Services.ConfigureSettings(builder.Configuration);
+
+// Supabase
+builder.Services.ConfigureSupabase();
 
 // Managers
 builder.Services.ConfigureRepositoryManager();
@@ -33,12 +37,14 @@ builder.Services.ConfigureCors();
 
 
 // Swagger
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.ConfigureSwagger();
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
 
 
 var app = builder.Build();
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

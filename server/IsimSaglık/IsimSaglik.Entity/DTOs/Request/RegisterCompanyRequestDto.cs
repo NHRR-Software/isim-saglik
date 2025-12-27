@@ -16,7 +16,7 @@ namespace IsimSaglik.Entity.DTOs.Request
         public string Email { get; init; } = string.Empty;
 
 
-        [Required(ErrorMessage = "Phone Number is required")]
+        [Required(ErrorMessage = "PhoneNumber is required")]
         public string PhoneNumber { get; init; } = string.Empty;
 
 
@@ -28,5 +28,10 @@ namespace IsimSaglik.Entity.DTOs.Request
         [Required(ErrorMessage = "PasswordAgain is required.")]
         [Compare("Password", ErrorMessage = "Passwords do not match.")]
         public string PasswordAgain { get; init; } = string.Empty;
+
+
+        [Required(ErrorMessage = "FoundingDate is required")]
+        [DataType(DataType.Date)]
+        public DateTime FoundingDate { get; init; }
     }
 }

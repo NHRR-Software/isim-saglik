@@ -8,6 +8,7 @@ using IsimSaglik.Service.Abstract;
 using IsimSaglik.Service.Concrete;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -19,6 +20,20 @@ namespace IsimSaglik.API.Extensions
         public static void ConfigureSettings(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+            services.Configure<SupabaseSettings>(configuration.GetSection("SupabaseSettings"));
+        }
+
+
+        public static void ConfigureSupabase(this IServiceCollection services)
+        {
+            services.AddScoped<ISupabaseClient>(provider =>
+            {
+                var settings = provider.GetRequiredService<IOptions<SupabaseSettings>>();
+                var service = new SupabaseClient(settings);
+
+                service.InitializeAsync().Wait();
+                return service;
+            });
         }
 
 
@@ -36,7 +51,7 @@ namespace IsimSaglik.API.Extensions
             services.AddScoped<ISafetyFindingRepository, SafetyFindingRepository>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IAssignmentRepository, AssignmentRepository>();
-            services.AddScoped<ITokenRepository, TokenRepository>();
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
         }
 

@@ -24,6 +24,7 @@ namespace IsimSaglik.Entity.DTOs.Request
 
 
         [Required(ErrorMessage = "Gender is required")]
+        [EnumDataType(typeof(Gender), ErrorMessage = "Invalid gender selected.")]
         public Gender Gender { get; init; }
 
 

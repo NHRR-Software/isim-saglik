@@ -5,11 +5,12 @@ namespace IsimSaglik.Entity.DTOs.Request
 {
     public sealed record AssignmentRequestDto
     {
-        [Required(ErrorMessage = "Assignment description is required")]
+        [Required(ErrorMessage = "Description is required")]
         public string Description { get; init; } = string.Empty;
 
 
-        [Required(ErrorMessage = "Assignment severity is required")]
+        [Required(ErrorMessage = "Severity is required")]
+        [EnumDataType(typeof(SeverityType), ErrorMessage = "Invalid severity selected.")]
         public SeverityType Severity { get; init; }
     }
 }

@@ -5,9 +5,11 @@ namespace IsimSaglik.Service.Abstract
 {
     public interface IAuthService
     {
+        Task RegisterCompanyAsync(RegisterCompanyRequestDto dto);
+
         Task<TokenResponseDto> LogInAsync(LogInRequestDto dto);
 
-        Task<TokenResponseDto> TokenAsync(TokenRequestDto dto);
+        Task<TokenResponseDto> RefreshTokenAsync(TokenRequestDto dto);
 
         Task LogOutAsync(TokenRequestDto dto);
     }

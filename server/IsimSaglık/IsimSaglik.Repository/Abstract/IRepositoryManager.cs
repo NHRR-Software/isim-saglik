@@ -10,8 +10,10 @@
 
         ISafetyFindingRepository SafetyFinding { get; }
 
-        ITokenRepository Token { get; }
+        IRefreshTokenRepository Token { get; }
 
         IUserRepository User { get; }
+
+        IUserInvitationRepository UserInvitation { get; }
     }
 }

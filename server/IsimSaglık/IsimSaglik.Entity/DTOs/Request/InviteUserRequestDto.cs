@@ -13,6 +13,7 @@ namespace IsimSaglik.Entity.DTOs.Request
 
 
         [Required(ErrorMessage = "Role is required")]
+        [EnumDataType(typeof(UserRole), ErrorMessage = "Invalid role selected.")]
         public required UserRole Role { get; init; }
     }
 }

@@ -21,11 +21,7 @@ namespace IsimSaglik.Repository.Concrete
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            await using var command = new NpgsqlCommand("sp_get_all_users", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
+            await using var command = new NpgsqlCommand("SELECT * FROM sp_get_all_users()", connection);
             await using var reader = await command.ExecuteReaderAsync();
 
             while (await reader.ReadAsync())
@@ -39,7 +35,6 @@ namespace IsimSaglik.Repository.Concrete
                         : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     FullName = reader.GetString(reader.GetOrdinal("full_name")),
                     Email = reader.GetString(reader.GetOrdinal("email")),
-                    Password = reader.GetString(reader.GetOrdinal("password")),
                     PhoneNumber = reader.GetString(reader.GetOrdinal("phone_number")),
                     Role = (UserRole)reader.GetInt16(reader.GetOrdinal("role")),
                     Gender = (Gender)reader.GetInt16(reader.GetOrdinal("gender")),
@@ -71,21 +66,31 @@ namespace IsimSaglik.Repository.Concrete
                 CommandType = CommandType.StoredProcedure
             };
 
-            command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
-            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
-            command.Parameters.AddWithValue("p_full_name", entity.FullName);
-            command.Parameters.AddWithValue("p_email", entity.Email);
-            command.Parameters.AddWithValue("p_password", entity.Password);
-            command.Parameters.AddWithValue("p_phone_number", entity.PhoneNumber);
-            command.Parameters.AddWithValue("p_role", (short)entity.Role);
-            command.Parameters.AddWithValue("p_gender", (short)entity.Gender);
-            command.Parameters.AddWithValue("p_is_active", entity.IsActive);
-            command.Parameters.AddWithValue("p_parent_company_id", (object)entity.CompanyId ?? DBNull.Value);
-            command.Parameters.AddWithValue("p_job_title", (object)entity.JobTitle ?? DBNull.Value);
-            command.Parameters.AddWithValue("p_birth_date", entity.BirthDate);
-            command.Parameters.AddWithValue("p_photo_url", entity.PhotoUrl.ToString());
+            command.Parameters.AddWithValue("p_created_date", NpgsqlTypes.NpgsqlDbType.TimestampTz, entity.CreatedDate);
+            command.Parameters.AddWithValue("p_updated_date", NpgsqlTypes.NpgsqlDbType.TimestampTz, entity.UpdatedDate ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("p_full_name", NpgsqlTypes.NpgsqlDbType.Text, entity.FullName);
+            command.Parameters.AddWithValue("p_email", NpgsqlTypes.NpgsqlDbType.Text, entity.Email);
+            command.Parameters.AddWithValue("p_phone_number", NpgsqlTypes.NpgsqlDbType.Text, entity.PhoneNumber);
+            command.Parameters.AddWithValue("p_role", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Role);
+            command.Parameters.AddWithValue("p_gender", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Gender);
+            command.Parameters.AddWithValue("p_is_active", NpgsqlTypes.NpgsqlDbType.Boolean, entity.IsActive);
+            command.Parameters.AddWithValue("p_parent_company_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.CompanyId ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("p_job_title", NpgsqlTypes.NpgsqlDbType.Text, entity.JobTitle ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("p_birth_date", NpgsqlTypes.NpgsqlDbType.Date, entity.BirthDate);
+            command.Parameters.AddWithValue("p_photo_url", NpgsqlTypes.NpgsqlDbType.Text, entity.PhotoUrl.ToString());
 
-            var newId = await command.ExecuteScalarAsync();
+            command.Parameters.Add(new NpgsqlParameter("p_id", NpgsqlTypes.NpgsqlDbType.Uuid)
+            {
+                Direction = ParameterDirection.InputOutput,
+                Value = DBNull.Value
+            });
+
+            await command.ExecuteNonQueryAsync();
+
+            if (command.Parameters["p_id"].Value != DBNull.Value)
+            {
+                entity.Id = (Guid)command.Parameters["p_id"].Value;
+            }
         }
 
 
@@ -99,20 +104,19 @@ namespace IsimSaglik.Repository.Concrete
                 CommandType = CommandType.StoredProcedure
             };
 
-            command.Parameters.AddWithValue("p_id", entity.Id);
-            command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
-            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
-            command.Parameters.AddWithValue("p_full_name", entity.FullName);
-            command.Parameters.AddWithValue("p_email", entity.Email);
-            command.Parameters.AddWithValue("p_password", entity.Password);
-            command.Parameters.AddWithValue("p_phone_number", entity.PhoneNumber);
-            command.Parameters.AddWithValue("p_role", (short)entity.Role);
-            command.Parameters.AddWithValue("p_gender", (short)entity.Gender);
-            command.Parameters.AddWithValue("p_is_active", entity.IsActive);
-            command.Parameters.AddWithValue("p_parent_company_id", (object)entity.CompanyId ?? DBNull.Value);
-            command.Parameters.AddWithValue("p_job_title", (object)entity.JobTitle ?? DBNull.Value);
-            command.Parameters.AddWithValue("p_birth_date", entity.BirthDate);
-            command.Parameters.AddWithValue("p_photo_url", entity.PhotoUrl.ToString());
+            command.Parameters.AddWithValue("p_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.Id);
+            command.Parameters.AddWithValue("p_created_date", NpgsqlTypes.NpgsqlDbType.TimestampTz, entity.CreatedDate);
+            command.Parameters.AddWithValue("p_updated_date", NpgsqlTypes.NpgsqlDbType.TimestampTz, entity.UpdatedDate ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("p_full_name", NpgsqlTypes.NpgsqlDbType.Text, entity.FullName);
+            command.Parameters.AddWithValue("p_email", NpgsqlTypes.NpgsqlDbType.Text, entity.Email);
+            command.Parameters.AddWithValue("p_phone_number", NpgsqlTypes.NpgsqlDbType.Text, entity.PhoneNumber);
+            command.Parameters.AddWithValue("p_role", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Role);
+            command.Parameters.AddWithValue("p_gender", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Gender);
+            command.Parameters.AddWithValue("p_is_active", NpgsqlTypes.NpgsqlDbType.Boolean, entity.IsActive);
+            command.Parameters.AddWithValue("p_parent_company_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.CompanyId ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("p_job_title", NpgsqlTypes.NpgsqlDbType.Text, entity.JobTitle ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("p_birth_date", NpgsqlTypes.NpgsqlDbType.Date, entity.BirthDate);
+            command.Parameters.AddWithValue("p_photo_url", NpgsqlTypes.NpgsqlDbType.Text, entity.PhotoUrl.ToString());
 
             await command.ExecuteNonQueryAsync();
         }
@@ -128,7 +132,7 @@ namespace IsimSaglik.Repository.Concrete
                 CommandType = CommandType.StoredProcedure
             };
 
-            command.Parameters.AddWithValue("p_id", id);
+            command.Parameters.AddWithValue("p_id", NpgsqlTypes.NpgsqlDbType.Uuid, id);
 
             await command.ExecuteNonQueryAsync();
         }
@@ -141,11 +145,7 @@ namespace IsimSaglik.Repository.Concrete
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            await using var command = new NpgsqlCommand("sp_get_user_by_id", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
+            await using var command = new NpgsqlCommand("SELECT * FROM sp_get_user_by_id(@p_id)", connection);
             command.Parameters.AddWithValue("p_id", id);
 
             await using var reader = await command.ExecuteReaderAsync();
@@ -161,7 +161,6 @@ namespace IsimSaglik.Repository.Concrete
                         : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     FullName = reader.GetString(reader.GetOrdinal("full_name")),
                     Email = reader.GetString(reader.GetOrdinal("email")),
-                    Password = reader.GetString(reader.GetOrdinal("password")),
                     PhoneNumber = reader.GetString(reader.GetOrdinal("phone_number")),
                     Role = (UserRole)reader.GetInt16(reader.GetOrdinal("role")),
                     Gender = (Gender)reader.GetInt16(reader.GetOrdinal("gender")),
@@ -188,11 +187,7 @@ namespace IsimSaglik.Repository.Concrete
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            await using var command = new NpgsqlCommand("sp_get_user_by_email", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
+            await using var command = new NpgsqlCommand("SELECT * FROM sp_get_user_by_email(@p_email)", connection);
             command.Parameters.AddWithValue("p_email", email);
 
             await using var reader = await command.ExecuteReaderAsync();
@@ -208,7 +203,6 @@ namespace IsimSaglik.Repository.Concrete
                         : reader.GetDateTime(reader.GetOrdinal("updated_date")),
                     FullName = reader.GetString(reader.GetOrdinal("full_name")),
                     Email = reader.GetString(reader.GetOrdinal("email")),
-                    Password = reader.GetString(reader.GetOrdinal("password")),
                     PhoneNumber = reader.GetString(reader.GetOrdinal("phone_number")),
                     Role = (UserRole)reader.GetInt16(reader.GetOrdinal("role")),
                     Gender = (Gender)reader.GetInt16(reader.GetOrdinal("gender")),

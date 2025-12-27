@@ -34,7 +34,7 @@ namespace IsimSaglik.Infrastructure.Concrete
         }
 
 
-        public bool ValidateRefreshToken(Token refreshToken)
+        public bool ValidateRefreshToken(RefreshToken refreshToken)
         {
             // TODO: Aynı dakia içerisinde oluşturulmuşsa hata verebilir.
 
