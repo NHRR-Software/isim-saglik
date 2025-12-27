@@ -21,10 +21,7 @@ namespace IsimSaglik.Repository.Concrete
             await using var connection = new Npgsql.NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            await using var command = new Npgsql.NpgsqlCommand("sp_get_all_safety_findings", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
+            await using var command = new Npgsql.NpgsqlCommand("SELECT * FROM sp_get_all_safety_findings()", connection);
             await using var reader = await command.ExecuteReaderAsync();
 
             while (await reader.ReadAsync())
@@ -41,7 +38,9 @@ namespace IsimSaglik.Repository.Concrete
                     Severity = (FindingSeverity)reader.GetInt16(reader.GetOrdinal("severity")),
                     Type = (FindingType)reader.GetInt16(reader.GetOrdinal("type")),
                     Description = reader.GetString(reader.GetOrdinal("description")),
-                    ClosedDate = reader.GetDateTime(reader.GetOrdinal("closed_date")),
+                    ClosedDate = reader.IsDBNull(reader.GetOrdinal("closed_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("closed_date")),
                     PhotoUrl = reader.IsDBNull(reader.GetOrdinal("photo_url"))
                         ? null
                         : new Uri(reader.GetString(reader.GetOrdinal("photo_url"))),
@@ -64,11 +63,7 @@ namespace IsimSaglik.Repository.Concrete
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            await using var command = new NpgsqlCommand("sp_get_safety_finding_by_id", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
+            await using var command = new NpgsqlCommand("SELECT * FROM sp_get_safety_finding_by_id(@p_id)", connection);
             command.Parameters.AddWithValue("p_id", id);
 
             await using var reader = await command.ExecuteReaderAsync();
@@ -87,7 +82,9 @@ namespace IsimSaglik.Repository.Concrete
                     Severity = (FindingSeverity)reader.GetInt16(reader.GetOrdinal("severity")),
                     Type = (FindingType)reader.GetInt16(reader.GetOrdinal("type")),
                     Description = reader.GetString(reader.GetOrdinal("description")),
-                    ClosedDate = reader.GetDateTime(reader.GetOrdinal("closed_date")),
+                    ClosedDate = reader.IsDBNull(reader.GetOrdinal("closed_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("closed_date")),
                     PhotoUrl = reader.IsDBNull(reader.GetOrdinal("photo_url"))
                         ? null
                         : new Uri(reader.GetString(reader.GetOrdinal("photo_url"))),
@@ -110,11 +107,7 @@ namespace IsimSaglik.Repository.Concrete
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            await using var command = new NpgsqlCommand("sp_get_safety_findings_by_company_id", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
+            await using var command = new NpgsqlCommand("SELECT * FROM sp_get_safety_findings_by_company_id(@p_company_id)", connection);
             command.Parameters.AddWithValue("p_company_id", companyId);
 
             await using var reader = await command.ExecuteReaderAsync();
@@ -133,7 +126,9 @@ namespace IsimSaglik.Repository.Concrete
                     Severity = (FindingSeverity)reader.GetInt16(reader.GetOrdinal("severity")),
                     Type = (FindingType)reader.GetInt16(reader.GetOrdinal("type")),
                     Description = reader.GetString(reader.GetOrdinal("description")),
-                    ClosedDate = reader.GetDateTime(reader.GetOrdinal("closed_date")),
+                    ClosedDate = reader.IsDBNull(reader.GetOrdinal("closed_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("closed_date")),
                     PhotoUrl = reader.IsDBNull(reader.GetOrdinal("photo_url"))
                         ? null
                         : new Uri(reader.GetString(reader.GetOrdinal("photo_url"))),
@@ -156,11 +151,7 @@ namespace IsimSaglik.Repository.Concrete
             await using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            await using var command = new NpgsqlCommand("sp_get_safety_findings_by_reporter_id", connection)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-
+            await using var command = new NpgsqlCommand("SELECT * FROM sp_get_safety_findings_by_reporter_id(@p_reporter_id)", connection);
             command.Parameters.AddWithValue("p_reporter_id", reporterId);
 
             await using var reader = await command.ExecuteReaderAsync();
@@ -179,7 +170,9 @@ namespace IsimSaglik.Repository.Concrete
                     Severity = (FindingSeverity)reader.GetInt16(reader.GetOrdinal("severity")),
                     Type = (FindingType)reader.GetInt16(reader.GetOrdinal("type")),
                     Description = reader.GetString(reader.GetOrdinal("description")),
-                    ClosedDate = reader.GetDateTime(reader.GetOrdinal("closed_date")),
+                    ClosedDate = reader.IsDBNull(reader.GetOrdinal("closed_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("closed_date")),
                     PhotoUrl = reader.IsDBNull(reader.GetOrdinal("photo_url"))
                         ? null
                         : new Uri(reader.GetString(reader.GetOrdinal("photo_url"))),
@@ -205,20 +198,31 @@ namespace IsimSaglik.Repository.Concrete
                 CommandType = CommandType.StoredProcedure
             };
 
-            command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
-            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
-            command.Parameters.AddWithValue("p_title", entity.Title);
-            command.Parameters.AddWithValue("p_status", (short)entity.Status);
-            command.Parameters.AddWithValue("p_severity", (short)entity.Severity);
-            command.Parameters.AddWithValue("p_type", (short)entity.Type);
-            command.Parameters.AddWithValue("p_description", entity.Description);
-            command.Parameters.AddWithValue("p_closed_date", entity.ClosedDate);
-            command.Parameters.AddWithValue("p_photo_url", (object)entity.PhotoUrl?.ToString() ?? DBNull.Value);
-            command.Parameters.AddWithValue("p_company_id", entity.CompanyId);
-            command.Parameters.AddWithValue("p_reporter_id", entity.ReporterId);
-            command.Parameters.AddWithValue("p_reported_id", (object)entity.ReportedId ?? DBNull.Value);
+            command.Parameters.AddWithValue("p_created_date", NpgsqlTypes.NpgsqlDbType.TimestampTz, entity.CreatedDate);
+            command.Parameters.AddWithValue("p_updated_date", NpgsqlTypes.NpgsqlDbType.TimestampTz, (object)entity.UpdatedDate ?? DBNull.Value);
+            command.Parameters.AddWithValue("p_title", NpgsqlTypes.NpgsqlDbType.Text, entity.Title);
+            command.Parameters.AddWithValue("p_status", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Status);
+            command.Parameters.AddWithValue("p_severity", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Severity);
+            command.Parameters.AddWithValue("p_type", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Type);
+            command.Parameters.AddWithValue("p_description", NpgsqlTypes.NpgsqlDbType.Text, entity.Description);
+            command.Parameters.AddWithValue("p_closed_date", NpgsqlTypes.NpgsqlDbType.TimestampTz, (object)entity.ClosedDate ?? DBNull.Value);
+            command.Parameters.AddWithValue("p_photo_url", NpgsqlTypes.NpgsqlDbType.Text, (object)entity.PhotoUrl?.ToString() ?? DBNull.Value);
+            command.Parameters.AddWithValue("p_company_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.CompanyId);
+            command.Parameters.AddWithValue("p_reporter_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.ReporterId);
+            command.Parameters.AddWithValue("p_reported_id", NpgsqlTypes.NpgsqlDbType.Uuid, (object)entity.ReportedId ?? DBNull.Value);
 
-            await command.ExecuteScalarAsync();
+            command.Parameters.Add(new NpgsqlParameter("p_id", NpgsqlTypes.NpgsqlDbType.Uuid)
+            {
+                Direction = ParameterDirection.InputOutput,
+                Value = DBNull.Value
+            });
+
+            await command.ExecuteNonQueryAsync();
+
+            if (command.Parameters["p_id"].Value != DBNull.Value)
+            {
+                entity.Id = (Guid)command.Parameters["p_id"].Value;
+            }
         }
 
 
@@ -232,19 +236,19 @@ namespace IsimSaglik.Repository.Concrete
                 CommandType = CommandType.StoredProcedure
             };
 
-            command.Parameters.AddWithValue("p_id", entity.Id);
-            command.Parameters.AddWithValue("p_created_date", entity.CreatedDate);
-            command.Parameters.AddWithValue("p_updated_date", (object)entity.UpdatedDate ?? DBNull.Value);
-            command.Parameters.AddWithValue("p_title", entity.Title);
-            command.Parameters.AddWithValue("p_status", (short)entity.Status);
-            command.Parameters.AddWithValue("p_severity", (short)entity.Severity);
-            command.Parameters.AddWithValue("p_type", (short)entity.Type);
-            command.Parameters.AddWithValue("p_description", entity.Description);
-            command.Parameters.AddWithValue("p_closed_date", entity.ClosedDate);
-            command.Parameters.AddWithValue("p_photo_url", (object)entity.PhotoUrl?.ToString() ?? DBNull.Value);
-            command.Parameters.AddWithValue("p_company_id", entity.CompanyId);
-            command.Parameters.AddWithValue("p_reporter_id", entity.ReporterId);
-            command.Parameters.AddWithValue("p_reported_id", (object)entity.ReportedId ?? DBNull.Value);
+            command.Parameters.AddWithValue("p_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.Id);
+            command.Parameters.AddWithValue("p_created_date", NpgsqlTypes.NpgsqlDbType.TimestampTz, entity.CreatedDate);
+            command.Parameters.AddWithValue("p_updated_date", NpgsqlTypes.NpgsqlDbType.TimestampTz, (object)entity.UpdatedDate ?? DBNull.Value);
+            command.Parameters.AddWithValue("p_title", NpgsqlTypes.NpgsqlDbType.Text, entity.Title);
+            command.Parameters.AddWithValue("p_status", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Status);
+            command.Parameters.AddWithValue("p_severity", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Severity);
+            command.Parameters.AddWithValue("p_type", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Type);
+            command.Parameters.AddWithValue("p_description", NpgsqlTypes.NpgsqlDbType.Text, entity.Description);
+            command.Parameters.AddWithValue("p_closed_date", NpgsqlTypes.NpgsqlDbType.TimestampTz, (object)entity.ClosedDate ?? DBNull.Value);
+            command.Parameters.AddWithValue("p_photo_url", NpgsqlTypes.NpgsqlDbType.Text, (object)entity.PhotoUrl?.ToString() ?? DBNull.Value);
+            command.Parameters.AddWithValue("p_company_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.CompanyId);
+            command.Parameters.AddWithValue("p_reporter_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.ReporterId);
+            command.Parameters.AddWithValue("p_reported_id", NpgsqlTypes.NpgsqlDbType.Uuid, (object)entity.ReportedId ?? DBNull.Value);
 
             await command.ExecuteNonQueryAsync();
         }
@@ -260,7 +264,7 @@ namespace IsimSaglik.Repository.Concrete
                 CommandType = CommandType.StoredProcedure
             };
 
-            command.Parameters.AddWithValue("p_id", id);
+            command.Parameters.AddWithValue("p_id", NpgsqlTypes.NpgsqlDbType.Uuid, id);
 
             await command.ExecuteNonQueryAsync();
         }
