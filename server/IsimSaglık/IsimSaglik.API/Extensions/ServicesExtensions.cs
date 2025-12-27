@@ -53,6 +53,7 @@ namespace IsimSaglik.API.Extensions
             services.AddScoped<IAssignmentRepository, AssignmentRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserInvitationRepository, UserInvitationRepository>();
         }
 
 

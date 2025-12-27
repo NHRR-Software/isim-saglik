@@ -39,9 +39,9 @@ namespace IsimSaglik.Repository.Concrete
                     Role = (UserRole)reader.GetInt16(reader.GetOrdinal("role")),
                     Gender = (Gender)reader.GetInt16(reader.GetOrdinal("gender")),
                     IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                    CompanyId = reader.IsDBNull(reader.GetOrdinal("parent_company_id"))
+                    CompanyId = reader.IsDBNull(reader.GetOrdinal("company_id"))
                         ? null
-                        : reader.GetGuid(reader.GetOrdinal("parent_company_id")),
+                        : reader.GetGuid(reader.GetOrdinal("company_id")),
                     JobTitle = reader.IsDBNull(reader.GetOrdinal("job_title"))
                         ? null
                         : reader.GetString(reader.GetOrdinal("job_title")),
@@ -74,7 +74,7 @@ namespace IsimSaglik.Repository.Concrete
             command.Parameters.AddWithValue("p_role", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Role);
             command.Parameters.AddWithValue("p_gender", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Gender);
             command.Parameters.AddWithValue("p_is_active", NpgsqlTypes.NpgsqlDbType.Boolean, entity.IsActive);
-            command.Parameters.AddWithValue("p_parent_company_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.CompanyId ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("p_company_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.CompanyId ?? (object)DBNull.Value);
             command.Parameters.AddWithValue("p_job_title", NpgsqlTypes.NpgsqlDbType.Text, entity.JobTitle ?? (object)DBNull.Value);
             command.Parameters.AddWithValue("p_birth_date", NpgsqlTypes.NpgsqlDbType.Date, entity.BirthDate);
             command.Parameters.AddWithValue("p_photo_url", NpgsqlTypes.NpgsqlDbType.Text, entity.PhotoUrl.ToString());
@@ -113,7 +113,7 @@ namespace IsimSaglik.Repository.Concrete
             command.Parameters.AddWithValue("p_role", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Role);
             command.Parameters.AddWithValue("p_gender", NpgsqlTypes.NpgsqlDbType.Smallint, (short)entity.Gender);
             command.Parameters.AddWithValue("p_is_active", NpgsqlTypes.NpgsqlDbType.Boolean, entity.IsActive);
-            command.Parameters.AddWithValue("p_parent_company_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.CompanyId ?? (object)DBNull.Value);
+            command.Parameters.AddWithValue("p_company_id", NpgsqlTypes.NpgsqlDbType.Uuid, entity.CompanyId ?? (object)DBNull.Value);
             command.Parameters.AddWithValue("p_job_title", NpgsqlTypes.NpgsqlDbType.Text, entity.JobTitle ?? (object)DBNull.Value);
             command.Parameters.AddWithValue("p_birth_date", NpgsqlTypes.NpgsqlDbType.Date, entity.BirthDate);
             command.Parameters.AddWithValue("p_photo_url", NpgsqlTypes.NpgsqlDbType.Text, entity.PhotoUrl.ToString());
@@ -165,9 +165,9 @@ namespace IsimSaglik.Repository.Concrete
                     Role = (UserRole)reader.GetInt16(reader.GetOrdinal("role")),
                     Gender = (Gender)reader.GetInt16(reader.GetOrdinal("gender")),
                     IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                    CompanyId = reader.IsDBNull(reader.GetOrdinal("parent_company_id"))
+                    CompanyId = reader.IsDBNull(reader.GetOrdinal("company_id"))
                         ? null
-                        : reader.GetGuid(reader.GetOrdinal("parent_company_id")),
+                        : reader.GetGuid(reader.GetOrdinal("company_id")),
                     JobTitle = reader.IsDBNull(reader.GetOrdinal("job_title"))
                         ? null
                         : reader.GetString(reader.GetOrdinal("job_title")),
@@ -207,9 +207,9 @@ namespace IsimSaglik.Repository.Concrete
                     Role = (UserRole)reader.GetInt16(reader.GetOrdinal("role")),
                     Gender = (Gender)reader.GetInt16(reader.GetOrdinal("gender")),
                     IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
-                    CompanyId = reader.IsDBNull(reader.GetOrdinal("parent_company_id"))
+                    CompanyId = reader.IsDBNull(reader.GetOrdinal("company_id"))
                         ? null
-                        : reader.GetGuid(reader.GetOrdinal("parent_company_id")),
+                        : reader.GetGuid(reader.GetOrdinal("company_id")),
                     JobTitle = reader.IsDBNull(reader.GetOrdinal("job_title"))
                         ? null
                         : reader.GetString(reader.GetOrdinal("job_title")),

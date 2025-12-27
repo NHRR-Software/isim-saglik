@@ -36,7 +36,6 @@ namespace IsimSaglik.Service.Concrete
             {
                 Email = dto.Email,
                 Role = dto.Role,
-                Token = Guid.NewGuid().ToString("N"),
                 CompanyId = companyId,
                 CreatedDate = DateTime.UtcNow,
                 ExpiresDate = DateTime.UtcNow.AddDays(1),
