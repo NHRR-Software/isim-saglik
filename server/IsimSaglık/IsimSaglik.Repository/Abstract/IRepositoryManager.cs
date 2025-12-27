@@ -10,7 +10,7 @@
 
         ISafetyFindingRepository SafetyFinding { get; }
 
-        IRefreshTokenRepository Token { get; }
+        IRefreshTokenRepository RefreshToken { get; }
 
         IUserRepository User { get; }
 

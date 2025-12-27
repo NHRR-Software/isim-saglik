@@ -101,7 +101,7 @@ namespace IsimSaglik.Service.Concrete
                 CreatedDate = DateTime.UtcNow
             };
 
-            await _repositoryManager.Token.CreateAsync(token);
+            await _repositoryManager.RefreshToken.CreateAsync(token);
 
             return tokens;
         }
@@ -109,7 +109,7 @@ namespace IsimSaglik.Service.Concrete
 
         public async Task<TokenResponseDto> RefreshTokenAsync(TokenRequestDto dto)
         {
-            var token = await _repositoryManager.Token.GetByTokenAsync(dto.Token)
+            var token = await _repositoryManager.RefreshToken.GetByTokenAsync(dto.Token)
                 ?? throw new NotFoundException($"{nameof(RefreshToken)} with refresh token '{dto.Token}' not found.", ErrorCodes.TokenNotFound);
 
             if (!_tokenGenerator.ValidateRefreshToken(token))
@@ -128,7 +128,7 @@ namespace IsimSaglik.Service.Concrete
             token.ExpiresDate = DateTime.UtcNow.AddDays(15);
             token.CreatedDate = DateTime.UtcNow;
 
-            await _repositoryManager.Token.UpdateAsync(token);
+            await _repositoryManager.RefreshToken.UpdateAsync(token);
 
             return tokens;
         }
@@ -136,10 +136,10 @@ namespace IsimSaglik.Service.Concrete
 
         public async Task LogOutAsync(TokenRequestDto dto)
         {
-            var token = await _repositoryManager.Token.GetByTokenAsync(dto.Token)
+            var token = await _repositoryManager.RefreshToken.GetByTokenAsync(dto.Token)
                 ?? throw new NotFoundException($"{nameof(RefreshToken)} with refresh token '{dto.Token}' not found.", ErrorCodes.TokenNotFound);
 
-            await _repositoryManager.Token.DeleteAsync(token.Id);
+            await _repositoryManager.RefreshToken.DeleteAsync(token.Id);
         }
     }
 }

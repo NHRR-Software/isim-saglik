@@ -8,7 +8,7 @@ namespace IsimSaglik.Repository.Concrete
         private readonly IHealthProfileRepository _healthProfileRepository;
         private readonly INotificationRepository _notificationRepository;
         private readonly ISafetyFindingRepository _safetyFindingRepository;
-        private readonly IRefreshTokenRepository _tokenRepository;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUserInvitationRepository _userInvitationRepository;
 
@@ -18,7 +18,7 @@ namespace IsimSaglik.Repository.Concrete
             IHealthProfileRepository healthProfileRepository,
             INotificationRepository notificationRepository,
             ISafetyFindingRepository safetyFindingRepository,
-            IRefreshTokenRepository tokenRepository,
+            IRefreshTokenRepository refreshTokenRepository,
             IUserRepository userRepository,
             IUserInvitationRepository userInvitationRepository)
         {
@@ -26,7 +26,7 @@ namespace IsimSaglik.Repository.Concrete
             _healthProfileRepository = healthProfileRepository;
             _notificationRepository = notificationRepository;
             _safetyFindingRepository = safetyFindingRepository;
-            _tokenRepository = tokenRepository;
+            _refreshTokenRepository = refreshTokenRepository;
             _userRepository = userRepository;
             _userInvitationRepository = userInvitationRepository;
         }
@@ -40,7 +40,7 @@ namespace IsimSaglik.Repository.Concrete
 
         public ISafetyFindingRepository SafetyFinding => _safetyFindingRepository;
 
-        public IRefreshTokenRepository Token => _tokenRepository;
+        public IRefreshTokenRepository RefreshToken => _refreshTokenRepository;
 
         public IUserRepository User => _userRepository;
 
