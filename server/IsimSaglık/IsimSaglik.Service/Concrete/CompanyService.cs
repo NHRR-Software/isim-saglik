@@ -27,9 +27,33 @@ namespace IsimSaglik.Service.Concrete
         {
             var existingUser = await _repositoryManager.User.GetByEmailAsync(dto.Email);
 
-            if (existingUser != null)
+            if (existingUser is not null)
             {
-                throw new BadRequestException("User already exists.", ErrorCodes.UserAlreadyExists);
+                throw new BadRequestException($"User with email '{dto.Email}' already exists.", ErrorCodes.UserAlreadyExists);
+            }
+
+            var lastInvitation = await _repositoryManager.UserInvitation.GetInvitationByEmailAsync(dto.Email);
+
+            if (lastInvitation is not null)
+            {
+                if (!lastInvitation.IsUsed && lastInvitation.ExpiresDate > DateTime.UtcNow)
+                {
+                    throw new BadRequestException("An active invitation already exists.", ErrorCodes.InvitationAlreadyActive);
+                }
+            }
+
+            var inviteOptions = new Supabase.Gotrue.InviteUserByEmailOptions
+            {
+                RedirectTo = "https://app.isimsaglik.com/complete-registration"
+            };
+
+            try
+            {
+                await _supabaseClient.AdminAuth.InviteUserByEmail(dto.Email, inviteOptions);
+            }
+            catch (Exception ex)
+            {
+                throw new BadRequestException($"Failed to send invitation email: {ex.Message}", ErrorCodes.EmailSendingFailed);
             }
 
             var userInvitation = new UserInvitation
@@ -43,8 +67,6 @@ namespace IsimSaglik.Service.Concrete
             };
 
             await _repositoryManager.UserInvitation.CreateAsync(userInvitation);
-
-
         }
     }
 }

@@ -5,5 +5,7 @@
         IAuthService Auth { get; }
 
         IUserService User { get; }
+
+        ICompanyService Company { get; }
     }
 }

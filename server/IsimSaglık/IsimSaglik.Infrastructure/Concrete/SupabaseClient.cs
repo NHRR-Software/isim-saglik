@@ -1,12 +1,22 @@
 ﻿using IsimSaglik.Infrastructure.Abstract;
 using IsimSaglik.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
+using Supabase.Gotrue;
+using Supabase.Gotrue.Interfaces;
+using Supabase.Storage;
+using Supabase.Storage.Interfaces;
 
 namespace IsimSaglik.Infrastructure.Concrete
 {
     public class SupabaseClient : ISupabaseClient
     {
-        public Supabase.Client Client { get; }
+        private readonly Supabase.Client _client;
+
+
+        public IGotrueClient<User, Session> Auth { get; }
+        public IGotrueAdminClient<User> AdminAuth { get; }
+        public IStorageClient<Bucket, FileObject> Storage { get; }
+
 
         public SupabaseClient(IOptions<SupabaseSettings> settings)
         {
@@ -18,12 +28,17 @@ namespace IsimSaglik.Infrastructure.Concrete
                 AutoConnectRealtime = false
             };
 
-            Client = new Supabase.Client(config.Url, config.Key, options);
+            _client = new Supabase.Client(config.Url, config.Key, options);
+
+            Auth = _client.Auth;
+            Storage = _client.Storage;
+            AdminAuth = _client.AdminAuth(config.ServiceRoleKey);
         }
+
 
         public async Task InitializeAsync()
         {
-            await Client.InitializeAsync();
+            await _client.InitializeAsync();
         }
     }
 }

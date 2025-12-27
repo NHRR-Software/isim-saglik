@@ -42,7 +42,7 @@ namespace IsimSaglik.Service.Concrete
                 throw new BadRequestException("User already exists.", ErrorCodes.UserAlreadyExists);
             }
 
-            var session = await _supabaseClient.Client.Auth.SignUp(dto.Email, dto.Password)
+            var session = await _supabaseClient.Auth.SignUp(dto.Email, dto.Password)
                 ?? throw new BadRequestException("Registration failed at authentication provider.", ErrorCodes.UnexpectedError);
 
             // TODO: Default photo url 
@@ -70,7 +70,7 @@ namespace IsimSaglik.Service.Concrete
 
             try
             {
-                session = await _supabaseClient.Client.Auth.SignIn(dto.Email, dto.Password);
+                session = await _supabaseClient.Auth.SignIn(dto.Email, dto.Password);
             }
             catch (Supabase.Gotrue.Exceptions.GotrueException)
             {
