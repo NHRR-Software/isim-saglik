@@ -105,7 +105,9 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
         // 5. Diğer (Founder vs.)
         else if (route.name.includes("employees"))
           iconName = isFocused ? "people" : "people-outline";
-
+        // 6. Founder Rotaları (YENİ)
+        else if (route.name === "company")
+          iconName = isFocused ? "business" : "business-outline"; // Firma İkonu (Bina)
         // Dinamik İkon Renkleri
         const iconColor = isFocused
           ? colors.primary.main

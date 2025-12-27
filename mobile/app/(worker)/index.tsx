@@ -17,12 +17,15 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
+import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
 const CARD_GAP = 16;
 const CARD_WIDTH = (width - 48 - CARD_GAP) / 2;
 
 export default function WorkerHomeScreen() {
+  const router = useRouter();
+
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
 
@@ -291,8 +294,13 @@ export default function WorkerHomeScreen() {
           </View>
         </View>
 
-        {/* GÖREVLER KARTI (BÜYÜTÜLDÜ) */}
-        <View style={styles.taskCard}>
+        {/* GÖREVLER KARTI */}
+        <TouchableOpacity
+          style={styles.taskCard}
+          // 👇 YÖNLENDİRME BURADA: Klasör yapına göre rota
+          onPress={() => router.push("/common/taskScreen")}
+          activeOpacity={0.9}
+        >
           <View style={styles.taskIconContainer}>
             <Image
               source={require("../../assets/images/taskIcon.png")}
@@ -310,7 +318,7 @@ export default function WorkerHomeScreen() {
             size={28}
             color={colors.text.secondary}
           />
-        </View>
+        </TouchableOpacity>
 
         {/* Bottom Bar Boşluğu */}
         <View style={{ height: 110 }} />

@@ -56,12 +56,14 @@ export const lightColors = {
         card4: '#D1F5FF', // Mavi (SSS)
         card5: '#D1FFD1', // Yeşil (Hakkımızda)
         card6: '#FFD1F5', // Pembe (Davet)
+        card7: '#fff3bbff', // Pembe (Davet)
         text1: '#FF4D4D',
         text2: '#FF9F47',
         text3: '#8E44AD',
         text4: '#4870FF',
         text5: '#27AE60',
         text6: '#E91E63',
+        text7: '#d9af06ff',
     }
 };
 

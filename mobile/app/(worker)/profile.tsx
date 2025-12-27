@@ -17,6 +17,7 @@ import {
   FontAwesome5,
 } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
+import { useRouter } from "expo-router"; // Router'ı import etmeyi unutma
 
 const { width } = Dimensions.get("window");
 const CARD_GAP = 16;
@@ -26,7 +27,7 @@ const CARD_WIDTH = (width - 48 - CARD_GAP) / 2;
 export default function ProfileScreen() {
   const { colors, theme, setTheme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
-
+  const router = useRouter();
   const [themeModalVisible, setThemeModalVisible] = useState(false);
 
   // Menü Kartları Verisi
@@ -75,10 +76,27 @@ export default function ProfileScreen() {
       onPress: () => setThemeModalVisible(true),
     },
     {
-      title: "Çıkış Yap",
-      icon: <Ionicons name="log-out" size={32} color={colors.profile.text6} />,
-      bgColor: colors.profile.card6,
+      title: "Hakkımızda",
+      icon: <Ionicons name="people" size={32} color={colors.profile.text7} />, // text5 (Yeşil) kullanabiliriz veya colors.profile.text5
+      bgColor: colors.profile.card7, // card5 (Yeşilimsi)
+      textColor: colors.profile.text7,
+      onPress: () => router.push("/common/aboutScreen"), // Yönlendirme
+    },
+    {
+      title: "Davet Et",
+      icon: (
+        <Ionicons name="share-social" size={32} color={colors.profile.text6} />
+      ), // text6 (Pembe)
+      bgColor: colors.profile.card6, // card6 (Pembemsi)
       textColor: colors.profile.text6,
+      onPress: () => console.log("Davet Et"),
+    },
+    {
+      title: "Çıkış Yap",
+      // ... Çıkış butonu aynı kalabilir ama belki rengini gri yapabilirsin
+      icon: <Ionicons name="log-out" size={32} color={colors.text.secondary} />,
+      bgColor: colors.neutral.gray[100],
+      textColor: colors.text.secondary,
       onPress: () => console.log("Çıkış"),
     },
   ];

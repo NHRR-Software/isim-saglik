@@ -1,29 +1,34 @@
+// app/(founder)/_layout.tsx
+
 import React from "react";
 import { Tabs } from "expo-router";
 import CustomTabBar from "../../components/navigation/CustomTabBar";
-import { colors } from "../styles/theme/colors";
+import { useTheme } from "../context/ThemeContext";
 
 export default function FounderLayout() {
+  const { colors } = useTheme();
+
   return (
     <Tabs
       screenOptions={{ headerShown: false }}
-      // BURADA PATRONA ÖZEL AYARLAR
       tabBar={(props) => (
         <CustomTabBar
           {...props}
           config={{
-            centerButtonRouteName: "scan", // Patron QR okutur
-            centerButtonColor: colors.primary.main, // Mavi buton
-            centerButtonIconName: "qr-code-outline", // İkon kullansın
+            centerButtonRouteName: "add-personnel", // Orta buton rotası
+            centerButtonColor: colors.dashboard.red, // Kırmızı
+            centerButtonIconName: "person-add", // Ionicons ikonu (Resim yerine ikon kullanıyoruz)
           }}
         />
       )}
     >
-      <Tabs.Screen name="index" options={{ title: "Genel Bakış" }} />
-      <Tabs.Screen name="employees" options={{ title: "Çalışanlar" }} />
-      <Tabs.Screen name="scan" options={{ title: "" }} />
-      <Tabs.Screen name="stats" options={{ title: "Raporlar" }} />
-      <Tabs.Screen name="profile" options={{ title: "Hesabım" }} />
+      <Tabs.Screen name="index" options={{ title: "Ana Sayfa" }} />
+      <Tabs.Screen name="reports" options={{ title: "Raporlar" }} />
+
+      <Tabs.Screen name="add-personnel" options={{ title: "" }} />
+
+      <Tabs.Screen name="personnel" options={{ title: "Personeller" }} />
+      <Tabs.Screen name="company" options={{ title: "Firma" }} />
     </Tabs>
   );
 }
