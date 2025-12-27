@@ -7,5 +7,9 @@
         IUserService User { get; }
 
         ICompanyService Company { get; }
+
+        IHealthProfileService HealthProfile { get; }
+
+        IAssignmentService Assignment { get; }
     }
 }

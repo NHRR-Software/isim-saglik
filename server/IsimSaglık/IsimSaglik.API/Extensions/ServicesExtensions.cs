@@ -62,6 +62,8 @@ namespace IsimSaglik.API.Extensions
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICompanyService, CompanyService>();
+            services.AddScoped<IHealthProfileService, HealthProfileService>();
+            services.AddScoped<IAssignmentService, AssignmentService>();
         }
 
 
