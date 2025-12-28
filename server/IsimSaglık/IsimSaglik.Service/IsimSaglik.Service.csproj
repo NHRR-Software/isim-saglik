@@ -6,4 +6,19 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="Utilities\AvatarResolver.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IsimSaglik.Entity\IsimSaglik.Entity.csproj" />
+    <ProjectReference Include="..\IsimSaglik.Infrastructure\IsimSaglik.Infrastructure.csproj" />
+    <ProjectReference Include="..\IsimSaglik.Repository\IsimSaglik.Repository.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -4,7 +4,7 @@ namespace IsimSaglik.Entity.DTOs.Response
 {
     public sealed record AssignmentResponseDto
     {
-        public required string Id { get; init; }
+        public required Guid Id { get; init; }
 
         public required StatusType Status { get; set; }
 

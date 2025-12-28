@@ -12,6 +12,6 @@ namespace IsimSaglik.Entity.Models
 
         public required NotificationType Type { get; set; }
 
-        public required string UserId { get; set; }
+        public required Guid UserId { get; set; }
     }
 }

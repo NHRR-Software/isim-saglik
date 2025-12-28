@@ -32,6 +32,7 @@ namespace IsimSaglik.API.Middleware
             }
         }
 
+
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
@@ -56,9 +57,14 @@ namespace IsimSaglik.API.Middleware
                     apiError = new ApiErrorDto(ex.Code, ex.Message);
                     break;
 
+                case ForbiddenException ex:
+                    statusCode = (int)HttpStatusCode.Forbidden;
+                    apiError = new ApiErrorDto(ex.Code, ex.Message);
+                    break;
+
                 default:
                     statusCode = (int)HttpStatusCode.InternalServerError;
-                    apiError = new ApiErrorDto(ErrorCodes.UnexpectedError, "Internal Server Error");
+                    apiError = new ApiErrorDto(ErrorCodes.UnexpectedError, "An unexpected error occurred.");
                     break;
             }
 

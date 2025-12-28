@@ -13,7 +13,5 @@ namespace IsimSaglik.Entity.DTOs.Response
         public required UserRole Role { get; init; }
 
         public required string JobTitle { get; init; }
-
-
     }
 }

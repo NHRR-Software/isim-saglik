@@ -10,6 +10,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsimSaglik.Infrastructure", "IsimSaglik.Infrastructure\IsimSaglik.Infrastructure.csproj", "{95DA8C5E-6C9B-4123-AE46-229182597A4D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsimSaglik.Repository", "IsimSaglik.Repository\IsimSaglik.Repository.csproj", "{A57C0852-3B45-4F0F-9FE9-05E98AA8545B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{871C4EF8-939A-48B9-B8A6-C9774F1B9CC7} = {871C4EF8-939A-48B9-B8A6-C9774F1B9CC7}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsimSaglik.Service", "IsimSaglik.Service\IsimSaglik.Service.csproj", "{F59850AA-9C13-410B-AC0A-249AC2BE3B89}"
 EndProject
