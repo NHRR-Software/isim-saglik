@@ -5,7 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import tr from 'date-fns/locale/tr';
 import { 
   FaUser, FaPhoneAlt, FaCalendarAlt, FaLock, 
-  FaCheckCircle, FaVenusMars 
+  FaCheckCircle, FaVenusMars, FaExclamationTriangle 
 } from 'react-icons/fa';
 
 // Assets
@@ -16,11 +16,15 @@ import bannerRight from '../assets/img3.png';
 
 registerLocale('tr', tr);
 
+// --- API AYARLARI ---
+// const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com/"; 
+const API_BASE_URL = "http://localhost:5187";
 const Register = () => {
-  // Token artık prop değil, state olarak tutulacak
+  // Token State
   const [accessToken, setAccessToken] = useState(null);
+  const [tokenError, setTokenError] = useState(false);
   
-  const [showModal, setShowModal] = useState(false); // Sözleşme modalı
+  const [showModal, setShowModal] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -28,11 +32,11 @@ const Register = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false); 
   const [isRegistrationComplete, setIsRegistrationComplete] = useState(false);
 
-  // Form State (Gender Eklendi)
+  // Form State
   const [formData, setFormData] = useState({
     FullName: '',
     PhoneNumber: '',
-    Gender: '', // Selectbox için başlangıçta boş string
+    Gender: '',
     Password: '',
     PasswordAgain: ''
   });
@@ -41,18 +45,19 @@ const Register = () => {
 
   // 1. ADIM: URL'den Hash Token Okuma
   useEffect(() => {
-    // Tarayıcıdaki URL'in hash kısmını al (#access_token=...&...)
-    const hash = window.location.hash;
+    const hash = window.location.hash; 
     
     if (hash) {
-      // '#' işaretini kaldırıp parametreleri ayırıyoruz
-      const params = new URLSearchParams(hash.substring(1));
+      const params = new URLSearchParams(hash.substring(1)); 
       const tokenFromUrl = params.get('access_token');
       
       if (tokenFromUrl) {
         setAccessToken(tokenFromUrl);
-        // console.log("Token Yakalandı:", tokenFromUrl);
+      } else {
+        setTokenError(true);
       }
+    } else {
+      setTokenError(true);
     }
   }, []);
 
@@ -60,7 +65,6 @@ const Register = () => {
     const { name, value } = e.target;
     setFormData(prev => ({ 
       ...prev, 
-      // Gender gelirse integer'a çevir, diğerleri string kalsın
       [name]: name === 'Gender' ? parseInt(value) : value 
     }));
   };
@@ -68,43 +72,42 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 2. ADIM: Validasyonlar
     if (!accessToken) {
-        alert("Kayıt linki geçersiz veya token bulunamadı. Lütfen davet linkine tekrar tıklayınız.");
+        alert("Geçersiz davet linki. Lütfen linki kontrol ediniz.");
         return;
     }
-
     if (!agreed) { alert("Lütfen üyelik sözleşmesini onaylayınız."); return; }
     if (formData.Password !== formData.PasswordAgain) { alert("Şifreler eşleşmiyor!"); return; }
     if (!birthDate) { alert("Lütfen doğum tarihinizi giriniz."); return; }
-    
-    // Cinsiyet Kontrolü (0 veya boş ise hata ver)
-    if (!formData.Gender || formData.Gender === 0) { 
-        alert("Lütfen cinsiyet seçimi yapınız."); 
-        return; 
-    }
+    if (!formData.Gender || formData.Gender === 0) { alert("Lütfen cinsiyet seçimi yapınız."); return; }
 
     setLoading(true);
 
-    // 3. ADIM: Backend Payload (AccessToken ve Gender Eklendi)
+    // API Dokümanına Uygun Payload (camelCase)
     const payload = {
-      AccessToken: accessToken, // URL'den okuduğumuz token
-      FullName: formData.FullName,
-      Password: formData.Password,
-      PasswordAgain: formData.PasswordAgain,
-      PhoneNumber: formData.PhoneNumber,
-      BirthDate: birthDate.toISOString(), 
-      Gender: formData.Gender // 1: Erkek, 2: Kadın
+      accessToken: accessToken, 
+      fullName: formData.FullName,
+      password: formData.Password,
+      passwordAgain: formData.PasswordAgain,
+      phoneNumber: formData.PhoneNumber,
+      birthDate: birthDate.toISOString(), 
+      gender: formData.Gender // 0: None, 1: Male, 2: Female
     };
 
     try {
       // API İsteği
-      // await axios.post('https://api.isimsaglik.com/api/auth/register-with-invite', payload);
-      await axios.post('https://localhost:7213/api/Auth/RegisterWithInvite', payload);
+      const response = await axios.post(`${API_BASE_URL}/api/auth/register-with-invite`, payload);
       
-      // Başarılı olursa
-      setIsRegistrationComplete(true);
-      setShowSuccessModal(true);
+      // Backend'den gelen isSuccess kontrolü
+      if (response.data && response.data.isSuccess) {
+          setIsRegistrationComplete(true);
+          setShowSuccessModal(true);
+      } else {
+          // isSuccess false ise hata mesajını göster
+          const msg = response.data?.message || "Kayıt işlemi başarısız.";
+          alert(msg);
+      }
+
     } catch (error) {
       console.error(error);
       const errMsg = error.response?.data?.message || "Kayıt sırasında bir hata oluştu.";
@@ -138,86 +141,75 @@ const Register = () => {
       {/* SAĞ PANEL */}
       <div className="right-panel">
         <div className="auth-form-container">
-          <h2 className="auth-title">Hesabını Oluştur</h2>
-          <form onSubmit={handleSubmit}>
-            
-            {/* Ad Soyad */}
-            <div className="input-group">
-              <FaUser className="input-icon" />
-              <input type="text" name="FullName" placeholder="İsminizi Giriniz" className="custom-input" required onChange={handleChange} disabled={isRegistrationComplete} />
-            </div>
-
-            {/* Telefon */}
-            <div className="input-group">
-              <FaPhoneAlt className="input-icon" />
-              <input type="tel" name="PhoneNumber" placeholder="Telefon Numarası" className="custom-input" required onChange={handleChange} disabled={isRegistrationComplete} />
-            </div>
-
-            {/* Doğum Tarihi */}
-            <div className="input-group">
-              <FaCalendarAlt className="input-icon" style={{zIndex: 10}} />
-              <DatePicker selected={birthDate} onChange={(date) => setBirthDate(date)} dateFormat="dd/MM/yyyy" locale="tr" placeholderText="Doğum Tarihi (GG/AA/YYYY)" className="custom-input" required showYearDropdown scrollableYearDropdown yearDropdownItemNumber={100} disabled={isRegistrationComplete} />
-            </div>
-
-            {/* CİNSİYET (YENİ EKLENDİ) */}
-            <div className="input-group">
-              <FaVenusMars className="input-icon" />
-              <select 
-                name="Gender" 
-                className="custom-input" 
-                required 
-                onChange={handleChange} 
-                disabled={isRegistrationComplete}
-                defaultValue=""
-                style={{cursor: 'pointer', appearance: 'none'}} // Mobilde düzgün görünüm için
-              >
-                <option value="" disabled>Cinsiyet Seçiniz</option>
-                <option value="1">Erkek</option>
-                <option value="2">Kadın</option>
-              </select>
-            </div>
-
-            {/* Şifre */}
-            <div className="input-group">
-              <FaLock className="input-icon" />
-              <input type="password" name="Password" placeholder="Şifre" className="custom-input" required onChange={handleChange} disabled={isRegistrationComplete} />
-            </div>
-
-            {/* Şifre Tekrar */}
-            <div className="input-group">
-              <FaLock className="input-icon" />
-              <input type="password" name="PasswordAgain" placeholder="Şifre Tekrar" className="custom-input" required onChange={handleChange} disabled={isRegistrationComplete} />
-            </div>
-
-            {/* Sözleşme */}
-            <div className="agreement">
-              <input type="checkbox" id="terms" className="checkbox-custom" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} disabled={isRegistrationComplete} />
-              <label htmlFor="terms">
-                <span className="link-text" onClick={() => !isRegistrationComplete && setShowModal(true)}>Hizmet Şartları ve Gizlilik Politikasını</span> okudum, onaylıyorum.
-              </label>
-            </div>
-
-            <button type="submit" className="btn-primary" disabled={loading || isRegistrationComplete}>
-              {loading ? 'İşleniyor...' : 'Hesap Oluştur'}
-            </button>
-          </form>
+          
+          {tokenError ? (
+             <div style={{textAlign:'center', color:'#dc2626'}}>
+                <FaExclamationTriangle size={50} style={{marginBottom:'20px'}} />
+                <h2 className="auth-title">Bağlantı Hatası</h2>
+                <p>Davet bağlantısı geçersiz veya eksik.</p>
+             </div>
+          ) : (
+            <>
+              <h2 className="auth-title">Hesabını Oluştur</h2>
+              <form onSubmit={handleSubmit}>
+                <div className="input-group">
+                  <FaUser className="input-icon" />
+                  <input type="text" name="FullName" placeholder="İsminizi Giriniz" className="custom-input" required onChange={handleChange} disabled={isRegistrationComplete} />
+                </div>
+                <div className="input-group">
+                  <FaPhoneAlt className="input-icon" />
+                  <input type="tel" name="PhoneNumber" placeholder="Telefon Numarası" className="custom-input" required onChange={handleChange} disabled={isRegistrationComplete} />
+                </div>
+                <div className="input-group">
+                  <FaCalendarAlt className="input-icon" style={{zIndex: 10}} />
+                  <DatePicker selected={birthDate} onChange={(date) => setBirthDate(date)} dateFormat="dd/MM/yyyy" locale="tr" placeholderText="Doğum Tarihi (GG/AA/YYYY)" className="custom-input" required showYearDropdown scrollableYearDropdown yearDropdownItemNumber={100} disabled={isRegistrationComplete} />
+                </div>
+                <div className="input-group">
+                  <FaVenusMars className="input-icon" />
+                  <select name="Gender" className="custom-input" required onChange={handleChange} disabled={isRegistrationComplete} defaultValue="" style={{cursor: 'pointer', appearance: 'none'}}>
+                    <option value="" disabled>Cinsiyet Seçiniz</option>
+                    <option value="1">Erkek</option>
+                    <option value="2">Kadın</option>
+                  </select>
+                </div>
+                <div className="input-group">
+                  <FaLock className="input-icon" />
+                  <input type="password" name="Password" placeholder="Şifre" className="custom-input" required onChange={handleChange} disabled={isRegistrationComplete} />
+                </div>
+                <div className="input-group">
+                  <FaLock className="input-icon" />
+                  <input type="password" name="PasswordAgain" placeholder="Şifre Tekrar" className="custom-input" required onChange={handleChange} disabled={isRegistrationComplete} />
+                </div>
+                <div className="agreement">
+                  <input type="checkbox" id="terms" className="checkbox-custom" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} disabled={isRegistrationComplete} />
+                  <label htmlFor="terms">
+                    <span className="link-text" onClick={() => !isRegistrationComplete && setShowModal(true)}>Hizmet Şartları ve Gizlilik Politikasını</span> okudum, onaylıyorum.
+                  </label>
+                </div>
+                <button type="submit" className="btn-primary" disabled={loading || isRegistrationComplete}>
+                  {loading ? 'İşleniyor...' : 'Hesap Oluştur'}
+                </button>
+              </form>
+            </>
+          )}
         </div>
       </div>
 
-      {/* MODALLAR */}
+      {/* Sözleşme Modalı */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <FaCheckCircle size={50} color="#2563eb" style={{marginBottom: '20px'}} />
             <h3 style={{color:'#333'}}>Üyelik Sözleşmesi</h3>
             <div style={{textAlign:'left', margin:'20px 0', fontSize:'0.9rem', color:'#666', maxHeight:'300px', overflowY:'auto', border:'1px solid #eee', padding:'10px', borderRadius:'8px'}}>
-              <p>KVKK ve Aydınlatma Metni içeriği...</p>
+              <p>KVKK ve Aydınlatma Metni...</p>
             </div>
             <button className="btn-primary" onClick={() => {setAgreed(true); setShowModal(false);}}>Okudum, Onaylıyorum</button>
           </div>
         </div>
       )}
 
+      {/* Başarı Modalı */}
       {showSuccessModal && (
         <div className="modal-overlay">
             <div className="modal-content">
