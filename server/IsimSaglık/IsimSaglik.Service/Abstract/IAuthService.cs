@@ -7,10 +7,16 @@ namespace IsimSaglik.Service.Abstract
     {
         Task RegisterCompanyAsync(RegisterCompanyRequestDto dto);
 
+        Task RegisterWithInviteAsync(RegisterWithInviteRequestDto dto);
+
         Task<TokenResponseDto> LogInAsync(LogInRequestDto dto);
 
-        Task<TokenResponseDto> RefreshTokenAsync(TokenRequestDto dto);
+        Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto dto);
 
-        Task LogOutAsync(TokenRequestDto dto);
+        Task ForgotPasswordAsync(ForgotPasswordRequest dto);
+
+        Task ResetPasswordAsync(ResetPasswordRequestDto dto);
+
+        Task LogOutAsync(RefreshTokenRequestDto dto);
     }
 }

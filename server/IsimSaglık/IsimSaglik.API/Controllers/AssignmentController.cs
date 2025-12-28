@@ -10,10 +10,12 @@ namespace IsimSaglik.API.Controllers
     {
         private readonly IServiceManager _serviceManager;
 
+
         public AssignmentController(IServiceManager serviceManager)
         {
             _serviceManager = serviceManager;
         }
+
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -22,13 +24,14 @@ namespace IsimSaglik.API.Controllers
             return OkResponse(response,"Assignments retrieved successfully.");
         }
 
+
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] AssignmentRequestDto requestDto)
         {
            var response = await _serviceManager.Assignment.CreateAsync(UserId, requestDto);
-
-            return OkResponse(response,"Assignment created successfully.");
+           return OkResponse(response,"Assignment created successfully.");
         }
+
 
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] AssignmentRequestDto requestDto)
@@ -45,7 +48,5 @@ namespace IsimSaglik.API.Controllers
             await _serviceManager.Assignment.DeleteAsync(UserId, id);
             return OkResponse("Assignment deleted successfully.");
         }
-
-
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IsimSaglik.API.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/auth")]
     [ApiController]
     public sealed class AuthController : BaseController
     {
@@ -20,8 +20,9 @@ namespace IsimSaglik.API.Controllers
         }
 
 
-        [HttpPost]
+        // POST: api/auth/register-company
         [AllowAnonymous]
+        [HttpPost("register-company")]
         public async Task<IActionResult> RegisterCompany([FromBody] RegisterCompanyRequestDto dto)
         {
             await _serviceManager.Auth.RegisterCompanyAsync(dto);
@@ -29,8 +30,19 @@ namespace IsimSaglik.API.Controllers
         }
 
 
-        [HttpPost]
+        // POST: api/auth/register-with-invite
         [AllowAnonymous]
+        [HttpPost("register-with-invite")]
+        public async Task<IActionResult> RegisterWithInvite([FromBody] RegisterWithInviteRequestDto dto) 
+        {
+            await _serviceManager.Auth.RegisterWithInviteAsync(dto);
+            return CreatedResponse("User registered successfully with invitation.");
+        }
+
+
+        // POST: api/auth/login
+        [AllowAnonymous]
+        [HttpPost("login")]
         public async Task<IActionResult> LogIn([FromBody] LogInRequestDto dto) 
         {
             var result = await _serviceManager.Auth.LogInAsync(dto);
@@ -38,17 +50,39 @@ namespace IsimSaglik.API.Controllers
         }
 
 
-        [HttpPost]
+        // POST: api/auth/refresh-token
         [AllowAnonymous]
-        public async Task<IActionResult> RefreshToken([FromBody] TokenRequestDto dto)
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto dto)
         {
             var result = await _serviceManager.Auth.RefreshTokenAsync(dto);
             return OkResponse(result, "Token refreshed successfully.");
         }
 
 
-        [HttpPost]
-        public async Task<IActionResult> LogOut([FromBody] TokenRequestDto dto) 
+        // POST: api/auth/forgot-password
+        [AllowAnonymous]
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest dto)
+        {
+            await _serviceManager.Auth.ForgotPasswordAsync(dto);
+            return OkResponse("Password reset email sent successfully.");
+        }
+
+
+        // POST: api/auth/reset-password
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto dto)
+        {
+            await _serviceManager.Auth.ResetPasswordAsync(dto);
+            return OkResponse("Password has been reset successfully. You can now login.");
+        }
+
+
+        // POST: api/auth/logout
+        [HttpPost("logout")]
+        public async Task<IActionResult> LogOut([FromBody] RefreshTokenRequestDto dto) 
         {
             await _serviceManager.Auth.LogOutAsync(dto);
             return OkResponse("Logout successful.");

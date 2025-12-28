@@ -12,10 +12,14 @@ namespace IsimSaglik.Service.Concrete
     {
         private readonly IRepositoryManager _repositoryManager;
 
+
+
         public HealthProfileService(IRepositoryManager repositoryManager)
         {
             _repositoryManager = repositoryManager;
         }
+
+
 
         public async Task CreateAsync(Guid userId, HealthProfileRequestDto dto)
         {
@@ -39,6 +43,8 @@ namespace IsimSaglik.Service.Concrete
             await _repositoryManager.HealthProfile.CreateAsync(healthProfile);
         }
 
+
+
         public async Task UpdateAsync(Guid userId, HealthProfileRequestDto dto)
         {
             var existingHealthProfile = await _repositoryManager.HealthProfile.GetHealthProfileByUserIdAsync(userId)
@@ -52,6 +58,8 @@ namespace IsimSaglik.Service.Concrete
 
             await _repositoryManager.HealthProfile.UpdateAsync(existingHealthProfile);
         }
+
+
 
         public async Task<HealthProfileResponseDto> GetByUserIdAsync(Guid userId)
         {

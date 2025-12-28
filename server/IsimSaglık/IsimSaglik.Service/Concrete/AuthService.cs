@@ -1,12 +1,13 @@
-﻿using IsimSaglik.Entity.DTOs.Request;
+﻿using AutoMapper;
+using IsimSaglik.Entity.DTOs.Request;
 using IsimSaglik.Entity.DTOs.Response;
-using IsimSaglik.Entity.Enums;
 using IsimSaglik.Entity.Models;
 using IsimSaglik.Infrastructure.Abstract;
 using IsimSaglik.Repository.Abstract;
 using IsimSaglik.Service.Abstract;
 using IsimSaglik.Service.Exceptions;
 using IsimSaglik.Service.Exceptions.Types;
+using IsimSaglik.Service.Utilities;
 using Microsoft.AspNetCore.Http;
 
 namespace IsimSaglik.Service.Concrete
@@ -17,19 +18,22 @@ namespace IsimSaglik.Service.Concrete
         private readonly IRepositoryManager _repositoryManager;
         private readonly ITokenGenerator _tokenGenerator;
         private readonly ISupabaseClient _supabaseClient;
+        private readonly IMapper _mapper;
 
 
         public AuthService(
             IHttpContextAccessor httpContextAccessor,
             IRepositoryManager repositoryManager,
             ITokenGenerator tokenGenerator,
-            ISupabaseClient supabaseClient
+            ISupabaseClient supabaseClient,
+            IMapper mapper
             )
         {
             _httpContextAccessor = httpContextAccessor;
             _repositoryManager = repositoryManager;
             _tokenGenerator = tokenGenerator;
             _supabaseClient = supabaseClient;
+            _mapper = mapper;
         }
 
 
@@ -37,28 +41,18 @@ namespace IsimSaglik.Service.Concrete
         {
             var existingUser = await _repositoryManager.User.GetByEmailAsync(dto.Email);
 
-            if (existingUser != null)
+            if (existingUser is not null)
             {
+                // TODO: Company Already denilebilir mi?
                 throw new BadRequestException("User already exists.", ErrorCodes.UserAlreadyExists);
             }
 
+            // TODO: AdminAuth ile user oluşturulabilir
             var session = await _supabaseClient.Auth.SignUp(dto.Email, dto.Password)
                 ?? throw new BadRequestException("Registration failed at authentication provider.", ErrorCodes.UnexpectedError);
 
-            // TODO: Default photo url 
-            // TODO: Add AutoMapper mapping
-            var user = new User
-            {
-                Email = dto.Email,
-                FullName = dto.Name,
-                PhoneNumber = dto.PhoneNumber,
-                Gender = Gender.None,
-                Role = UserRole.Company,
-                BirthDate = dto.FoundingDate,
-                PhotoUrl = new Uri("https://example.com/default-company-photo.png"),
-                IsActive = true,
-                CreatedDate = DateTime.UtcNow,
-            };
+            var user = _mapper.Map<User>(dto);
+            user.PhotoUrl = AvatarResolver.GetDefaultUri(user.Role, user.Gender);
 
             await _repositoryManager.User.CreateAsync(user);
         }
@@ -66,11 +60,9 @@ namespace IsimSaglik.Service.Concrete
 
         public async Task<TokenResponseDto> LogInAsync(LogInRequestDto dto)
         {
-            Supabase.Gotrue.Session? session = null;
-
             try
             {
-                session = await _supabaseClient.Auth.SignIn(dto.Email, dto.Password);
+                var session = await _supabaseClient.Auth.SignIn(dto.Email, dto.Password);
             }
             catch (Supabase.Gotrue.Exceptions.GotrueException)
             {
@@ -91,7 +83,7 @@ namespace IsimSaglik.Service.Concrete
 
             var tokens = _tokenGenerator.GenerateTokens(user);
 
-            var token = new RefreshToken
+            var refreshToken = new RefreshToken
             {
                 Token = tokens.RefreshToken,
                 UserId = user.Id,
@@ -101,45 +93,120 @@ namespace IsimSaglik.Service.Concrete
                 CreatedDate = DateTime.UtcNow
             };
 
-            await _repositoryManager.RefreshToken.CreateAsync(token);
+            await _repositoryManager.RefreshToken.CreateAsync(refreshToken);
 
             return tokens;
         }
 
 
-        public async Task<TokenResponseDto> RefreshTokenAsync(TokenRequestDto dto)
+
+        public async Task RegisterWithInviteAsync(RegisterWithInviteRequestDto dto) 
         {
-            var token = await _repositoryManager.RefreshToken.GetByTokenAsync(dto.Token)
+            var authUser = await _supabaseClient.Auth.GetUser(dto.AccessToken)
+                ?? throw new BadRequestException("Failed to retrieve user from authentication provider.", ErrorCodes.UnexpectedError);
+
+            var userInvitation = await _repositoryManager.UserInvitation.GetInvitationByEmailAsync(authUser.Email)
+                ?? throw new NotFoundException("Invitation not found for the provided email.", ErrorCodes.InvitationNotFound);
+
+            if (userInvitation.IsUsed || userInvitation.ExpiresDate < DateTime.UtcNow)
+            {
+                throw new BadRequestException("Invitation is no longer valid.", ErrorCodes.InvitationExpired);
+            }
+
+            var userAttributes = new Supabase.Gotrue.AdminUserAttributes { Password = dto.Password };
+            await _supabaseClient.AdminAuth.UpdateUserById(authUser.Id, userAttributes);
+
+            var user = _mapper.Map<User>(dto);
+            _mapper.Map(userInvitation, user);
+            user.PhotoUrl = AvatarResolver.GetDefaultUri(user.Role, user.Gender);
+
+            await _repositoryManager.User.CreateAsync(user);
+
+            userInvitation.IsUsed = true;
+            userInvitation.UpdatedDate = DateTime.UtcNow;
+            await _repositoryManager.UserInvitation.UpdateAsync(userInvitation);
+        }
+
+
+
+        public async Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto dto)
+        {
+            var refreshToken = await _repositoryManager.RefreshToken.GetByTokenAsync(dto.Token)
                 ?? throw new NotFoundException($"{nameof(RefreshToken)} with refresh token '{dto.Token}' not found.", ErrorCodes.TokenNotFound);
 
-            if (!_tokenGenerator.ValidateRefreshToken(token))
+            if (!_tokenGenerator.ValidateRefreshToken(refreshToken))
             {
                 throw new BadRequestException("The refresh token provided is invalid or has expired.", ErrorCodes.InvalidRefreshToken);
             }
 
-            var user = await _repositoryManager.User.GetByIdAsync(token.UserId)
+            var user = await _repositoryManager.User.GetByIdAsync(refreshToken.UserId)
                 ?? throw new NotFoundException("User not found.", ErrorCodes.UserNotFound);
 
             var tokens = _tokenGenerator.GenerateTokens(user);
 
-            token.Token = tokens.RefreshToken;
-            token.CreatedIp = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
-            token.UserAgent = _httpContextAccessor.HttpContext.Request.Headers["User-Agent"].ToString();
-            token.ExpiresDate = DateTime.UtcNow.AddDays(15);
-            token.CreatedDate = DateTime.UtcNow;
+            refreshToken.Token = tokens.RefreshToken;
+            refreshToken.CreatedIp = _httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+            refreshToken.UserAgent = _httpContextAccessor.HttpContext.Request.Headers["User-Agent"].ToString();
+            refreshToken.ExpiresDate = DateTime.UtcNow.AddDays(15);
+            refreshToken.CreatedDate = DateTime.UtcNow;
 
-            await _repositoryManager.RefreshToken.UpdateAsync(token);
+            await _repositoryManager.RefreshToken.UpdateAsync(refreshToken);
 
             return tokens;
         }
 
 
-        public async Task LogOutAsync(TokenRequestDto dto)
+
+        public async Task ForgotPasswordAsync(ForgotPasswordRequest dto) 
         {
-            var token = await _repositoryManager.RefreshToken.GetByTokenAsync(dto.Token)
+            var user = await _repositoryManager.User.GetByEmailAsync(dto.Email)
+                ?? throw new NotFoundException($"{nameof(User)} with email '{dto.Email}' not found.", ErrorCodes.UserNotFound);
+
+            var options = new Supabase.Gotrue.ResetPasswordForEmailOptions(dto.Email)
+            {
+                RedirectTo = "https://isimsaglik.netlify.app/reset-password"
+            };
+
+            try
+            {
+                await _supabaseClient.Auth.ResetPasswordForEmail(options);
+            }
+            catch (Exception ex)
+            {
+                throw new BadRequestException($"Failed to send reset email: {ex.Message}", ErrorCodes.EmailSendingFailed);
+            }
+        }
+
+
+
+        public async Task ResetPasswordAsync(ResetPasswordRequestDto dto) 
+        {
+            var authUser = await _supabaseClient.Auth.GetUser(dto.AccessToken)
+                ?? throw new BadRequestException("Failed to retrieve user from authentication provider.", ErrorCodes.UnexpectedError);
+
+            var attributes = new Supabase.Gotrue.AdminUserAttributes
+            {
+                Password = dto.Password
+            };
+
+            try
+            {
+                await _supabaseClient.AdminAuth.UpdateUserById(authUser.Id, attributes);
+            }
+            catch (Exception ex)
+            {
+                throw new BadRequestException($"Failed to reset password: {ex.Message}", ErrorCodes.AuthProviderError);
+            }
+        }
+
+
+
+        public async Task LogOutAsync(RefreshTokenRequestDto dto)
+        {
+            var refreshToken = await _repositoryManager.RefreshToken.GetByTokenAsync(dto.Token)
                 ?? throw new NotFoundException($"{nameof(RefreshToken)} with refresh token '{dto.Token}' not found.", ErrorCodes.TokenNotFound);
 
-            await _repositoryManager.RefreshToken.DeleteAsync(token.Id);
+            await _repositoryManager.RefreshToken.DeleteAsync(refreshToken.Id);
         }
     }
 }

@@ -1,5 +1,6 @@
 using IsimSaglik.API.Extensions;
 using IsimSaglik.API.Middleware;
+using IsimSaglik.Service.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,22 +8,31 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+
 // Settings
 builder.Services.ConfigureSettings(builder.Configuration);
+
 
 // Supabase
 builder.Services.ConfigureSupabase();
 
+
 // Managers
 builder.Services.ConfigureRepositoryManager();
 builder.Services.ConfigureServiceManager();
+
 
 // Registers
 builder.Services.RegisterInfrastructures();
 builder.Services.RegisterRepositories();
 builder.Services.RegisterServices();
 
+
 // AutoMapper
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddMaps(typeof(MappingProfile).Assembly);
+});
 
 
 // JWT

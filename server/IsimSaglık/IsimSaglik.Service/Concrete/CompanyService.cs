@@ -1,11 +1,11 @@
-﻿using IsimSaglik.Entity.DTOs.Request;
+﻿using AutoMapper;
+using IsimSaglik.Entity.DTOs.Request;
 using IsimSaglik.Entity.Models;
 using IsimSaglik.Infrastructure.Abstract;
 using IsimSaglik.Repository.Abstract;
 using IsimSaglik.Service.Abstract;
 using IsimSaglik.Service.Exceptions;
 using IsimSaglik.Service.Exceptions.Types;
-using Newtonsoft.Json.Linq;
 
 namespace IsimSaglik.Service.Concrete
 {
@@ -13,14 +13,19 @@ namespace IsimSaglik.Service.Concrete
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly ISupabaseClient _supabaseClient;
+        private readonly IMapper _mapper;
 
 
-        public CompanyService(IRepositoryManager repositoryManager,
-            ISupabaseClient supabaseClient)
+        public CompanyService(
+            IRepositoryManager repositoryManager,
+            ISupabaseClient supabaseClient,
+            IMapper mapper)
         {
             _repositoryManager = repositoryManager;
             _supabaseClient = supabaseClient;
+            _mapper = mapper;
         }
+
 
 
         public async Task InviteUserAsync(Guid companyId, InviteUserRequestDto dto) 
@@ -44,7 +49,7 @@ namespace IsimSaglik.Service.Concrete
 
             var inviteOptions = new Supabase.Gotrue.InviteUserByEmailOptions
             {
-                RedirectTo = "https://app.isimsaglik.com/complete-registration"
+                RedirectTo = "https://isimsaglik.netlify.app/register"
             };
 
             try
@@ -56,15 +61,8 @@ namespace IsimSaglik.Service.Concrete
                 throw new BadRequestException($"Failed to send invitation email: {ex.Message}", ErrorCodes.EmailSendingFailed);
             }
 
-            var userInvitation = new UserInvitation
-            {
-                Email = dto.Email,
-                Role = dto.Role,
-                CompanyId = companyId,
-                CreatedDate = DateTime.UtcNow,
-                ExpiresDate = DateTime.UtcNow.AddDays(1),
-                IsUsed = false
-            };
+            var userInvitation = _mapper.Map<UserInvitation>(dto);
+            userInvitation.CompanyId = companyId;
 
             await _repositoryManager.UserInvitation.CreateAsync(userInvitation);
         }
