@@ -4,32 +4,122 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   ScrollView,
   Modal,
-  Dimensions,
+  Alert,
+  ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import AuthInput from "../../components/ui/AuthInput";
 import { useTheme } from "../context/ThemeContext";
+// styles dosyasını import etmeyi unutmayın veya aynı dosyanın altındaysa sorun yok.
+// import { styles } from './styles';
 
-const { height } = Dimensions.get("window");
+// API URL'ini buraya tanımlıyoruz (Geliştirme aşamasında localhost veya IP adresi)
+
+const API_BASE_URL = "http://10.0.2.2:5187";
+
+// const API_BASE_URL =
+//   "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 
 export default function RegisterScreen() {
   const router = useRouter();
   const { colors } = useTheme();
 
+  // Form Verileri State'i
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phoneNumber: "",
+    foundingDate: "", // Kullanıcıdan YYYY-MM-DD formatında alacağız
+    password: "",
+    passwordAgain: "",
+  });
+
   const [isChecked, setIsChecked] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegister = () => {
+  // Input değişimlerini yakalayan fonksiyon
+  const handleInputChange = (key: string, value: string) => {
+    setFormData({ ...formData, [key]: value });
+  };
+
+  // Kayıt Ol Butonu
+  const handleRegister = async () => {
+    // 1. Sözleşme Kontrolü
     if (!isChecked) {
-      alert(
+      Alert.alert(
+        "Uyarı",
         "Devam etmek için üyelik sözleşmesini kabul etmeniz gerekmektedir."
       );
       return;
+    }
+
+    // 2. Şifre Eşleşme Kontrolü
+    if (formData.password !== formData.passwordAgain) {
+      Alert.alert("Hata", "Şifreler uyuşmuyor.");
+      return;
+    }
+
+    // 3. Boş Alan Kontrolü (Basit)
+    if (!formData.name || !formData.email || !formData.password) {
+      Alert.alert("Hata", "Lütfen gerekli alanları doldurunuz.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // Tarihi ISO formatına çevirme (Basitçe YYYY-MM-DD -> ISO)
+      // Eğer kullanıcı düzgün tarih girmezse API hata verebilir, burada date picker kullanmak daha sağlıklı olur ama text input ile ilerliyoruz.
+      const formattedDate = new Date(formData.foundingDate).toISOString();
+
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        password: formData.password,
+        passwordAgain: formData.passwordAgain,
+        foundingDate: formattedDate,
+      };
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/auth/register-company`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.isSuccess) {
+        Alert.alert(
+          "Başarılı",
+          "Şirket kaydı başarıyla oluşturuldu. Giriş yapabilirsiniz.",
+          [{ text: "Tamam", onPress: () => router.replace("/auth/login") }]
+        );
+      } else {
+        // Backend'den gelen hata mesajını göster
+        const errorMessage =
+          result.error?.message || result.message || "Bir hata oluştu.";
+        Alert.alert("Kayıt Başarısız", errorMessage);
+      }
+    } catch (error) {
+      console.error("Register Error:", error);
+      Alert.alert(
+        "Hata",
+        "Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin."
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -46,7 +136,7 @@ export default function RegisterScreen() {
     <View style={{ flex: 1 }}>
       <ScrollView
         contentContainerStyle={[
-          styles.scrollContainer,
+          styles.scrollContainer, // styles dosyasının tanımlı olduğunu varsayıyoruz
           { backgroundColor: colors.background.default },
         ]}
         showsVerticalScrollIndicator={false}
@@ -57,30 +147,57 @@ export default function RegisterScreen() {
           </Text>
 
           <View style={styles.form}>
-            <AuthInput iconName="business-outline" placeholder="Firma Adı" />
+            {/* Firma Adı */}
+            <AuthInput
+              iconName="business-outline"
+              placeholder="Firma Adı"
+              value={formData.name}
+              onChangeText={(text) => handleInputChange("name", text)}
+            />
+
+            {/* Email */}
             <AuthInput
               iconName="mail-outline"
               placeholder="Email"
               keyboardType="email-address"
+              autoCapitalize="none"
+              value={formData.email}
+              onChangeText={(text) => handleInputChange("email", text)}
             />
+
+            {/* Telefon */}
             <AuthInput
               iconName="call-outline"
               placeholder="Telefon Numarası"
               keyboardType="phone-pad"
+              value={formData.phoneNumber}
+              onChangeText={(text) => handleInputChange("phoneNumber", text)}
             />
+
+            {/* Kuruluş Tarihi */}
             <AuthInput
               iconName="calendar-outline"
-              placeholder="Kuruluş Tarihi (GG/AA/YYYY)"
+              placeholder="Kuruluş Tarihi (YYYY-AA-GG)"
+              value={formData.foundingDate}
+              onChangeText={(text) => handleInputChange("foundingDate", text)}
             />
+
+            {/* Şifre */}
             <AuthInput
               iconName="lock-closed-outline"
               placeholder="Şifre"
               secureTextEntry
+              value={formData.password}
+              onChangeText={(text) => handleInputChange("password", text)}
             />
+
+            {/* Şifre Tekrar */}
             <AuthInput
               iconName="lock-closed-outline"
               placeholder="Şifre Tekrar"
               secureTextEntry
+              value={formData.passwordAgain}
+              onChangeText={(text) => handleInputChange("passwordAgain", text)}
             />
 
             {/* Checkbox */}
@@ -116,15 +233,24 @@ export default function RegisterScreen() {
               </View>
             </View>
 
+            {/* Oluştur Butonu */}
             <TouchableOpacity
               style={[styles.button, { backgroundColor: colors.primary.main }]}
               onPress={handleRegister}
+              disabled={isLoading} // Yüklenirken tıklamayı engelle
             >
-              <Text
-                style={[styles.buttonText, { color: colors.primary.contrast }]}
-              >
-                Oluştur
-              </Text>
+              {isLoading ? (
+                <ActivityIndicator color={colors.primary.contrast} />
+              ) : (
+                <Text
+                  style={[
+                    styles.buttonText,
+                    { color: colors.primary.contrast },
+                  ]}
+                >
+                  Oluştur
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
 

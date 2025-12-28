@@ -9,15 +9,14 @@ import bannerLeft from '../assets/img1.png';
 import bannerCenter from '../assets/img2.png'; 
 import bannerRight from '../assets/img3.png';
 
+// --- API AYARLARI ---
+// const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
+const API_BASE_URL = "http://localhost:5187";
 const ResetPassword = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  
   const [accessToken, setAccessToken] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  
-  // Hata durumunu göstermek için
   const [errorState, setErrorState] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -25,13 +24,11 @@ const ResetPassword = () => {
     PasswordAgain: ''
   });
 
-  // Sayfa yüklendiğinde URL Hash'inden Token'ı ayıkla
+  // URL Hash Okuma
   useEffect(() => {
-    // Örnek Hash: #access_token=eyJ...&refresh_token=...&type=recovery
     const hash = location.hash; 
     
     if (hash) {
-      // '#' işaretini at ve parametreleri ayır
       const params = new URLSearchParams(hash.substring(1));
       const token = params.get('access_token');
       
@@ -64,21 +61,27 @@ const ResetPassword = () => {
 
     setLoading(true);
 
-    // Backend DTO Yapısına Uygun Payload
+    // API Dokümanına Uygun Payload (camelCase)
     const payload = {
-      AccessToken: accessToken,
-      Password: formData.Password,
-      PasswordAgain: formData.PasswordAgain
+      accessToken: accessToken,
+      password: formData.Password,
+      passwordAgain: formData.PasswordAgain
     };
 
     try {
-      // Şifre Sıfırlama Endpoint'i
-      await axios.post('https://api.isimsaglik.com/api/auth/reset-password-confirm', payload);
+      // API İsteği: /api/auth/reset-password
+      const response = await axios.post(`${API_BASE_URL}/api/auth/reset-password`, payload);
       
-      setIsSuccess(true); // Başarılı modalını aç
+      // Backend'den gelen isSuccess kontrolü
+      if (response.data && response.data.isSuccess) {
+         setIsSuccess(true);
+      } else {
+         const msg = response.data?.message || "Şifre sıfırlama işlemi başarısız.";
+         alert(msg);
+      }
     } catch (error) {
       console.error(error);
-      const errMsg = error.response?.data?.message || "Şifre sıfırlama işlemi başarısız oldu.";
+      const errMsg = error.response?.data?.message || "Şifre sıfırlama işlemi sırasında hata oluştu.";
       alert("Hata: " + errMsg);
     } finally {
       setLoading(false);
@@ -87,7 +90,7 @@ const ResetPassword = () => {
 
   return (
     <div className="container">
-      {/* SOL PANEL (Register ile aynı tasarım ama metin farklı) */}
+      {/* SOL PANEL */}
       <div className="left-panel">
         <div className="left-content">
           <div className="brand-logo">
@@ -98,12 +101,10 @@ const ResetPassword = () => {
             <h1>Şifrenizi<br />Güvenle Yenileyin.</h1>
             <p>Hesabınıza erişim sağlamak için lütfen yeni şifrenizi belirleyiniz.</p>
           </div>
-          
-          {/* 3'LÜ GALERİ YAPISI */}
           <div className="hero-gallery">
-             <img src={bannerLeft} alt="App Sol" className="gallery-card card-left" />
-             <img src={bannerCenter} alt="App Merkez" className="gallery-card card-center" />
-             <img src={bannerRight} alt="App Sağ" className="gallery-card card-right" />
+             <img src={bannerLeft} alt="Sol" className="gallery-card card-left" />
+             <img src={bannerCenter} alt="Merkez" className="gallery-card card-center" />
+             <img src={bannerRight} alt="Sağ" className="gallery-card card-right" />
           </div>
         </div>
       </div>
@@ -112,7 +113,6 @@ const ResetPassword = () => {
       <div className="right-panel">
         <div className="auth-form-container">
           
-          {/* Hata varsa form yerine hata göster */}
           {errorState ? (
              <div style={{textAlign:'center', color:'#ef4444'}}>
                 <FaExclamationCircle size={50} style={{marginBottom:'20px'}} />
@@ -125,20 +125,12 @@ const ResetPassword = () => {
               <form onSubmit={handleSubmit}>
                 <div className="input-group">
                   <FaLock className="input-icon" />
-                  <input 
-                    type="password" name="Password" placeholder="Yeni Şifre" 
-                    className="custom-input" required 
-                    onChange={handleChange} disabled={isSuccess}
-                  />
+                  <input type="password" name="Password" placeholder="Yeni Şifre" className="custom-input" required onChange={handleChange} disabled={isSuccess} />
                 </div>
 
                 <div className="input-group">
                   <FaLock className="input-icon" />
-                  <input 
-                    type="password" name="PasswordAgain" placeholder="Yeni Şifre Tekrar" 
-                    className="custom-input" required 
-                    onChange={handleChange} disabled={isSuccess}
-                  />
+                  <input type="password" name="PasswordAgain" placeholder="Yeni Şifre Tekrar" className="custom-input" required onChange={handleChange} disabled={isSuccess} />
                 </div>
 
                 <button type="submit" className="btn-primary" disabled={loading || isSuccess}>
@@ -160,7 +152,7 @@ const ResetPassword = () => {
             <p style={{margin: '20px 0', color: '#666'}}>
                 Şifreniz başarıyla değiştirildi. Mobil uygulamadan yeni şifrenizle giriş yapabilirsiniz.
             </p>
-            {/* Burada butona basınca belki bir yere yönlendirme yapılabilir veya modal kapanır */}
+            {/* Burada butona basınca yapılacak işlem (örn: Ana sayfa) */}
             <button className="btn-primary" onClick={() => window.location.href = '/'}>
                 Ana Ekrana Dön
             </button>
