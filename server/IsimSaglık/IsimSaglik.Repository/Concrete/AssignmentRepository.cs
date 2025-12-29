@@ -14,6 +14,7 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
+        // REVIEW: Metodun null değer döndürebilme durumu var. Kişi belki de hiç görev eklemedi. '?' ekleyerek dönüt tipini güncelleyelim.
         public async Task<IEnumerable<Assignment>> GetAssignmentsByUserIdAsync(Guid userId)
         {
             var assignments = new List<Assignment>();
@@ -46,6 +47,7 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
+        // REVIEW: GetAllAsync metodu kullanılmayacağı için kaldırılabilir.
         public override async Task<IEnumerable<Assignment>> GetAllAsync()
         {
             var assignments = new List<Assignment>();

@@ -16,6 +16,8 @@ namespace IsimSaglik.API.Controllers
             _serviceManager = serviceManager;
         }
 
+        // REVIEW: Controller ve her bir action için küçük harflerle route tanımlaması yapalım. AuthController 'da örnek var.
+
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] HealthProfileRequestDto dto)

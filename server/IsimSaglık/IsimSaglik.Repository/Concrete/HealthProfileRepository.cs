@@ -13,6 +13,8 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
+
+        // REVIEW: Metodun ismi GetByUserIdAsync olarak güncellenebilir. Diğerleri ile tutarlı olması için.
         public async Task<HealthProfile?> GetHealthProfileByUserIdAsync(Guid userId)
         {
             HealthProfile? healthProfile = null;
@@ -48,6 +50,8 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
+
+        // REVIEW: GetAllAsync metodu kullanılmayacağı için kaldırılabilir.
         public override async Task<IEnumerable<HealthProfile>> GetAllAsync()
         {
             var profiles = new List<HealthProfile>();

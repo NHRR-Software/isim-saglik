@@ -16,6 +16,7 @@ namespace IsimSaglik.Infrastructure.Concrete
     {
         private readonly JwtSettings _tokenSettings;
 
+
         public TokenGenerator(IOptions<JwtSettings> tokenSettings)
         {
             _tokenSettings = tokenSettings.Value;
@@ -36,8 +37,6 @@ namespace IsimSaglik.Infrastructure.Concrete
 
         public bool ValidateRefreshToken(RefreshToken refreshToken)
         {
-            // TODO: Aynı dakia içerisinde oluşturulmuşsa hata verebilir.
-
             if (refreshToken == null || refreshToken.ExpiresDate < DateTime.UtcNow)
             {
                 return false;

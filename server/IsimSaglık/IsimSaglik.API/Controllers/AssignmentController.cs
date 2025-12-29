@@ -16,6 +16,8 @@ namespace IsimSaglik.API.Controllers
             _serviceManager = serviceManager;
         }
 
+        // REVIEW: Controller ve her bir action için küçük harflerle route tanımlaması yapalım. AuthController 'da örnek var.
+
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -37,7 +39,6 @@ namespace IsimSaglik.API.Controllers
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] AssignmentRequestDto requestDto)
         {
             var response = await _serviceManager.Assignment.UpdateAsync(UserId, id, requestDto);
-
             return OkResponse(response, "Assignment updated successfully.");
         }
 
