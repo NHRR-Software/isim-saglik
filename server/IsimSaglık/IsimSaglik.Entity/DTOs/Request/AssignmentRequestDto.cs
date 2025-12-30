@@ -8,6 +8,9 @@ namespace IsimSaglik.Entity.DTOs.Request
         [Required(ErrorMessage = "Description is required")]
         public string Description { get; init; } = string.Empty;
 
+        [Required(ErrorMessage = "Status is required")]
+        [EnumDataType(typeof(StatusType), ErrorMessage = "Invalid status selected.")]
+        public StatusType Status { get; init; }
 
         [Required(ErrorMessage = "Severity is required")]
         [EnumDataType(typeof(SeverityType), ErrorMessage = "Invalid severity selected.")]

@@ -40,6 +40,10 @@ namespace IsimSaglik.Service.Mapping
                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.ExpiresDate, opt => opt.MapFrom(src => DateTime.UtcNow.AddDays(1)))
                 .ForMember(dest => dest.CompanyId, opt => opt.Ignore());
+
+            // Assignment -> AssignmentResponseDto
+            CreateMap<Assignment, AssignmentResponseDto>();
+
         }
     }
 }
