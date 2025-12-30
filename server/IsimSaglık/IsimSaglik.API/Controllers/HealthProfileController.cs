@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IsimSaglik.API.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/health-profiles")]  
     [ApiController]
     public class HealthProfileController : BaseController
     {
@@ -16,9 +16,8 @@ namespace IsimSaglik.API.Controllers
             _serviceManager = serviceManager;
         }
 
-        // REVIEW: Controller ve her bir action için küçük harflerle route tanımlaması yapalım. AuthController 'da örnek var.
 
-
+        // POST: api/health-profiles
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] HealthProfileRequestDto dto)
         {
@@ -27,6 +26,7 @@ namespace IsimSaglik.API.Controllers
         }
 
 
+        // PUT: api/health-profiles
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] HealthProfileRequestDto dto)
         {
@@ -35,11 +35,12 @@ namespace IsimSaglik.API.Controllers
         }
 
 
+        // GET: api/health-profiles
         [HttpGet] 
-        public async Task<IActionResult> GetHealthProfile()
+        public async Task<IActionResult> Get()
         {
             var result = await _serviceManager.HealthProfile.GetByUserIdAsync(UserId);
-            return Ok(result);
+            return OkResponse(result, "Health profile retrieved successfully.");
         }
     }
 }
