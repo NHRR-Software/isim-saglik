@@ -14,8 +14,7 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
-        // REVIEW: Metodun null değer döndürebilme durumu var. Kişi belki de hiç görev eklemedi. '?' ekleyerek dönüt tipini güncelleyelim.
-        public async Task<IEnumerable<Assignment>> GetAssignmentsByUserIdAsync(Guid userId)
+        public async Task<IEnumerable<Assignment>?> GetAssignmentsByUserIdAsync(Guid userId)
         {
             var assignments = new List<Assignment>();
 
