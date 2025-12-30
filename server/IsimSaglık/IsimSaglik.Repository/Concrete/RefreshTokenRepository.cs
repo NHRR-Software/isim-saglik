@@ -13,6 +13,7 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
+        // REVIEW: GetAllAsync metodu kullanılmayacağı için kaldırılabilir.
         public override async Task<IEnumerable<RefreshToken>> GetAllAsync()
         {
             var tokens = new List<RefreshToken>();

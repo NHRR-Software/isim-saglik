@@ -14,7 +14,7 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
-
+        // GetAllAsync metodu kullanılmayacağı için kaldırılabilir.
         public override async Task<IEnumerable<UserInvitation>> GetAllAsync()
         {
             var list = new List<UserInvitation>();
@@ -82,6 +82,7 @@ namespace IsimSaglik.Repository.Concrete
 
 
 
+        // REVIEW: Metodun ismi GetByEmailAsync olarak güncellenebilir. Diğerleri ile tutarlı olması için.
         public async Task<UserInvitation?> GetInvitationByEmailAsync(string email)
         {
             UserInvitation? invitation = null;
@@ -116,6 +117,7 @@ namespace IsimSaglik.Repository.Concrete
 
 
 
+        // REVIEW: Metodun null değer döndürebilme durumu var. Belki de şirket için hiç davet oluşturulmamıştır. '?' ekleyerek dönüt tipini güncelleyelim.
         public async Task<IEnumerable<UserInvitation>> GetByCompanyIdAsync(Guid companyId)
         {
             var list = new List<UserInvitation>();

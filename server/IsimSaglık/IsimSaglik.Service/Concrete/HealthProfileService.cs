@@ -30,6 +30,7 @@ namespace IsimSaglik.Service.Concrete
                 throw new BadRequestException("Health profile already exists for this user.", ErrorCodes.ValidationError);
             }
 
+            // REVIEW: Eğer mümkünse AutoMapper kullanımını ekleyelim.
             var healthProfile = new HealthProfile
             {
                 UserId = userId,
@@ -66,6 +67,8 @@ namespace IsimSaglik.Service.Concrete
             var healthProfile = await _repositoryManager.HealthProfile.GetHealthProfileByUserIdAsync(userId)
                 ?? throw new NotFoundException("Health profile not found for this user.", ErrorCodes.UserNotFound);
 
+            // REVIEW: Eğer mümkünse AutoMapper kullanımını ekleyelim.
+            // REVIEW: Değişken isimlendirmelerinde camelCase kullanalım. 'healthProfileResponse' şeklinde.
             var HealthProfileResponse = new HealthProfileResponseDto
             {
                 BloodGroup = healthProfile.BloodGroup,

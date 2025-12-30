@@ -14,6 +14,7 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
+        // REVIEW: GetAllAsync metodu kullanılmayacağı için kaldırılabilir.
         public override async Task<IEnumerable<SafetyFinding>> GetAllAsync()
         {
             var safetyFindings = new List<SafetyFinding>();
@@ -100,6 +101,7 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
+        // REVIEW: Metodun null değer döndürebilme durumu var. Şirket için belki de hiç bulgu eklenmedi. '?' ekleyerek dönüt tipini güncelleyelim.
         public async Task<IEnumerable<SafetyFinding>> GetByCompanyIdAsync(Guid companyId)
         {
             var findings = new List<SafetyFinding>();
@@ -144,6 +146,8 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
+
+        // REVIEW: Metodun null değer döndürebilme durumu var. Kullanıcı için belki de hiç bulgu eklenmedi. '?' ekleyerek dönüt tipini güncelleyelim.
         public async Task<IEnumerable<SafetyFinding>> GetByReporterIdAsync(Guid reporterId)
         {
             var findings = new List<SafetyFinding>();

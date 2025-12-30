@@ -22,6 +22,8 @@ namespace IsimSaglik.Service.Concrete
 
 
 
+        // REVIEW: Repository 'den null değer döndüğü durumda hata verir mi? Bu olağan bir durum. Hata vermemesi gerekli. Bunu test edelim.
+        // REVIEW: Eğer mümkünse AutoMapper kullanımını ekleyelim.
         public async Task<IEnumerable<AssignmentResponseDto>> GetAllByUserIdAsync(Guid userId)
         {
             var assignments = await _repositoryManager.Assignment.GetAssignmentsByUserIdAsync(userId);
@@ -39,6 +41,8 @@ namespace IsimSaglik.Service.Concrete
         }
 
 
+
+        // REVIEW: Eğer mümkünse AutoMapper kullanımını ekleyelim. Hem entity oluşturma için hem de response dto oluşturma için.
         public async Task<AssignmentResponseDto> CreateAsync(Guid userId, AssignmentRequestDto dto)
         {
             var assignment = new Assignment
@@ -68,6 +72,7 @@ namespace IsimSaglik.Service.Concrete
 
         public async Task<AssignmentResponseDto> UpdateAsync(Guid userId, Guid id, AssignmentRequestDto dto)
         {
+            // REVIEW: Repository 'den null değer gelme durumunu if statementi yerine '??' ile daha kısa şekilde yazabiliriz.
             var assignment = await _repositoryManager.Assignment.GetByIdAsync(id);
 
             if (assignment is null)
@@ -75,6 +80,7 @@ namespace IsimSaglik.Service.Concrete
                 throw new NotFoundException("Assignment not found.", ErrorCodes.ValidationError);
             }
 
+            // REWIEW: Kontrol için 'Equals' metodu kullanmak daha doğru olabilir.
             if (assignment.UserId != userId)
             {
                 throw new BadRequestException("You are not authorized to update this assignment.", ErrorCodes.ValidationError);
@@ -86,6 +92,7 @@ namespace IsimSaglik.Service.Concrete
 
             await _repositoryManager.Assignment.UpdateAsync(assignment);
 
+            // REVIEW: Eğer mümkünse AutoMapper kullanalım.
             var responseDto = new AssignmentResponseDto
             {
                 Id = assignment.Id,
@@ -105,6 +112,7 @@ namespace IsimSaglik.Service.Concrete
             var assignment = await _repositoryManager.Assignment.GetByIdAsync(id)
                 ?? throw new NotFoundException("Assignment not found.", ErrorCodes.ValidationError);
 
+            // REWIEW: Kontrol için 'Equals' metodu kullanmak daha doğru olabilir.
             if (assignment.UserId != userId)
             {
                 throw new BadRequestException("You are not authorized to delete this assignment.", ErrorCodes.ValidationError);
