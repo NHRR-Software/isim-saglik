@@ -1,4 +1,5 @@
-﻿using IsimSaglik.Entity.DTOs.Request;
+﻿using AutoMapper;
+using IsimSaglik.Entity.DTOs.Request;
 using IsimSaglik.Entity.DTOs.Response;
 using IsimSaglik.Entity.Enums;
 using IsimSaglik.Entity.Models;
@@ -12,12 +13,15 @@ namespace IsimSaglik.Service.Concrete
     public class AssignmentService : IAssignmentService
     {
         private readonly IRepositoryManager _repositoryManager;
+        private readonly IMapper _mapper;
 
 
-
-        public AssignmentService(IRepositoryManager repositoryManager)
+        public AssignmentService(
+            IRepositoryManager repositoryManager,
+            IMapper mapper)
         {
             _repositoryManager = repositoryManager;
+            _mapper = mapper;
         }
 
 
@@ -72,35 +76,22 @@ namespace IsimSaglik.Service.Concrete
 
         public async Task<AssignmentResponseDto> UpdateAsync(Guid userId, Guid id, AssignmentRequestDto dto)
         {
-            // REVIEW: Repository 'den null değer gelme durumunu if statementi yerine '??' ile daha kısa şekilde yazabiliriz.
-            var assignment = await _repositoryManager.Assignment.GetByIdAsync(id);
+            var assignment = await _repositoryManager.Assignment.GetByIdAsync(id)
+                ?? throw new NotFoundException("Assignment not found.", ErrorCodes.ValidationError);
 
-            if (assignment is null)
-            {
-                throw new NotFoundException("Assignment not found.", ErrorCodes.ValidationError);
-            }
-
-            // REWIEW: Kontrol için 'Equals' metodu kullanmak daha doğru olabilir.
-            if (assignment.UserId != userId)
+            if (!assignment.UserId.Equals(userId))
             {
                 throw new BadRequestException("You are not authorized to update this assignment.", ErrorCodes.ValidationError);
             }
 
             assignment.Description = dto.Description;
             assignment.Severity = dto.Severity;
+            assignment.Status = dto.Status;
             assignment.UpdatedDate = DateTime.UtcNow;
 
             await _repositoryManager.Assignment.UpdateAsync(assignment);
 
-            // REVIEW: Eğer mümkünse AutoMapper kullanalım.
-            var responseDto = new AssignmentResponseDto
-            {
-                Id = assignment.Id,
-                Description = assignment.Description,
-                Severity = assignment.Severity,
-                Status = assignment.Status,
-                CreatedDate = assignment.CreatedDate
-            };
+            var responseDto = _mapper.Map<AssignmentResponseDto>(assignment);
 
             return responseDto;
         }
@@ -112,8 +103,7 @@ namespace IsimSaglik.Service.Concrete
             var assignment = await _repositoryManager.Assignment.GetByIdAsync(id)
                 ?? throw new NotFoundException("Assignment not found.", ErrorCodes.ValidationError);
 
-            // REWIEW: Kontrol için 'Equals' metodu kullanmak daha doğru olabilir.
-            if (assignment.UserId != userId)
+            if (!assignment.UserId.Equals(userId))
             {
                 throw new BadRequestException("You are not authorized to delete this assignment.", ErrorCodes.ValidationError);
             }
