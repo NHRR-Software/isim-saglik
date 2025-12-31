@@ -13,23 +13,21 @@ import {
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
-import * as SecureStore from "expo-secure-store"; // Token için
+import * as SecureStore from "expo-secure-store";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../app/context/ThemeContext";
 import CustomHeader from "../../components/ui/CustomHeader";
 import AuthInput from "../../components/ui/AuthInput";
 
-// API URL (Login sayfasında kullandığınla aynı olmalı)
-// const API_BASE_URL = "http://192.168.1.35:5187";
-// const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
+// API URL
 const API_BASE_URL = "http://10.0.2.2:5187";
+// const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 
-// Roller (API Dokümantasyonuna göre)
-// 0: Admin, 1: Company (Kendisi), 2: Expert (İSG Uzmanı), 3: Worker (İşçi)
-const ROLES = [
+// SADELEŞTİRİLMİŞ ROLLER
+// Sadece Çalışan (3) ve İSG Uzmanı (2) davet edilebilir.
+const ALLOWED_ROLES = [
   { id: 3, label: "Çalışan (Worker)", icon: "person" },
   { id: 2, label: "İSG Uzmanı (Expert)", icon: "medkit" },
-  { id: 0, label: "Yönetici (Admin)", icon: "shield-checkmark" },
 ];
 
 export default function AddPersonnelScreen() {
@@ -47,6 +45,16 @@ export default function AddPersonnelScreen() {
       Alert.alert(
         "Eksik Bilgi",
         "Lütfen davet edilecek kişinin e-posta adresini giriniz."
+      );
+      return;
+    }
+
+    // Email format kontrolü (Basit regex)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert(
+        "Hatalı Format",
+        "Lütfen geçerli bir e-posta adresi giriniz."
       );
       return;
     }
@@ -71,7 +79,7 @@ export default function AddPersonnelScreen() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Bearer Token Eklendi
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           email: email,
@@ -89,7 +97,7 @@ export default function AddPersonnelScreen() {
             onPress: () => {
               setEmail(""); // Formu temizle
               setSelectedRole(3); // Rolü sıfırla
-              router.back(); // Geri dön (veya kalabilirsin)
+              // İsteğe bağlı: router.back();
             },
           },
         ]);
@@ -126,14 +134,14 @@ export default function AddPersonnelScreen() {
               color={colors.primary.main}
             />
             <Text style={styles.infoText}>
-              Davet ettiğiniz kullanıcıya bir e-posta gönderilecektir.
-              Kullanıcı, e-postadaki linke tıklayarak şifresini belirleyip
-              sisteme kayıt olabilir.
+              Davet edeceğiniz kişiye bir kayıt linki gönderilecektir. Kişi,
+              linke tıklayarak şifresini belirleyip sisteme dahil olabilir.
             </Text>
           </View>
 
           {/* Form Alanı */}
           <View style={styles.formContainer}>
+            {/* E-Posta */}
             <Text style={styles.sectionTitle}>E-Posta Adresi</Text>
             <AuthInput
               iconName="mail-outline"
@@ -144,9 +152,10 @@ export default function AddPersonnelScreen() {
               onChangeText={setEmail}
             />
 
+            {/* Rol Seçimi */}
             <Text style={styles.sectionTitle}>Rol Seçimi</Text>
             <View style={styles.rolesContainer}>
-              {ROLES.map((role) => (
+              {ALLOWED_ROLES.map((role) => (
                 <TouchableOpacity
                   key={role.id}
                   style={[
@@ -186,7 +195,7 @@ export default function AddPersonnelScreen() {
                     {role.label}
                   </Text>
 
-                  {/* Seçili İkonu */}
+                  {/* Radyo Butonu */}
                   <View style={styles.radioOuter}>
                     {selectedRole === role.id && (
                       <View style={styles.radioInner} />
@@ -232,7 +241,7 @@ const createStyles = (colors: any, theme: string) =>
     },
     scrollContent: {
       padding: 20,
-      paddingBottom: 100, // Bottom Tab Bar payı
+      paddingBottom: 100,
     },
 
     // Bilgi Kartı
@@ -245,7 +254,7 @@ const createStyles = (colors: any, theme: string) =>
       marginBottom: 24,
       alignItems: "center",
       borderWidth: 1,
-      borderColor: colors.primary.main + "40", // %25 opacity
+      borderColor: colors.primary.main + "40",
     },
     infoText: {
       flex: 1,
@@ -321,10 +330,9 @@ const createStyles = (colors: any, theme: string) =>
       backgroundColor: colors.primary.main,
     },
 
-    // Buton
     submitButton: {
       flexDirection: "row",
-      backgroundColor: colors.dashboard.red, // Dikkat çeksin diye kırmızı yaptım (Founder rengi)
+      backgroundColor: colors.dashboard.red,
       paddingVertical: 16,
       borderRadius: 14,
       justifyContent: "center",

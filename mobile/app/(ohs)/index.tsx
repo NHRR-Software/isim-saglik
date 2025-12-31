@@ -1,6 +1,6 @@
 // app/(ohs)/index.tsx
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Dimensions,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import {
   Ionicons,
@@ -17,12 +18,57 @@ import {
   FontAwesome5,
 } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
+import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 
 const { width } = Dimensions.get("window");
 
+// API URL (Login'dekiyle aynı olmalı)
+const API_BASE_URL = "http://10.0.2.2:5187";
+
 export default function OHSHomeScreen() {
+  const router = useRouter();
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
+
+  const [userInfo, setUserInfo] = useState({
+    fullName: "Yükleniyor...",
+    jobTitle: "...",
+    photoUrl: null,
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Kullanıcı Bilgilerini Çekme
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await SecureStore.getItemAsync("accessToken");
+        if (!token) return;
+
+        const response = await fetch(`${API_BASE_URL}/api/users`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const result = await response.json();
+        if (result.isSuccess && result.data) {
+          setUserInfo({
+            fullName: result.data.fullName || "İsimsiz Kullanıcı",
+            jobTitle: result.data.jobTitle || "İSG Uzmanı", // Varsayılan ünvan
+            photoUrl: result.data.photoUrl,
+          });
+        }
+      } catch (error) {
+        console.error("User Data Fetch Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -34,12 +80,22 @@ export default function OHSHomeScreen() {
       <View style={styles.header}>
         <View style={styles.userInfo}>
           <Image
-            source={require("../../assets/images/avatar.png")}
+            source={
+              userInfo.photoUrl
+                ? { uri: userInfo.photoUrl }
+                : require("../../assets/images/avatar.png")
+            }
             style={styles.avatar}
           />
           <View>
-            <Text style={styles.userName}>Ramazan Yiğit</Text>
-            <Text style={styles.userRole}>İSG UZMANI</Text>
+            {loading ? (
+              <ActivityIndicator size="small" color={colors.text.secondary} />
+            ) : (
+              <>
+                <Text style={styles.userName}>{userInfo.fullName}</Text>
+                <Text style={styles.userRole}>{userInfo.jobTitle}</Text>
+              </>
+            )}
           </View>
         </View>
         <TouchableOpacity style={styles.notificationBtn}>
@@ -144,7 +200,6 @@ export default function OHSHomeScreen() {
               <View
                 style={[styles.dot, { backgroundColor: colors.status.warning }]}
               />
-              {/* Son eleman değilse çizgi devam eder, burada bölüm bitiyor ama çizgi aşağı inebilir */}
               <View style={[styles.line, { backgroundColor: "transparent" }]} />
             </View>
             <View style={styles.timelineContent}>
@@ -243,7 +298,11 @@ export default function OHSHomeScreen() {
         </View>
 
         {/* --- GÖREVLER KARTI --- */}
-        <View style={styles.taskCard}>
+        <TouchableOpacity
+          style={styles.taskCard}
+          activeOpacity={0.9}
+          onPress={() => router.push("/common/taskScreen")} // Ortak görev ekranına yönlendirme
+        >
           <View style={styles.taskIconContainer}>
             <Image
               source={require("../../assets/images/taskIcon.png")}
@@ -261,7 +320,7 @@ export default function OHSHomeScreen() {
             size={28}
             color={colors.text.secondary}
           />
-        </View>
+        </TouchableOpacity>
 
         {/* Bottom Bar Boşluğu */}
         <View style={{ height: 110 }} />
@@ -384,6 +443,7 @@ const createStyles = (colors: any, theme: string) =>
     sectionTitle: {
       fontSize: 16,
       fontWeight: "bold",
+      color: colors.text.main, // Dinamik Renk
       marginBottom: 15,
     },
     timelineItem: {

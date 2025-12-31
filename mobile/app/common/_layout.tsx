@@ -11,8 +11,7 @@ export default function CommonLayout() {
       <Stack.Screen name="stress-detail" />
       <Stack.Screen name="work-hours-detail" />
       <Stack.Screen name="taskScreen/index" />
-
-      {/* YENİ EKLENEN */}
+      <Stack.Screen name="health-profile" />
       <Stack.Screen name="aboutScreen/index" />
     </Stack>
   );

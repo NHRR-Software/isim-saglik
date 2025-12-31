@@ -1,16 +1,6 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { useTheme } from "@react-navigation/native";
+import React from 'react';
+import ReportsScreen from '../common/reportsScreen';
 
-export default function FounderHomeScreen() {
-  const { colors } = useTheme();
-  return (
-    <View>
-      <Text>Firma Sahibi Paneli</Text>
-    </View>
-  );
+export default function ReportsRoute() {
+    return <ReportsScreen />;
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center" },
-});

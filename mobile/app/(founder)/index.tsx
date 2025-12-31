@@ -1,6 +1,6 @@
 // app/(founder)/index.tsx
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import {
   Dimensions,
   Image,
@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import {
   FontAwesome5,
@@ -17,9 +18,13 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
+import * as SecureStore from "expo-secure-store";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 50) / 2;
+
+// API URL
+const API_BASE_URL = "http://10.0.2.2:5187";
 
 export default function FounderDashboard() {
   const { colors, theme } = useTheme();
@@ -31,6 +36,52 @@ export default function FounderDashboard() {
   const alertScrollRef = useRef<ScrollView>(null);
   const [deptX, setDeptX] = useState(0);
   const [alertX, setAlertX] = useState(0);
+
+  // KULLANICI BİLGİLERİ STATE'İ
+  const [userInfo, setUserInfo] = useState({
+    fullName: "Yükleniyor...",
+    jobTitle: "...",
+    companyName: "Şirketim",
+    photoUrl: null,
+  });
+  const [loading, setLoading] = useState(true);
+
+  // API'den Kullanıcı Bilgilerini Çek
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await SecureStore.getItemAsync("accessToken");
+        if (!token) return;
+
+        const response = await fetch(`${API_BASE_URL}/api/users`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const result = await response.json();
+
+        if (result.isSuccess && result.data) {
+          const data = result.data;
+          setUserInfo({
+            fullName: data.fullName || "İsimsiz Yönetici",
+            // Eğer API'den jobTitle gelmezse varsayılan olarak Firma Sahibi yaz
+            jobTitle: data.jobTitle || "Firma Sahibi",
+            // API'den şirket adı gelmiyorsa (User objesinde yoksa) sabit veya varsayılan
+            companyName: data.fullName || "NHRR Tech",
+            photoUrl: data.photoUrl,
+          });
+        }
+      } catch (error) {
+        console.error("Founder User Fetch Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   // DUMMY DATA - UYARILAR
   const alerts = [
@@ -143,13 +194,26 @@ export default function FounderDashboard() {
       {/* --- HEADER --- */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
+          {/* Logo Kısmı (API'den gelen photoUrl varsa onu kullan) */}
           <Image
-            source={require("../../assets/images/company/companylogo.png")}
+            source={
+              userInfo.photoUrl
+                ? { uri: userInfo.photoUrl }
+                : require("../../assets/images/company/companylogo.png")
+            }
             style={styles.logo}
           />
           <View style={styles.headerTextContainer}>
-            <Text style={styles.companyName}>NHRR</Text>
-            <Text style={styles.subTitle}>Genel Durum Özeti</Text>
+            {loading ? (
+              <ActivityIndicator size="small" color={colors.text.secondary} />
+            ) : (
+              <>
+                <Text style={styles.companyName}>{userInfo.companyName}</Text>
+                <Text style={styles.subTitle}>
+                  {userInfo.fullName} - {userInfo.jobTitle}
+                </Text>
+              </>
+            )}
           </View>
         </View>
         <TouchableOpacity>
@@ -378,8 +442,8 @@ const createStyles = (colors: any, theme: string) =>
       paddingTop: 50,
       marginBottom: 15,
     },
-    headerLeft: { flexDirection: "row", alignItems: "center" },
-    headerTextContainer: { marginLeft: 12 },
+    headerLeft: { flexDirection: "row", alignItems: "center", flex: 1 },
+    headerTextContainer: { marginLeft: 12, flex: 1 },
     logo: { width: 50, height: 50, borderRadius: 15 },
     companyName: {
       fontSize: 20,

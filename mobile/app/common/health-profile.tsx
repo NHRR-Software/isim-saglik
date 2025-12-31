@@ -1,4 +1,4 @@
-// app/setup/user-info.tsx
+// app/common/health-profile.tsx
 
 import React, { useState, useMemo, useEffect } from "react";
 import {
@@ -15,13 +15,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import * as SecureStore from "expo-secure-store"; // Token için
+import * as SecureStore from "expo-secure-store";
 import { useTheme } from "../../app/context/ThemeContext";
+import CustomHeader from "../../components/ui/CustomHeader";
 
-// API URL (Login sayfasında kullandığınla aynı olmalı)
+// API URL
 const API_BASE_URL = "http://10.0.2.2:5187";
+// const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 
 const BLOOD_TYPES = [
   "A Rh+",
@@ -34,89 +35,110 @@ const BLOOD_TYPES = [
   "0 Rh-",
 ];
 
-export default function UserInfoScreen() {
-  const router = useRouter();
-  const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+export default function HealthProfileScreen() {
+  const { colors, theme } = useTheme();
+  const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
 
   // State'ler
-  const [bloodType, setBloodType] = useState("");
+  const [bloodGroup, setBloodGroup] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [hasDisease, setHasDisease] = useState<boolean | null>(null);
   const [diseaseDescription, setDiseaseDescription] = useState("");
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [userRole, setUserRole] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true); // Sayfa açılışında loading
+  const [isSaving, setIsSaving] = useState(false); // Kayıt sırasında loading
 
-  // Sayfa yüklendiğinde kullanıcı rolünü çek
+  // 1. Verileri Çek (GET) - Sayfa yüklendiğinde çalışır
   useEffect(() => {
-    const getUserRole = async () => {
+    const fetchHealthProfile = async () => {
       try {
         const token = await SecureStore.getItemAsync("accessToken");
-        if (token) {
-          const response = await fetch(`${API_BASE_URL}/api/users`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const result = await response.json();
-          if (result.isSuccess && result.data) {
-            setUserRole(result.data.role);
-          }
+        if (!token) {
+          Alert.alert("Oturum Hatası", "Lütfen tekrar giriş yapınız.");
+          // router.replace("/auth/login"); // Login'e yönlendirebilirsin
+          return;
         }
-      } catch (e) {
-        console.error("Role fetch error:", e);
+
+        const response = await fetch(`${API_BASE_URL}/api/health-profiles`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const result = await response.json();
+
+        if (result.isSuccess && result.data) {
+          const data = result.data;
+          // Gelen verileri state'lere doldur
+          setBloodGroup(data.bloodGroup || "");
+          setHeight(data.height?.toString() || ""); // float'tan string'e
+          setWeight(data.weight?.toString() || ""); // float'tan string'e
+
+          // Kronik hastalık durumu
+          if (
+            data.chronicDisease &&
+            data.chronicDisease !== "Yok" &&
+            data.chronicDisease !== ""
+          ) {
+            setHasDisease(true);
+            setDiseaseDescription(data.chronicDisease);
+          } else {
+            setHasDisease(false);
+            setDiseaseDescription("");
+          }
+        } else {
+          // Eğer profil yoksa (yani GET isteği başarısız olursa)
+          // Kullanıcıya bilgi verip form boş kalsın ya da varsayılan değerler girilebilir.
+          console.warn(
+            "Sağlık profili bulunamadı veya boş döndü. Yeni oluşturulacak."
+          );
+          // Alert.alert("Bilgi", "Mevcut sağlık profili bulunamadı, lütfen bilgilerinizi giriniz.");
+          setHasDisease(false); // Varsayılan olarak hastalık yok
+        }
+      } catch (error) {
+        console.error("Health Profile Fetch Error:", error);
+        Alert.alert(
+          "Hata",
+          "Sağlık bilgileriniz yüklenirken bir sorun oluştu."
+        );
+      } finally {
+        setIsLoading(false);
       }
     };
-    getUserRole();
+
+    fetchHealthProfile();
   }, []);
 
-  const handleContinue = async () => {
-    // 1. Validasyon
-    if (!bloodType || !height || !weight) {
+  // 2. Verileri Güncelle (PUT)
+  const handleUpdate = async () => {
+    // Validasyonlar
+    if (!bloodGroup || !height || !weight) {
       Alert.alert(
         "Eksik Bilgi",
         "Lütfen kan grubu, boy ve kilo bilgilerini giriniz."
       );
       return;
     }
-
-    if (hasDisease === null) {
-      Alert.alert(
-        "Eksik Bilgi",
-        "Lütfen kronik rahatsızlık durumunu belirtiniz."
-      );
-      return;
-    }
-
     if (hasDisease && !diseaseDescription) {
       Alert.alert("Eksik Bilgi", "Lütfen hastalığınızı açıklayınız.");
       return;
     }
 
-    setIsLoading(true);
+    setIsSaving(true);
 
     try {
-      // 2. Token'ı Al
       const token = await SecureStore.getItemAsync("accessToken");
 
-      if (!token) {
-        Alert.alert("Oturum Hatası", "Lütfen tekrar giriş yapınız.");
-        router.replace("/auth/login");
-        return;
-      }
-
-      // 3. API İsteği Hazırlığı
       const payload = {
-        bloodGroup: bloodType,
+        bloodGroup: bloodGroup,
         weight: parseFloat(weight),
         height: parseFloat(height),
-        chronicDisease: hasDisease ? diseaseDescription : "Yok",
+        chronicDisease: hasDisease ? diseaseDescription : "Yok", // 'Yok' stringi gönderiyoruz
       };
 
-      // 4. API İsteği (POST /api/health-profiles)
       const response = await fetch(`${API_BASE_URL}/api/health-profiles`, {
-        method: "POST",
+        method: "PUT", // UPDATE için PUT
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -127,47 +149,19 @@ export default function UserInfoScreen() {
       const result = await response.json();
 
       if (result.isSuccess) {
-        // 5. BAŞARILI: ROLÜNE GÖRE YÖNLENDİR
-        let roleToRedirect = userRole;
-
-        // Eğer useEffect'te rol çekilemediyse son bir kez daha dene
-        if (roleToRedirect === null) {
-          const userRes = await fetch(`${API_BASE_URL}/api/users`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const userData = await userRes.json();
-          if (userData.isSuccess) roleToRedirect = userData.data.role;
-        }
-
-        // 0: Admin, 1: Company, 2: Expert, 3: Worker
-        switch (roleToRedirect) {
-          case 1:
-            router.replace("/(founder)");
-            break;
-          case 2:
-            router.replace("/(ohs)");
-            break;
-          case 3:
-            router.replace("/(worker)");
-            break;
-          default:
-            router.replace("/(founder)"); // Fallback
-        }
+        Alert.alert("Başarılı", "Sağlık bilgileriniz güncellendi.");
       } else {
-        const errorMsg =
-          result.error?.message || result.message || "Bir hata oluştu.";
-        Alert.alert("Kayıt Başarısız", errorMsg);
+        Alert.alert("Hata", result.message || "Güncelleme başarısız.");
       }
     } catch (error) {
       console.error(error);
-      Alert.alert("Bağlantı Hatası", "Sunucuya erişilemiyor.");
+      Alert.alert("Hata", "Sunucuya bağlanılamadı.");
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   };
 
-  // --- BİLEŞENLER ---
-
+  // --- Yardımcı Bileşenler ---
   const LabelInput = ({
     label,
     placeholder,
@@ -205,8 +199,24 @@ export default function UserInfoScreen() {
     </TouchableOpacity>
   );
 
+  if (isLoading) {
+    return (
+      <View
+        style={[
+          styles.mainContainer,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color={colors.primary.main} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.mainContainer}>
+      {/* CustomHeader artık safe area'yı kendisi ayarlıyor */}
+      <CustomHeader title="Sağlık Bilgilerim" />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -215,8 +225,6 @@ export default function UserInfoScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.pageTitle}>Profilinizi Tamamlayın</Text>
-
           {/* --- KAN GRUBU --- */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Kan Grubu</Text>
@@ -227,10 +235,10 @@ export default function UserInfoScreen() {
               <Text
                 style={[
                   styles.dropdownText,
-                  !bloodType && { color: colors.text.secondary },
+                  !bloodGroup && { color: colors.text.secondary },
                 ]}
               >
-                {bloodType || "Seçiniz"}
+                {bloodGroup || "Seçiniz"}
               </Text>
               <Ionicons
                 name="chevron-down"
@@ -291,18 +299,20 @@ export default function UserInfoScreen() {
             </View>
           )}
 
-          {/* --- BUTON --- */}
+          {/* --- GÜNCELLE BUTONU --- */}
           <TouchableOpacity
             style={styles.button}
-            onPress={handleContinue}
-            disabled={isLoading}
+            onPress={handleUpdate}
+            disabled={isSaving}
           >
-            {isLoading ? (
+            {isSaving ? (
               <ActivityIndicator color={colors.primary.contrast} />
             ) : (
-              <Text style={styles.buttonText}>Devam Et</Text>
+              <Text style={styles.buttonText}>Bilgileri Güncelle</Text>
             )}
           </TouchableOpacity>
+
+          <View style={{ height: 50 }} />
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -327,14 +337,14 @@ export default function UserInfoScreen() {
                 <TouchableOpacity
                   style={styles.modalItem}
                   onPress={() => {
-                    setBloodType(item); // State güncelleniyor
+                    setBloodGroup(item);
                     setIsDropdownOpen(false);
                   }}
                 >
                   <Text
                     style={[
                       styles.modalItemText,
-                      bloodType === item && {
+                      bloodGroup === item && {
                         color: colors.primary.main,
                         fontWeight: "bold",
                       },
@@ -342,7 +352,7 @@ export default function UserInfoScreen() {
                   >
                     {item}
                   </Text>
-                  {bloodType === item && (
+                  {bloodGroup === item && (
                     <Ionicons
                       name="checkmark"
                       size={20}
@@ -359,16 +369,11 @@ export default function UserInfoScreen() {
   );
 }
 
-const createStyles = (colors: any) =>
+const createStyles = (colors: any, theme: string) =>
   StyleSheet.create({
     mainContainer: { flex: 1, backgroundColor: colors.background.default },
-    scrollContent: { padding: 24, paddingTop: 60, paddingBottom: 40 },
-    pageTitle: {
-      fontSize: 24,
-      fontWeight: "bold",
-      color: colors.primary.main,
-      marginBottom: 30,
-    },
+    scrollContent: { padding: 24, paddingBottom: 40 },
+
     inputGroup: { marginBottom: 20 },
     label: {
       fontSize: 16,
@@ -385,8 +390,7 @@ const createStyles = (colors: any) =>
       fontSize: 16,
       color: colors.text.main,
       borderWidth: 1,
-      borderColor:
-        colors.mode === "dark" ? colors.neutral.border : "transparent",
+      borderColor: theme === "dark" ? colors.neutral.border : "transparent",
     },
     textArea: { height: 120, textAlignVertical: "top", paddingTop: 14 },
     dropdownButton: {
@@ -398,8 +402,7 @@ const createStyles = (colors: any) =>
       justifyContent: "space-between",
       alignItems: "center",
       borderWidth: 1,
-      borderColor:
-        colors.mode === "dark" ? colors.neutral.border : "transparent",
+      borderColor: theme === "dark" ? colors.neutral.border : "transparent",
     },
     dropdownText: { fontSize: 16, color: colors.text.main },
     radioGroup: { flexDirection: "row", gap: 20 },

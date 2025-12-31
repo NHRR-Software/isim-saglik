@@ -1,3 +1,5 @@
+// app/common/taskScreen/AddTaskModal.js
+
 import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -5,6 +7,7 @@ const AddTaskModal = ({ visible, onClose, onSave, styles, initialData, colors })
   const [taskTitle, setTaskTitle] = useState('');
   const [priority, setPriority] = useState('high');
 
+  // Modal açıldığında veya düzenlenecek veri geldiğinde alanları doldur
   useEffect(() => {
     if (initialData) {
       setTaskTitle(initialData.title);
@@ -56,7 +59,7 @@ const AddTaskModal = ({ visible, onClose, onSave, styles, initialData, colors })
               onPress={() => {
                 if(taskTitle.trim()){
                   onSave(taskTitle, priority);
-                  onClose();
+                  // onClose(); // Bunu siliyoruz çünkü onSave içinde işlem bitince kapatıyoruz
                 }
               }}
             >

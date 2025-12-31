@@ -20,7 +20,6 @@ export default function WorkerLayout() {
           {...props}
           config={{
             centerButtonRouteName: "alert",
-            // DÜZELTME 2: Direkt colors üzerinden erişiyoruz
             centerButtonColor: colors.dashboard.red,
             centerButtonIcon: alertIcon,
           }}
@@ -30,7 +29,6 @@ export default function WorkerLayout() {
       <Tabs.Screen name="index" options={{ title: "Ana Sayfa" }} />
       <Tabs.Screen name="tips" options={{ title: "İpuçları" }} />
 
-      {/* ORTA BUTON ROUTE'U */}
       <Tabs.Screen name="alert" options={{ title: "" }} />
 
       <Tabs.Screen name="progress" options={{ title: "İstatistikler" }} />

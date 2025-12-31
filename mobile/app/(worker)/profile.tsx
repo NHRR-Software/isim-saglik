@@ -1,3 +1,5 @@
+// app/(worker)/profile.tsx
+
 import React, { useState, useMemo } from "react";
 import {
   View,
@@ -10,6 +12,8 @@ import {
   Modal,
   TouchableWithoutFeedback,
   StatusBar,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import {
   Ionicons,
@@ -17,18 +21,72 @@ import {
   FontAwesome5,
 } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
-import { useRouter } from "expo-router"; // Router'ı import etmeyi unutma
+import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 
 const { width } = Dimensions.get("window");
 const CARD_GAP = 16;
-// (Ekran Genişliği - Kenar Boşlukları - Aradaki Boşluk) / 2
 const CARD_WIDTH = (width - 48 - CARD_GAP) / 2;
 
+// API URL (Login sayfasında kullandığınla aynı olmalı)
+// Yerel geliştirme için kendi IP adresini kullanıyorsun
+const API_BASE_URL = "http://10.0.2.2:5187";
+
 export default function ProfileScreen() {
+  const router = useRouter();
   const { colors, theme, setTheme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
-  const router = useRouter();
+
   const [themeModalVisible, setThemeModalVisible] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // --- ÇIKIŞ YAP FONKSİYONU ---
+  const handleLogout = async () => {
+    Alert.alert(
+      "Çıkış Yap",
+      "Hesabınızdan çıkış yapmak istediğinize emin misiniz?",
+      [
+        { text: "Vazgeç", style: "cancel" },
+        {
+          text: "Çıkış Yap",
+          style: "destructive",
+          onPress: async () => {
+            setIsLoggingOut(true);
+            try {
+              // 1. Tokenları Al
+              const accessToken = await SecureStore.getItemAsync("accessToken");
+              const refreshToken = await SecureStore.getItemAsync(
+                "refreshToken"
+              );
+
+              if (accessToken && refreshToken) {
+                // 2. API İsteği
+                await fetch(`${API_BASE_URL}/api/auth/logout`, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${accessToken}`,
+                  },
+                  body: JSON.stringify({ token: refreshToken }),
+                });
+              }
+            } catch (error) {
+              console.error("Çıkış hatası:", error);
+            } finally {
+              // 3. Tokenları Sil
+              await SecureStore.deleteItemAsync("accessToken");
+              await SecureStore.deleteItemAsync("refreshToken");
+
+              setIsLoggingOut(false);
+
+              // 4. Login Ekranına Yönlendir
+              router.replace("/auth/login");
+            }
+          },
+        },
+      ]
+    );
+  };
 
   // Menü Kartları Verisi
   const menuItems = [
@@ -37,7 +95,7 @@ export default function ProfileScreen() {
       icon: <Ionicons name="heart" size={32} color={colors.profile.text1} />,
       bgColor: colors.profile.card1,
       textColor: colors.profile.text1,
-      onPress: () => console.log("Sağlık Bilgileri"),
+      onPress: () => router.push("/common/health-profile"),
     },
     {
       title: "Profili Düzenle",
@@ -69,7 +127,7 @@ export default function ProfileScreen() {
       onPress: () => console.log("SSS"),
     },
     {
-      title: "Tema & Ayarlar", // YENİ: Tema değiştirme buraya bağlandı
+      title: "Tema & Ayarlar",
       icon: <Ionicons name="settings" size={32} color={colors.profile.text5} />,
       bgColor: colors.profile.card5,
       textColor: colors.profile.text5,
@@ -77,27 +135,36 @@ export default function ProfileScreen() {
     },
     {
       title: "Hakkımızda",
-      icon: <Ionicons name="people" size={32} color={colors.profile.text7} />, // text5 (Yeşil) kullanabiliriz veya colors.profile.text5
-      bgColor: colors.profile.card7, // card5 (Yeşilimsi)
-      textColor: colors.profile.text7,
-      onPress: () => router.push("/common/aboutScreen"), // Yönlendirme
+      icon: (
+        <Ionicons
+          name="people"
+          size={32}
+          color={colors.profile.text7 || colors.text.main}
+        />
+      ),
+      bgColor: colors.profile.card7 || colors.neutral.gray[100],
+      textColor: colors.profile.text7 || colors.text.main,
+      onPress: () => router.push("/common/aboutScreen"),
     },
     {
       title: "Davet Et",
       icon: (
         <Ionicons name="share-social" size={32} color={colors.profile.text6} />
-      ), // text6 (Pembe)
-      bgColor: colors.profile.card6, // card6 (Pembemsi)
+      ),
+      bgColor: colors.profile.card6,
       textColor: colors.profile.text6,
       onPress: () => console.log("Davet Et"),
     },
     {
       title: "Çıkış Yap",
-      // ... Çıkış butonu aynı kalabilir ama belki rengini gri yapabilirsin
-      icon: <Ionicons name="log-out" size={32} color={colors.text.secondary} />,
+      icon: isLoggingOut ? (
+        <ActivityIndicator color={colors.text.secondary} />
+      ) : (
+        <Ionicons name="log-out" size={32} color={colors.text.secondary} />
+      ),
       bgColor: colors.neutral.gray[100],
       textColor: colors.text.secondary,
-      onPress: () => console.log("Çıkış"),
+      onPress: handleLogout, // Fonksiyon bağlandı
     },
   ];
 
@@ -109,8 +176,10 @@ export default function ProfileScreen() {
 
       {/* --- HEADER --- */}
       <View style={styles.headerBackground}>
-        {/* Geri butonu simülasyonu */}
-        <TouchableOpacity style={styles.backButton}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
           <Ionicons name="arrow-back" size={24} color={colors.text.main} />
         </TouchableOpacity>
       </View>
@@ -151,6 +220,7 @@ export default function ProfileScreen() {
               ]}
               onPress={item.onPress}
               activeOpacity={0.8}
+              disabled={isLoggingOut && item.title === "Çıkış Yap"}
             >
               <View style={styles.cardIcon}>{item.icon}</View>
               <Text style={[styles.cardTitle, { color: item.textColor }]}>
@@ -247,7 +317,7 @@ const createStyles = (colors: any, theme: string) =>
     // Header
     headerBackground: {
       height: 140,
-      backgroundColor: theme === "light" ? "#E7EFFF" : "#1E1E1E", // Light'ta Mavi ton, Dark'ta Koyu
+      backgroundColor: theme === "light" ? "#E7EFFF" : "#1E1E1E",
       justifyContent: "center",
       paddingHorizontal: 20,
       paddingTop: 10,
@@ -262,7 +332,7 @@ const createStyles = (colors: any, theme: string) =>
     // Profil Bilgileri
     profileHeaderContainer: {
       alignItems: "center",
-      marginTop: -50, // Avatarı yukarı taşır
+      marginTop: -50,
       marginBottom: 20,
     },
     avatarContainer: {
@@ -274,7 +344,7 @@ const createStyles = (colors: any, theme: string) =>
       height: 100,
       borderRadius: 50,
       borderWidth: 4,
-      borderColor: colors.background.default, // Sayfa rengiyle aynı border
+      borderColor: colors.background.default,
     },
     editIconBtn: {
       position: "absolute",
@@ -323,8 +393,7 @@ const createStyles = (colors: any, theme: string) =>
       justifyContent: "center",
       alignItems: "center",
       padding: 10,
-      borderWidth: theme === "dark" ? 1 : 0, // Dark modda ince çizgi
-      // Light modda gölge
+      borderWidth: theme === "dark" ? 1 : 0,
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: theme === "light" ? 0.05 : 0,

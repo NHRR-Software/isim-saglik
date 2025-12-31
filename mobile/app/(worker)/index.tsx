@@ -1,6 +1,6 @@
 // app/(worker)/index.tsx
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Dimensions,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import {
   Ionicons,
@@ -18,16 +19,58 @@ import {
 } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
 
 const { width } = Dimensions.get("window");
 const CARD_GAP = 16;
 const CARD_WIDTH = (width - 48 - CARD_GAP) / 2;
 
+// API URL
+const API_BASE_URL = "http://10.0.2.2:5187";
+
 export default function WorkerHomeScreen() {
   const router = useRouter();
-
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
+
+  const [userInfo, setUserInfo] = useState({
+    fullName: "Yükleniyor...",
+    jobTitle: "...",
+    photoUrl: null, // Varsa URL gelecek
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Kullanıcı Bilgilerini Çekme
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await SecureStore.getItemAsync("accessToken");
+        if (!token) return;
+
+        const response = await fetch(`${API_BASE_URL}/api/users`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const result = await response.json();
+        if (result.isSuccess && result.data) {
+          setUserInfo({
+            fullName: result.data.fullName || "İsimsiz Kullanıcı",
+            jobTitle: result.data.jobTitle || "Çalışan", // Eğer jobTitle yoksa varsayılan
+            photoUrl: result.data.photoUrl,
+          });
+        }
+      } catch (error) {
+        console.error("User Data Fetch Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -38,19 +81,30 @@ export default function WorkerHomeScreen() {
       {/* HEADER */}
       <View style={styles.header}>
         <View style={styles.userInfo}>
+          {/* Avatar Kısmı: URL varsa onu kullan, yoksa yerel resmi kullan */}
           <Image
-            source={require("../../assets/images/avatar.png")}
+            source={
+              userInfo.photoUrl
+                ? { uri: userInfo.photoUrl }
+                : require("../../assets/images/avatar.png")
+            }
             style={styles.avatar}
           />
           <View>
-            <Text style={styles.userName}>Hamza Ali Doğan</Text>
-            <Text style={styles.userRole}>Mühendis – Üretim Geliştirme</Text>
+            {loading ? (
+              <ActivityIndicator size="small" color={colors.text.secondary} />
+            ) : (
+              <>
+                <Text style={styles.userName}>{userInfo.fullName}</Text>
+                <Text style={styles.userRole}>{userInfo.jobTitle}</Text>
+              </>
+            )}
           </View>
         </View>
         <TouchableOpacity style={styles.notificationBtn}>
           <Ionicons
             name="notifications"
-            size={28} // Header ikonu da hafif büyüdü
+            size={28}
             color={theme === "dark" ? "#FFF" : colors.text.secondary}
           />
           <View style={styles.badge} />
@@ -297,7 +351,6 @@ export default function WorkerHomeScreen() {
         {/* GÖREVLER KARTI */}
         <TouchableOpacity
           style={styles.taskCard}
-          // 👇 YÖNLENDİRME BURADA: Klasör yapına göre rota
           onPress={() => router.push("/common/taskScreen")}
           activeOpacity={0.9}
         >
@@ -372,7 +425,7 @@ const createStyles = (colors: any, theme: string) =>
     notificationBtn: {
       width: 44, // Hafif büyüdü
       height: 44,
-      backgroundColor: colors.background.card,
+      backgroundColor: colors.background.card, // Dinamik
       borderRadius: 22,
       justifyContent: "center",
       alignItems: "center",
@@ -395,7 +448,7 @@ const createStyles = (colors: any, theme: string) =>
       justifyContent: "space-between",
       backgroundColor: colors.background.card,
       borderRadius: 24, // Radius arttı
-      paddingVertical: 18, // Dikey boşluk ciddi oranda arttı (Eskisi 20)
+      paddingVertical: 18, // Dikey boşluk ciddi oranda arttı
       paddingHorizontal: 20,
       marginBottom: 30, // Alt boşluk arttı
       borderWidth: 1,
@@ -414,12 +467,12 @@ const createStyles = (colors: any, theme: string) =>
       alignSelf: "center",
     },
     statValue: {
-      fontSize: 28, // Font Büyüdü (Eskisi 20)
+      fontSize: 28, // Font Büyüdü
       fontWeight: "800",
       marginTop: 10,
     },
     statLabel: {
-      fontSize: 14, // Font Büyüdü (Eskisi 12)
+      fontSize: 14, // Font Büyüdü
       color: colors.text.secondary,
       fontWeight: "600",
       marginTop: 6,
@@ -478,13 +531,13 @@ const createStyles = (colors: any, theme: string) =>
       alignItems: "center",
       backgroundColor: colors.background.card,
       borderRadius: 28, // Radius arttı
-      paddingVertical: 25, // Dikey padding arttı (Eskisi 16)
+      paddingVertical: 25, // Dikey padding arttı
       paddingHorizontal: 20,
       borderWidth: 1,
       borderColor: colors.neutral.border,
     },
     taskIconContainer: {
-      width: 85, // Büyüdü (Eskisi 70)
+      width: 85, // Büyüdü
       height: 85, // Büyüdü
       backgroundColor: theme === "dark" ? "#2C2C2C" : colors.primary.light,
       borderRadius: 20,
@@ -503,13 +556,13 @@ const createStyles = (colors: any, theme: string) =>
       flex: 1,
     },
     taskTitle: {
-      fontSize: 20, // Font Büyüdü (Eskisi 16)
+      fontSize: 20, // Font Büyüdü
       fontWeight: "bold",
       color: colors.text.main,
       marginBottom: 6,
     },
     taskDesc: {
-      fontSize: 14, // Font Büyüdü (Eskisi 12)
+      fontSize: 14, // Font Büyüdü
       color: colors.text.secondary,
       lineHeight: 20,
       paddingRight: 10,

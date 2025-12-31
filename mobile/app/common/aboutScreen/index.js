@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-// Context ve Stil yollarını klasör yapına göre (../../) güncelledik
 import { useTheme } from '../../context/ThemeContext';
 import { createAboutStyles } from './styles';
 import TeamCard from './TeamCard';
@@ -53,7 +52,6 @@ const AboutScreen = () => {
        <CustomHeader title="Hakkımızda" />
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-                {/* Uygulama Hakkında Bilgi Kutusu */}
                 <View style={styles.aboutBox}>
                     <Text style={styles.aboutText}>
                         Bu uygulama, çalışanların sağlık verilerini ve iş ortamındaki riskleri 
@@ -68,7 +66,6 @@ const AboutScreen = () => {
                 {/* Proje Ekibi Başlığı */}
                 <Text style={styles.sectionTitle}>Proje Ekibi</Text>
 
-                {/* Ekip Üyeleri Listesi (Grid) */}
                 <View style={styles.teamGrid}>
                     {teamData.map((member) => (
                         <TeamCard 
@@ -84,5 +81,4 @@ const AboutScreen = () => {
     );
 };
 
-// EN KRİTİK SATIR: Bu satır olmazsa uygulama çöker.
 export default AboutScreen;

@@ -18,10 +18,10 @@ import AuthInput from "../../components/ui/AuthInput";
 import { useTheme } from "../context/ThemeContext";
 
 const { height } = Dimensions.get("window");
-// const API_BASE_URL =
-//   "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 
+// API URL (Lokal veya Canlı)
 const API_BASE_URL = "http://10.0.2.2:5187";
+// const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -40,68 +40,100 @@ export default function LoginScreen() {
     setIsLoading(true);
 
     try {
+      console.log(
+        "1. Login İsteği Atılıyor:",
+        `${API_BASE_URL}/api/auth/login`
+      );
+
       // 1. LOGIN İSTEĞİ
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const loginResponse = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
-      const result = await response.json();
+      // Cevabı önce text olarak alalım hata ayıklamak için
+      const loginText = await loginResponse.text();
+      console.log("Login Response Status:", loginResponse.status);
+      console.log("Login Response Body:", loginText);
 
-      if (result.isSuccess && result.data) {
-        const { accessToken, refreshToken } = result.data;
+      if (!loginResponse.ok) {
+        throw new Error(`Login Hatası: ${loginResponse.status} - ${loginText}`);
+      }
 
-        // Tokenları Güvenli Sakla
+      // Text'i JSON'a çeviriyoruz (Eğer boşsa burada patlamaz, kontrol etmiş oluruz)
+      const loginResult = loginText ? JSON.parse(loginText) : {};
+
+      if (loginResult.isSuccess && loginResult.data) {
+        const { accessToken, refreshToken } = loginResult.data;
+
         await SecureStore.setItemAsync("accessToken", accessToken);
         await SecureStore.setItemAsync("refreshToken", refreshToken);
 
-        // 2. USER INFO İSTEĞİ (SİMÜLASYON)
-        // Gerçekte: fetch(`${API_BASE_URL}/api/user/me`, { headers: { Authorization: `Bearer ${accessToken}` } })
+        console.log(
+          "2. User Info İsteği Atılıyor:",
+          `${API_BASE_URL}/api/users`
+        );
 
-        // Şimdilik Simüle Ediyoruz:
-        // SENARYO 1: İlk giriş (lastLoginDate null) -> Setup'a gitmeli
-        // SENARYO 2: Normal giriş (lastLoginDate dolu) ve rol Company -> Founder'a gitmeli
+        // 2. KULLANICI BİLGİLERİNİ ÇEKME
+        const userResponse = await fetch(`${API_BASE_URL}/api/users`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
 
-        // Test için bu değişkeni değiştir:
-        const mockUserData = {
-          role: "company", // 'company', 'expert', 'worker'
-          lastLoginDate: "2024-01-01T12:00:00Z", // Doluysa ana sayfaya, null ise setup'a
-          // lastLoginDate: null,
-        };
+        const userText = await userResponse.text();
+        console.log("User Response Status:", userResponse.status);
+        console.log("User Response Body:", userText);
 
-        console.log("User Info (Mock):", mockUserData);
+        if (!userResponse.ok) {
+          // Eğer 401 ise token geçersizdir, 404 ise endpoint yanlıştır.
+          throw new Error(
+            `User Info Hatası: ${userResponse.status} - ${userText}`
+          );
+        }
 
-        // 3. YÖNLENDİRME MANTIĞI
-        if (!mockUserData.lastLoginDate) {
-          // İlk kez giriş yapıyor, profil bilgilerini tamamlamalı
-          router.replace("/setup/user-info");
-        } else {
-          // Daha önce giriş yapmış, direkt paneline gitsin
-          switch (mockUserData.role) {
-            case "company": // Founder / Şirket Sahibi
+        const userResult = userText ? JSON.parse(userText) : {};
+
+        if (userResult.isSuccess && userResult.data) {
+          const userData = userResult.data;
+          console.log("Yönlendirme Yapılıyor, Rol:", userData.role);
+
+          if (!userData.isSetupCompleted) {
+            router.replace("/setup/user-info");
+            return;
+          }
+
+          switch (userData.role) {
+            case 1:
               router.replace("/(founder)");
               break;
-            case "expert": // İSG Uzmanı
+            case 2:
               router.replace("/(ohs)");
               break;
-            case "worker": // İşçi
+            case 3:
               router.replace("/(worker)");
               break;
             default:
-              // Rol tanımsızsa yine de işçiye veya bir hata sayfasına atabiliriz
-              Alert.alert("Hata", "Kullanıcı rolü tanımlanamadı.");
+              // Admin (0) veya diğerleri için varsayılan
+              router.replace("/(worker)"); //şimdişil
               break;
           }
+        } else {
+          Alert.alert("Hata", "Kullanıcı bilgileri alınamadı.");
         }
       } else {
         const errorMessage =
-          result.error?.message || result.message || "Giriş başarısız.";
+          loginResult.error?.message ||
+          loginResult.message ||
+          "Giriş başarısız.";
         Alert.alert("Hata", errorMessage);
       }
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Hata", "Sunucuya bağlanılamadı.");
+    } catch (error: any) {
+      console.error("Login Try-Catch Error:", error);
+      Alert.alert("Bağlantı Hatası", error.message || "Bir hata oluştu.");
     } finally {
       setIsLoading(false);
     }

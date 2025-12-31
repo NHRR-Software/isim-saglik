@@ -1,3 +1,5 @@
+// app/common/taskScreen/TaskItem.js
+
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Pressable, Text, TouchableOpacity, View } from 'react-native';
@@ -8,7 +10,10 @@ const TaskItem = ({ task, onToggle, onEdit, onDelete, styles, colors }) => {
   if (!colors || !colors.text) return null;
 
   const handleLongPress = () => {
-    setShowActions(!showActions);
+    // Sadece tamamlanmamış görevlerde düzenleme menüsü açılır
+    if (!task.isCompleted) {
+        setShowActions(!showActions);
+    }
   };
 
   return (
@@ -19,7 +24,6 @@ const TaskItem = ({ task, onToggle, onEdit, onDelete, styles, colors }) => {
         styles.taskCard, 
         !task.isCompleted && { backgroundColor: task.bg },
         pressed && { opacity: 0.9 },
-        // İkonlar varken kartın sağ padding'ini biraz azaltarak yer açıyoruz
         showActions && { paddingRight: 8 } 
       ]}
     >
@@ -36,7 +40,6 @@ const TaskItem = ({ task, onToggle, onEdit, onDelete, styles, colors }) => {
             styles.taskText, 
             { 
               color: task.isCompleted ? colors.text.secondary : (task.textColor || colors.text.main),
-              // İkonlar varken yazının çok daralmaması için fontu çok az küçültebiliriz (Opsiyonel)
               fontSize: showActions ? 13 : 14 
             },
             task.isCompleted && styles.completedText
@@ -47,6 +50,7 @@ const TaskItem = ({ task, onToggle, onEdit, onDelete, styles, colors }) => {
         </Text>
       </View>
       
+      {/* Aksiyon Butonları (Düzenle / Sil) */}
       {!task.isCompleted && showActions && (
         <View style={[styles.actionButtons, { gap: 6, marginLeft: 'auto' }]}>
           <TouchableOpacity 
@@ -54,7 +58,7 @@ const TaskItem = ({ task, onToggle, onEdit, onDelete, styles, colors }) => {
               onEdit(task);
               setShowActions(false);
             }} 
-            style={[styles.actionBtn, { width: 38, height: 38 }]} // Buton boyutlarını sabitledik
+            style={[styles.actionBtn, { width: 38, height: 38 }]}
           >
             <Feather name="edit-2" size={18} color={colors.text.main} />
           </TouchableOpacity>
@@ -69,7 +73,6 @@ const TaskItem = ({ task, onToggle, onEdit, onDelete, styles, colors }) => {
             <Ionicons name="trash-outline" size={18} color={colors.dashboard.red} />
           </TouchableOpacity>
           
-          {/* Kapatma ikonu için biraz daha sağa yaslı bir duruş */}
           <TouchableOpacity 
             onPress={() => setShowActions(false)} 
             style={{ paddingHorizontal: 4 }}

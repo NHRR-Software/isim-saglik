@@ -1,16 +1,7 @@
+// app/(founder)/profile.tsx
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { useTheme } from "@react-navigation/native";
+import CompanyScreen from "../common/companyScreen";
 
-export default function FounderHomeScreen() {
-  const { colors } = useTheme();
-  return (
-    <View>
-      <Text>Firma Sahibi Paneli</Text>
-    </View>
-  );
+export default function CompanyRoute() {
+  return <CompanyScreen />;
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center" },
-});
