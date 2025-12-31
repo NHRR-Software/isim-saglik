@@ -22,6 +22,6 @@ namespace IsimSaglik.Entity.DTOs.Response
 
         public required Uri PhotoUrl { get; init; }
 
-        public bool IsSetupCompleted { get; set; }
+        public bool IsSetupCompleted { get; set; } = false;
     }
 }

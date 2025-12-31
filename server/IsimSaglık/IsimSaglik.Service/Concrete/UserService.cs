@@ -33,7 +33,7 @@ namespace IsimSaglik.Service.Concrete
 
             if (user.Role.Equals(UserRole.Worker) || user.Role.Equals(UserRole.Expert))
             {
-                responseDto.IsSetupCompleted = await _repositoryManager.HealthProfile.GetHealthProfileByUserIdAsync(userId) is not null ? false : true;
+                responseDto.IsSetupCompleted = await _repositoryManager.HealthProfile.GetHealthProfileByUserIdAsync(userId) is null;
             }
 
             return responseDto;
