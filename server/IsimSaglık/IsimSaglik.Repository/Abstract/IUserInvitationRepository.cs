@@ -4,8 +4,8 @@ namespace IsimSaglik.Repository.Abstract
 {
     public interface IUserInvitationRepository : IRepositoryBase<UserInvitation>
     {
-        Task<UserInvitation?> GetInvitationByEmailAsync(string email);
+        Task<UserInvitation?> GetByEmailAsync(string email);
 
-        Task<IEnumerable<UserInvitation>> GetByCompanyIdAsync(Guid companyId);
+        Task<IEnumerable<UserInvitation>?> GetByCompanyIdAsync(Guid companyId);
     }
 }

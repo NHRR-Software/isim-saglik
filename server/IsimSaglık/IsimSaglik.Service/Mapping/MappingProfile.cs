@@ -44,6 +44,17 @@ namespace IsimSaglik.Service.Mapping
             // Assignment -> AssignmentResponseDto
             CreateMap<Assignment, AssignmentResponseDto>();
 
+            // AssignmentRequestDto -> Assignment
+            CreateMap<AssignmentRequestDto, Assignment>();
+
+            // HealthProfile -> HealthProfileResponseDto (EKLENDİ)
+            CreateMap<HealthProfile, HealthProfileResponseDto>()
+                .ForMember(dest => dest.ChronicDisease, opt => opt.MapFrom(src => src.ChronicDisease ?? string.Empty));
+
+            // HealthProfileRequestDto -> HealthProfile 
+            CreateMap<HealthProfileRequestDto, HealthProfile>()
+              .ForMember(dest => dest.ChronicDisease, opt => opt.MapFrom(src => src.ChronicDisease ?? string.Empty));
+
         }
     }
 }

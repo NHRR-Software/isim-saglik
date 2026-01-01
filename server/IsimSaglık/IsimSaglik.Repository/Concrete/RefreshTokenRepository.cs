@@ -13,39 +13,9 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
-        // REVIEW: GetAllAsync metodu kullanılmayacağı için kaldırılabilir.
         public override async Task<IEnumerable<RefreshToken>> GetAllAsync()
         {
-            var tokens = new List<RefreshToken>();
-
-            await using var connection = new NpgsqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            await using var command = new NpgsqlCommand("SELECT * FROM sp_get_all_refresh_tokens()", connection);
-
-            await using var reader = await command.ExecuteReaderAsync();
-
-            while (await reader.ReadAsync())
-            {
-                tokens.Add(new RefreshToken
-                {
-                    Id = reader.GetGuid(reader.GetOrdinal("id")),
-                    UserId = reader.GetGuid(reader.GetOrdinal("user_id")),
-                    Token = reader.GetString(reader.GetOrdinal("token")),
-                    CreatedIp = reader.IsDBNull(reader.GetOrdinal("created_ip"))
-                        ? null
-                        : reader.GetString(reader.GetOrdinal("created_ip")),
-                    UserAgent = reader.IsDBNull(reader.GetOrdinal("user_agent"))
-                        ? null
-                        : reader.GetString(reader.GetOrdinal("user_agent")),
-                    ExpiresDate = reader.GetDateTime(reader.GetOrdinal("expires_date")),
-                    CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
-                        ? null
-                        : reader.GetDateTime(reader.GetOrdinal("updated_date"))
-                });
-            }
-            return tokens;
+            throw new NotImplementedException();
         }
 
 

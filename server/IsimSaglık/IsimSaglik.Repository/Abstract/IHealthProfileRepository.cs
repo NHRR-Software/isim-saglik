@@ -4,6 +4,6 @@ namespace IsimSaglik.Repository.Abstract
 {
     public interface IHealthProfileRepository: IRepositoryBase<HealthProfile>
     {
-        Task<HealthProfile?> GetHealthProfileByUserIdAsync(Guid userId);
+        Task<HealthProfile?> GetByUserIdAsync(Guid userId);
     }
 }

@@ -14,7 +14,7 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
-        public async Task<IEnumerable<Assignment>?> GetAssignmentsByUserIdAsync(Guid userId)
+        public async Task<IEnumerable<Assignment>?> GetByUserIdAsync(Guid userId)
         {
             var assignments = new List<Assignment>();
 
@@ -42,39 +42,13 @@ namespace IsimSaglik.Repository.Concrete
                 });
             }
 
-            return assignments;
+            return assignments.Count > 0 ? assignments : null;
         }
 
 
-        // REVIEW: GetAllAsync metodu kullanılmayacağı için kaldırılabilir.
         public override async Task<IEnumerable<Assignment>> GetAllAsync()
         {
-            var assignments = new List<Assignment>();
-
-            await using var connection = new NpgsqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            await using var command = new NpgsqlCommand("SELECT * FROM sp_get_all_assignments()", connection);
-
-            await using var reader = await command.ExecuteReaderAsync();
-
-            while (await reader.ReadAsync())
-            {
-                assignments.Add(new Assignment
-                {
-                    Id = reader.GetGuid(reader.GetOrdinal("id")),
-                    CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
-                        ? null
-                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
-                    Status = (StatusType)reader.GetInt16(reader.GetOrdinal("status")),
-                    Severity = (SeverityType)reader.GetInt16(reader.GetOrdinal("severity")),
-                    Description = reader.GetString(reader.GetOrdinal("description")),
-                    UserId = reader.GetGuid(reader.GetOrdinal("user_id"))
-                });
-            }
-
-            return assignments;
+            throw new NotImplementedException();
         }
 
 

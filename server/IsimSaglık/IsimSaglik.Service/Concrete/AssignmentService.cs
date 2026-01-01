@@ -26,50 +26,31 @@ namespace IsimSaglik.Service.Concrete
 
 
 
-        // REVIEW: Repository 'den null değer döndüğü durumda hata verir mi? Bu olağan bir durum. Hata vermemesi gerekli. Bunu test edelim.
-        // REVIEW: Eğer mümkünse AutoMapper kullanımını ekleyelim.
         public async Task<IEnumerable<AssignmentResponseDto>> GetAllByUserIdAsync(Guid userId)
         {
-            var assignments = await _repositoryManager.Assignment.GetAssignmentsByUserIdAsync(userId);
+            var assignments = await _repositoryManager.Assignment.GetByUserIdAsync(userId);
 
-            var assignmentDtos = assignments.Select(a => new AssignmentResponseDto
+            if (assignments is null)
             {
-                Id = a.Id,
-                Description = a.Description,
-                Severity = a.Severity,
-                Status = a.Status,
-                CreatedDate = a.CreatedDate
-            });
+                return Enumerable.Empty<AssignmentResponseDto>();
+            }
 
-            return assignmentDtos;
+            return _mapper.Map<IEnumerable<AssignmentResponseDto>>(assignments);
         }
 
 
 
-        // REVIEW: Eğer mümkünse AutoMapper kullanımını ekleyelim. Hem entity oluşturma için hem de response dto oluşturma için.
         public async Task<AssignmentResponseDto> CreateAsync(Guid userId, AssignmentRequestDto dto)
         {
-            var assignment = new Assignment
-            {
-                UserId = userId,
-                Description = dto.Description,
-                Severity = dto.Severity,
-                Status = StatusType.Pending, 
-                CreatedDate = DateTime.UtcNow
-            };
+            var assignment = _mapper.Map<Assignment>(dto);
+
+            assignment.UserId = userId;
+            assignment.Status = StatusType.Pending;
+            assignment.CreatedDate = DateTime.UtcNow;
 
             await _repositoryManager.Assignment.CreateAsync(assignment);
 
-            var responseDto = new AssignmentResponseDto
-            {
-                Id = assignment.Id,
-                Description = assignment.Description,
-                Severity = assignment.Severity,
-                Status = assignment.Status,
-                CreatedDate = assignment.CreatedDate
-            };
-
-            return responseDto;
+            return _mapper.Map<AssignmentResponseDto>(assignment);
         }
 
 
