@@ -38,7 +38,7 @@ namespace IsimSaglik.Service.Concrete
             return responseDto;
         }
 
-
+        //user response dto ile dönck
         public async Task UpdateAsync(Guid userId) 
         {
             var user = await _repositoryManager.User.GetByIdAsync(userId)
@@ -47,7 +47,7 @@ namespace IsimSaglik.Service.Concrete
 
         }
 
-
+        // user info response dto  userid (id) ad soyd, email,profil photo (photo url) mapper kullanılck role de var. liste şeklinde döncek 
         public async Task GetByCompanyIdAsync(Guid companyId) 
         {
             throw new NotImplementedException();
