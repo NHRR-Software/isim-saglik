@@ -4,7 +4,6 @@ using Microsoft.Extensions.Options;
 using Supabase.Gotrue;
 using Supabase.Gotrue.Interfaces;
 using Supabase.Storage;
-using Supabase.Storage.Interfaces;
 
 namespace IsimSaglik.Infrastructure.Concrete
 {
@@ -15,7 +14,6 @@ namespace IsimSaglik.Infrastructure.Concrete
 
         public IGotrueClient<User, Session> Auth { get; }
         public IGotrueAdminClient<User> AdminAuth { get; }
-        public IStorageClient<Bucket, FileObject> Storage { get; }
 
 
         public SupabaseClient(IOptions<SupabaseSettings> settings)
@@ -28,10 +26,9 @@ namespace IsimSaglik.Infrastructure.Concrete
                 AutoConnectRealtime = false
             };
 
-            _client = new Supabase.Client(config.Url, config.Key, options);
+            _client = new Supabase.Client(config.Url, config.ServiceRoleKey, options);
 
             Auth = _client.Auth;
-            Storage = _client.Storage;
             AdminAuth = _client.AdminAuth(config.ServiceRoleKey);
         }
 
@@ -39,6 +36,38 @@ namespace IsimSaglik.Infrastructure.Concrete
         public async Task InitializeAsync()
         {
             await _client.InitializeAsync();
+        }
+
+
+        public async Task<Uri> UploadPhotoAsync(string bucketName, string folderPath, string fileName, byte[] fileBytes)
+        {
+            var fullPath = string.IsNullOrEmpty(folderPath)
+                ? $"{fileName}.webp"
+                : $"{folderPath}/{fileName}.webp";
+
+            var uploadOptions = new Supabase.Storage.FileOptions
+            {
+                Upsert = true, 
+                ContentType = "image/webp"
+            };
+
+            await _client.Storage
+                .From(bucketName)
+                .Upload(fileBytes, fullPath, uploadOptions);
+
+            var urlString = _client.Storage
+                .From(bucketName)
+                .GetPublicUrl(fullPath);
+
+            return new Uri(urlString);
+        }
+
+
+        public async Task DeleteFileAsync(string bucketName, string fileName)
+        {
+            await _client.Storage
+                .From(bucketName)
+                .Remove([fileName]);
         }
     }
 }

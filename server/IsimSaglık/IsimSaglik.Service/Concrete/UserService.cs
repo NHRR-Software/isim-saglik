@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using IsimSaglik.Entity.DTOs.Response;
 using IsimSaglik.Entity.Enums;
-using IsimSaglik.Entity.Models;
 using IsimSaglik.Repository.Abstract;
 using IsimSaglik.Service.Abstract;
 using IsimSaglik.Service.Exceptions;
@@ -33,7 +32,7 @@ namespace IsimSaglik.Service.Concrete
 
             if (user.Role.Equals(UserRole.Worker) || user.Role.Equals(UserRole.Expert))
             {
-                responseDto.IsSetupCompleted = await _repositoryManager.HealthProfile.GetHealthProfileByUserIdAsync(userId) is null;
+                responseDto.IsSetupCompleted = await _repositoryManager.HealthProfile.GetHealthProfileByUserIdAsync(userId) is null ? false : true;
             }
 
             return responseDto;

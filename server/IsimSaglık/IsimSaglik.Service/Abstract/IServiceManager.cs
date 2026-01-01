@@ -11,5 +11,7 @@
         IHealthProfileService HealthProfile { get; }
 
         IAssignmentService Assignment { get; }
+
+        ISafetyFindingService SafetyFinding { get; }
     }
 }

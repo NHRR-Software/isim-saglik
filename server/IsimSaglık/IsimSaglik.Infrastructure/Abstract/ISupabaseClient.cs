@@ -1,7 +1,5 @@
 ﻿using Supabase.Gotrue;
 using Supabase.Gotrue.Interfaces;
-using Supabase.Storage;
-using Supabase.Storage.Interfaces;
 
 namespace IsimSaglik.Infrastructure.Abstract
 {
@@ -9,8 +7,9 @@ namespace IsimSaglik.Infrastructure.Abstract
     {
         IGotrueClient<User, Session> Auth { get; }
         IGotrueAdminClient<User> AdminAuth { get; }
-        IStorageClient<Bucket, FileObject> Storage { get; }
 
         Task InitializeAsync();
+        Task<Uri> UploadPhotoAsync(string bucketName, string folderPath, string fileName, byte[] fileBytes);
+        Task DeleteFileAsync(string bucketName, string fileName);
     }
 }
