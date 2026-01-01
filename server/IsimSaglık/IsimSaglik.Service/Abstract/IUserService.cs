@@ -5,5 +5,7 @@ namespace IsimSaglik.Service.Abstract
     public interface IUserService
     {
         Task<UserResponseDto> GetByIdAsync(Guid userId);
+
+        Task<UserResponseDto> SearchUserAsync(string email);
     }
 }

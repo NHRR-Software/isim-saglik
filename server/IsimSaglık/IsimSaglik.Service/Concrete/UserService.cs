@@ -54,6 +54,12 @@ namespace IsimSaglik.Service.Concrete
         }
 
 
+        public async Task<UserResponseDto> SearchUserAsync(string email) 
+        {
+            var user = await _repositoryManager.User.GetByEmailAsync(email)
+                ?? throw new NotFoundException("User not found.", ErrorCodes.UserNotFound);
 
+            return _mapper.Map<UserResponseDto>(user);
+        }
     }
 }
