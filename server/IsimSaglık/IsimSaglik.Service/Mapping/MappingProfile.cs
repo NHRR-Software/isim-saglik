@@ -55,6 +55,9 @@ namespace IsimSaglik.Service.Mapping
             CreateMap<HealthProfileRequestDto, HealthProfile>()
               .ForMember(dest => dest.ChronicDisease, opt => opt.MapFrom(src => src.ChronicDisease ?? string.Empty));
 
+            // SafetyFinding -> SafetyFindingResponseDto
+            CreateMap<SafetyFinding, SafetyFindingResponseDto>();
+
         }
     }
 }
