@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using IsimSaglik.Entity.DTOs.Request;
 using IsimSaglik.Entity.DTOs.Response;
 using IsimSaglik.Entity.Enums;
+using IsimSaglik.Entity.Models;
 using IsimSaglik.Repository.Abstract;
 using IsimSaglik.Service.Abstract;
 using IsimSaglik.Service.Exceptions;
@@ -38,19 +40,26 @@ namespace IsimSaglik.Service.Concrete
             return responseDto;
         }
 
-        //user response dto ile dönck
-        public async Task UpdateAsync(Guid userId) 
+        public async Task<UserResponseDto> UpdateAsync(Guid userId, UserRequestDto dto)
         {
             var user = await _repositoryManager.User.GetByIdAsync(userId)
                 ?? throw new NotFoundException("User not found.", ErrorCodes.UserNotFound);
 
+            _mapper.Map(dto, user);
+
+            await _repositoryManager.User.UpdateAsync(user);
+
+            return _mapper.Map<UserResponseDto>(user);
 
         }
 
-        // user info response dto  userid (id) ad soyd, email,profil photo (photo url) mapper kullanılck role de var. liste şeklinde döncek 
-        public async Task GetByCompanyIdAsync(Guid companyId) 
+
+        public async Task<IEnumerable<UserInfoResponseDto>> GetByCompanyIdAsync(Guid companyId)
         {
-            throw new NotImplementedException();
+            var users = await _repositoryManager.User.GetByCompanyIdAsync(companyId)
+                          ?? Enumerable.Empty<User>();
+
+            return _mapper.Map<IEnumerable<UserInfoResponseDto>>(users);
         }
 
 
