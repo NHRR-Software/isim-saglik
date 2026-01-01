@@ -105,7 +105,7 @@ namespace IsimSaglik.Service.Concrete
             var authUser = await _supabaseClient.Auth.GetUser(dto.AccessToken)
                 ?? throw new BadRequestException("Failed to retrieve user from authentication provider.", ErrorCodes.UnexpectedError);
 
-            var userInvitation = await _repositoryManager.UserInvitation.GetInvitationByEmailAsync(authUser.Email)
+            var userInvitation = await _repositoryManager.UserInvitation.GetByEmailAsync(authUser.Email)
                 ?? throw new NotFoundException("Invitation not found for the provided email.", ErrorCodes.InvitationNotFound);
 
             if (userInvitation.IsUsed || userInvitation.ExpiresDate < DateTime.UtcNow)

@@ -37,7 +37,7 @@ namespace IsimSaglik.Service.Concrete
                 throw new BadRequestException($"User with email '{dto.Email}' already exists.", ErrorCodes.UserAlreadyExists);
             }
 
-            var lastInvitation = await _repositoryManager.UserInvitation.GetInvitationByEmailAsync(dto.Email);
+            var lastInvitation = await _repositoryManager.UserInvitation.GetByEmailAsync(dto.Email);
 
             if (lastInvitation is not null)
             {
