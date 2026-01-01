@@ -220,5 +220,49 @@ namespace IsimSaglik.Repository.Concrete
 
             return user;
         }
+
+
+        public async Task<IEnumerable<User>?> GetByCompanyIdAsync(Guid companyId)
+        {
+            var users = new List<User>();
+
+            await using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            await using var command = new NpgsqlCommand("SELECT * FROM sp_get_users_by_company_id(@p_company_id)", connection);
+            command.Parameters.AddWithValue("p_company_id", companyId);
+
+            await using var reader = await command.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                var user = new User
+                {
+                    Id = reader.GetGuid(reader.GetOrdinal("id")),
+                    CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
+                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
+                        ? null
+                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
+                    FullName = reader.GetString(reader.GetOrdinal("full_name")),
+                    Email = reader.GetString(reader.GetOrdinal("email")),
+                    PhoneNumber = reader.GetString(reader.GetOrdinal("phone_number")),
+                    Role = (UserRole)reader.GetInt16(reader.GetOrdinal("role")),
+                    Gender = (Gender)reader.GetInt16(reader.GetOrdinal("gender")),
+                    IsActive = reader.GetBoolean(reader.GetOrdinal("is_active")),
+                    CompanyId = reader.IsDBNull(reader.GetOrdinal("company_id"))
+                        ? null
+                        : reader.GetGuid(reader.GetOrdinal("company_id")),
+                    JobTitle = reader.IsDBNull(reader.GetOrdinal("job_title"))
+                        ? null
+                        : reader.GetString(reader.GetOrdinal("job_title")),
+                    BirthDate = reader.GetDateTime(reader.GetOrdinal("birth_date")),
+                    PhotoUrl = new Uri(reader.GetString(reader.GetOrdinal("photo_url")))
+                };
+
+                users.Add(user);
+            }
+
+            return users.Count > 0 ? users : null;
+        }
     }
 }
