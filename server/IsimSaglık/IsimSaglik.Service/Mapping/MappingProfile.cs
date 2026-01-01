@@ -41,6 +41,11 @@ namespace IsimSaglik.Service.Mapping
             // User -> UserInfoResponseDto
             CreateMap<User, UserInfoResponseDto>();
 
+            // UserRequestDto -> User 
+            CreateMap<UserRequestDto, User>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.UpdatedDate, opt => opt.MapFrom(src => DateTime.UtcNow));
+
 
             // InviteUserRequestDto -> UserInvitation
             CreateMap<InviteUserRequestDto, UserInvitation>()
