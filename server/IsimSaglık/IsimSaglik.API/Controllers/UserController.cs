@@ -1,4 +1,5 @@
-﻿using IsimSaglik.Service.Abstract;
+﻿using IsimSaglik.Entity.DTOs.Request;
+using IsimSaglik.Service.Abstract;
 using IsimSaglik.Service.Exceptions;
 using IsimSaglik.Service.Exceptions.Types;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +27,23 @@ namespace IsimSaglik.API.Controllers
         {
             var response = await _serviceManager.User.GetByIdAsync(UserId);
             return OkResponse(response, "User profile retrieved successfully.");
+        }
+
+        // PUT: api/users
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] UserRequestDto dto)
+        {
+            var response = await _serviceManager.User.UpdateAsync(UserId, dto);
+            return OkResponse(response, "User profile updated successfully.");
+        }
+
+
+        // GET: api/users/company/{companyId}
+        [HttpGet("company/{companyId}")]
+        public async Task<IActionResult> GetByCompanyId([FromRoute] Guid companyId)
+        {
+            var response = await _serviceManager.User.GetByCompanyIdAsync(companyId);
+            return OkResponse(response, "Company users retrieved successfully.");
         }
 
 

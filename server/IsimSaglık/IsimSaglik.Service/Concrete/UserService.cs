@@ -57,7 +57,7 @@ namespace IsimSaglik.Service.Concrete
         public async Task<IEnumerable<UserInfoResponseDto>> GetByCompanyIdAsync(Guid companyId)
         {
             var users = await _repositoryManager.User.GetByCompanyIdAsync(companyId)
-                          ?? Enumerable.Empty<User>();
+                         ?? throw new NotFoundException("No users found for the specified company.", ErrorCodes.UserNotFound);
 
             return _mapper.Map<IEnumerable<UserInfoResponseDto>>(users);
         }
