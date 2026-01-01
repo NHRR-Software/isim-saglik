@@ -47,6 +47,8 @@ namespace IsimSaglik.Service.Concrete
 
             _mapper.Map(dto, user);
 
+            user.UpdatedDate = DateTime.UtcNow;
+
             await _repositoryManager.User.UpdateAsync(user);
 
             return _mapper.Map<UserResponseDto>(user);
