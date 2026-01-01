@@ -1,6 +1,6 @@
-# AuthController, CompanyController, HealthProfileController ve AssignmentController API Dokümantasyonu
+# AuthController, CompanyController, HealthProfileController, AssignmentController ve SafetyFindingController API Dokümantasyonu
 
-Bu doküman, frontend geliştiricisinin Auth, Company, HealthProfile ve Assignment ile ilgili API isteklerini doğru şekilde yapabilmesi için hazırlanmıştır. Her endpoint için:
+Bu doküman, frontend geliştiricisinin Auth, Company, HealthProfile, Assignment ve SafetyFinding ile ilgili API isteklerini doğru şekilde yapabilmesi için hazırlanmıştır. Her endpoint için:
 - **Açıklama**
 - **HTTP Yöntemi ve URL**
 - **İstek Gövdesi (Request Body)**
@@ -418,6 +418,117 @@ bilgileri yer almaktadır.
 
 ---
 
+## SafetyFindingController (`/api/safety-findings`)
+
+### 1. İş Sağlığı ve Güvenliği Bulgularını Listele (Get All Safety Findings)
+- **Açıklama:** Kullanıcıya ait tüm iş sağlığı ve güvenliği bulgularını listeler.
+- **Yöntem & URL:** `GET /api/safety-findings`
+- **Bearer Token:** GEREKLİ
+- **Request Body:** YOK
+- **Response:**
+    ```json
+    {
+      "status": 200,
+      "isSuccess": true,
+      "data": [
+        {
+          "id": "b1a7e8c2-1d2f-4c3a-9e2b-123456789abc",
+          "title": "Kırık merdiven",
+          "status": 1, // 0: Closed, 1: Open
+          "severity": 2, // 0: Low, 1: Medium, 2: High, 3: Critical
+          "type": 0, // 0: SafetyBehavioral, 1: SafetyTechnical, 2: FireEmergency, 3: HygieneHealth, 4: Environmental, 5: Documentation
+          "description": "Merdiven kırık, tehlike arz ediyor.",
+          "photoUrl": "https://...",
+          "reportedId": null,
+          "closedDate": null
+        }
+      ],
+      "error": null,
+      "message": "Safety findings retrieved successfully.",
+      "timestamp": "2024-01-01T00:00:00Z"
+    }
+    ```
+
+---
+
+### 2. İş Sağlığı ve Güvenliği Bulgusu Oluştur (Create Safety Finding)
+- **Açıklama:** Yeni bir iş sağlığı ve güvenliği bulgusu raporlar. (Sadece Expert rolü)
+- **Yöntem & URL:** `POST /api/safety-findings`
+- **Bearer Token:** GEREKLİ (Expert)
+- **Request Body:**
+    ```json
+    {
+      "title": "Kırık merdiven",
+      "status": 1, // 0: Closed, 1: Open
+      "severity": 2, // 0: Low, 1: Medium, 2: High, 3: Critical
+      "type": 0, // 0: SafetyBehavioral, 1: SafetyTechnical, 2: FireEmergency, 3: HygieneHealth, 4: Environmental, 5: Documentation
+      "description": "Merdiven kırık, tehlike arz ediyor.",
+      "base64Image": "string",
+      "reportedId": "string (Guid) veya null"
+    }
+    ```
+- **Response:**
+    ```json
+    {
+      "status": 200,
+      "isSuccess": true,
+      "data": {
+        "id": "b1a7e8c2-1d2f-4c3a-9e2b-123456789abc",
+        "title": "Kırık merdiven",
+        "status": 1, // 0: Closed, 1: Open
+        "severity": 2, // 0: Low, 1: Medium, 2: High, 3: Critical
+        "type": 0, // 0: SafetyBehavioral, 1: SafetyTechnical, 2: FireEmergency, 3: HygieneHealth, 4: Environmental, 5: Documentation
+        "description": "Merdiven kırık, tehlike arz ediyor.",
+        "photoUrl": "https://...",
+        "reportedId": null,
+        "closedDate": null
+      },
+      "error": null,
+      "message": "Safety finding reported successfully.",
+      "timestamp": "2024-01-01T00:00:00Z"
+    }
+    ```
+
+---
+
+### 3. İş Sağlığı ve Güvenliği Bulgusunu Tamamla (Mark Safety Finding as Completed)
+- **Açıklama:** Belirtilen bulguyu tamamlanmış olarak işaretler. (Sadece Company rolü)
+- **Yöntem & URL:** `PATCH /api/safety-findings/{id}/complete`
+- **Bearer Token:** GEREKLİ (Company)
+- **Request Body:** YOK
+- **Response:**
+    ```json
+    {
+      "status": 200,
+      "isSuccess": true,
+      "data": null,
+      "error": null,
+      "message": "Safety finding marked as completed.",
+      "timestamp": "2024-01-01T00:00:00Z"
+    }
+    ```
+
+---
+
+### 4. İş Sağlığı ve Güvenliği Bulgusunu Sil (Delete Safety Finding)
+- **Açıklama:** Belirtilen bulguyu siler. (Sadece Company rolü)
+- **Yöntem & URL:** `DELETE /api/safety-findings/{id}`
+- **Bearer Token:** GEREKLİ (Company)
+- **Request Body:** YOK
+- **Response:**
+    ```json
+    {
+      "status": 200,
+      "isSuccess": true,
+      "data": null,
+      "error": null,
+      "message": "Safety finding deleted successfully.",
+      "timestamp": "2024-01-01T00:00:00Z"
+    }
+    ```
+
+---
+
 ## Genel Notlar
 
 - **Başarılı Yanıtlar:** `isSuccess: true`, `error: null`
@@ -445,5 +556,3 @@ bilgileri yer almaktadır.
     Authorization: Bearer {accessToken}
     ```
 - **Bazı endpointler için Authorization (Bearer Token) gereklidir, yukarıda belirtildi.**
-
----
