@@ -1,6 +1,6 @@
-# AuthController, CompanyController, HealthProfileController, AssignmentController ve SafetyFindingController API Dokümantasyonu
+# AuthController, CompanyController, HealthProfileController, AssignmentController, SafetyFindingController ve UserController API Dokümantasyonu
 
-Bu doküman, frontend geliştiricisinin Auth, Company, HealthProfile, Assignment ve SafetyFinding ile ilgili API isteklerini doğru şekilde yapabilmesi için hazırlanmıştır. Her endpoint için:
+Bu doküman, frontend geliştiricisinin Auth, Company, HealthProfile, Assignment, SafetyFinding ve User ile ilgili API isteklerini doğru şekilde yapabilmesi için hazırlanmıştır. Her endpoint için:
 - **Açıklama**
 - **HTTP Yöntemi ve URL**
 - **İstek Gövdesi (Request Body)**
@@ -523,6 +523,63 @@ bilgileri yer almaktadır.
       "data": null,
       "error": null,
       "message": "Safety finding deleted successfully.",
+      "timestamp": "2024-01-01T00:00:00Z"
+    }
+    ```
+
+---
+
+## UserController (`/api/users`)
+
+### 1. Kullanıcı Profilini Getir (Get User Profile)
+- **Açıklama:** Giriş yapan kullanıcının profil bilgilerini getirir.
+- **Yöntem & URL:** `GET /api/users`
+- **Bearer Token:** GEREKLİ
+- **Request Body:** YOK
+- **Response:**
+    ```json
+    {
+      "status": 200,
+      "isSuccess": true,
+      "data": {
+        "id": "b1a7e8c2-1d2f-4c3a-9e2b-123456789abc",
+        "email": "user@example.com",
+        "fullName": "Ad Soyad",
+        "phoneNumber": "5551234567",
+        "jobTitle": "Uzman",
+        "gender": 1, // 0: None, 1: Male, 2: Female
+        "role": 2, // 0: Admin, 1: Company, 2: Expert, 3: Worker
+        "birthDate": "1990-01-01T00:00:00Z",
+        "photoUrl": "https://...",
+        "isSetupCompleted": true
+      },
+      "error": null,
+      "message": "User profile retrieved successfully.",
+      "timestamp": "2024-01-01T00:00:00Z"
+    }
+    ```
+
+---
+
+### 2. Kullanıcı Ara (Search User)
+- **Açıklama:** E-posta adresine göre kullanıcı arar.
+- **Yöntem & URL:** `GET /api/users/search?email={email}`
+- **Bearer Token:** GEREKLİ
+- **Request Body:** YOK
+- **Response:**
+    ```json
+    {
+      "status": 200,
+      "isSuccess": true,
+      "data": {
+        "id": "b1a7e8c2-1d2f-4c3a-9e2b-123456789abc",
+        "fullName": "Ad Soyad",
+        "email": "user@example.com",
+        "role": 2, // 0: Admin, 1: Company, 2: Expert, 3: Worker
+        "photoUrl": "https://..."
+      },
+      "error": null,
+      "message": "User found successfully.",
       "timestamp": "2024-01-01T00:00:00Z"
     }
     ```

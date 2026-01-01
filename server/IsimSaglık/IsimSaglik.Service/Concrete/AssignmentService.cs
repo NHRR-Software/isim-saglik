@@ -43,10 +43,7 @@ namespace IsimSaglik.Service.Concrete
         public async Task<AssignmentResponseDto> CreateAsync(Guid userId, AssignmentRequestDto dto)
         {
             var assignment = _mapper.Map<Assignment>(dto);
-
             assignment.UserId = userId;
-            assignment.Status = StatusType.Pending;
-            assignment.CreatedDate = DateTime.UtcNow;
 
             await _repositoryManager.Assignment.CreateAsync(assignment);
 
