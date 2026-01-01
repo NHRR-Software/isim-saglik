@@ -9,12 +9,17 @@ namespace IsimSaglik.API.Middleware
     public class GlobalExceptionMiddleware
     {
         private readonly ILogger<GlobalExceptionMiddleware> _logger;
+        private readonly IWebHostEnvironment _env;
         private readonly RequestDelegate _next;
 
 
-        public GlobalExceptionMiddleware(ILogger<GlobalExceptionMiddleware> logger, RequestDelegate next)
+        public GlobalExceptionMiddleware(
+            ILogger<GlobalExceptionMiddleware> logger,
+            IWebHostEnvironment env,    
+            RequestDelegate next)
         {
             _logger = logger;
+            _env = env;
             _next = next;
         }
 
@@ -33,7 +38,7 @@ namespace IsimSaglik.API.Middleware
         }
 
 
-        private static Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
 
@@ -64,7 +69,10 @@ namespace IsimSaglik.API.Middleware
 
                 default:
                     statusCode = (int)HttpStatusCode.InternalServerError;
-                    apiError = new ApiErrorDto(ErrorCodes.UnexpectedError, "An unexpected error occurred.");
+                    List<string>? details = _env.IsDevelopment()
+                        ? [exception.ToString()]
+                        : null;
+                    apiError = new ApiErrorDto(ErrorCodes.UnexpectedError, "An unexpected error occurred.", details);
                     break;
             }
 

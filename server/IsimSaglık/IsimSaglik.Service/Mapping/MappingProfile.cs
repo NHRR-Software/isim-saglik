@@ -38,6 +38,10 @@ namespace IsimSaglik.Service.Mapping
             CreateMap<User, UserResponseDto>();
 
 
+            // User -> UserInfoResponseDto
+            CreateMap<User, UserInfoResponseDto>();
+
+
             // InviteUserRequestDto -> UserInvitation
             CreateMap<InviteUserRequestDto, UserInvitation>()
                 .ForMember(dest => dest.IsUsed, opt => opt.MapFrom(src => false))

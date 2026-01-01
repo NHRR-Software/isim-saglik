@@ -6,6 +6,6 @@ namespace IsimSaglik.Service.Abstract
     {
         Task<UserResponseDto> GetByIdAsync(Guid userId);
 
-        Task<UserResponseDto> SearchUserAsync(string email);
+        Task<UserInfoResponseDto> SearchUserAsync(string email);
     }
 }
