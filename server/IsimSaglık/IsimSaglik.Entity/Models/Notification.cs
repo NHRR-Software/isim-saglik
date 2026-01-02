@@ -8,7 +8,7 @@ namespace IsimSaglik.Entity.Models
 
         public required string Description { get; set; }
 
-        public required bool IsRead { get; set; }
+        public required bool IsRead { get; set; } = false;
 
         public required NotificationType Type { get; set; }
 
