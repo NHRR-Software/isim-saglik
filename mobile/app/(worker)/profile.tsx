@@ -1,6 +1,6 @@
 // app/(worker)/profile.tsx
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -14,13 +14,16 @@ import {
   StatusBar,
   Alert,
   ActivityIndicator,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import {
   Ionicons,
   MaterialCommunityIcons,
   FontAwesome5,
 } from "@expo/vector-icons";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../context/ThemeContext"; 
 import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 
@@ -28,8 +31,7 @@ const { width } = Dimensions.get("window");
 const CARD_GAP = 16;
 const CARD_WIDTH = (width - 48 - CARD_GAP) / 2;
 
-// API URL (Login sayfasında kullandığınla aynı olmalı)
-// Yerel geliştirme için kendi IP adresini kullanıyorsun
+// API URL
 const API_BASE_URL = "http://10.0.2.2:5187";
 
 export default function ProfileScreen() {
@@ -37,10 +39,115 @@ export default function ProfileScreen() {
   const { colors, theme, setTheme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
 
+  // Modallar
   const [themeModalVisible, setThemeModalVisible] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [editProfileVisible, setEditProfileVisible] = useState(false);
 
-  // --- ÇIKIŞ YAP FONKSİYONU ---
+  // Loading Durumları
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  // Kullanıcı Bilgileri
+  const [userInfo, setUserInfo] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    jobTitle: "",
+    photoUrl: null,
+    role: 3, // Worker
+    gender: 0,
+    birthDate: "",
+  });
+
+  // Form State'i (Düzenleme için)
+  const [editForm, setEditForm] = useState({
+    fullName: "",
+    phoneNumber: "",
+    jobTitle: "",
+    gender: 0,
+  });
+
+  // --- KULLANICI BİLGİLERİNİ ÇEK ---
+  const fetchUserData = async () => {
+    try {
+      const token = await SecureStore.getItemAsync("accessToken");
+      if (!token) return;
+
+      const response = await fetch(`${API_BASE_URL}/api/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await response.json();
+
+      if (result.isSuccess && result.data) {
+        setUserInfo(result.data);
+        // Edit formunu da doldur
+        setEditForm({
+          fullName: result.data.fullName || "",
+          phoneNumber: result.data.phoneNumber || "",
+          jobTitle: result.data.jobTitle || "",
+          gender: result.data.gender || 0,
+        });
+      }
+    } catch (error) {
+      console.error("Fetch User Error:", error);
+    } finally {
+      setLoadingUser(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  // --- PROFİL GÜNCELLEME (DÜZELTİLDİ) ---
+  const handleUpdateProfile = async () => {
+    setIsUpdating(true);
+    try {
+      const token = await SecureStore.getItemAsync("accessToken");
+      const payload = {
+        name: editForm.fullName,
+        phoneNumber: editForm.phoneNumber,
+        jobTitle: editForm.jobTitle,
+        gender: editForm.gender,
+        role: userInfo.role,
+        birthDate: userInfo.birthDate || new Date().toISOString(),
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/users`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (result.isSuccess) {
+        // 1. EKRANI GÜNCELLE (Anlık)
+        setUserInfo(result.data);
+
+        // 2. SECURE STORE GÜNCELLE (Kalıcılık)
+        // İsim gibi kritik verileri localde de güncelleyelim ki diğer sayfalar (yenilenince) hızlı erişsin
+        if (result.data.fullName) {
+          await SecureStore.setItemAsync("userFullName", result.data.fullName);
+        }
+
+        setEditProfileVisible(false);
+        Alert.alert("Başarılı", "Profiliniz başarıyla güncellendi.");
+      } else {
+        Alert.alert("Hata", result.message || "Güncelleme başarısız.");
+      }
+    } catch (error) {
+      Alert.alert("Hata", "Bir sorun oluştu.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // --- ÇIKIŞ YAP ---
   const handleLogout = async () => {
     Alert.alert(
       "Çıkış Yap",
@@ -53,14 +160,11 @@ export default function ProfileScreen() {
           onPress: async () => {
             setIsLoggingOut(true);
             try {
-              // 1. Tokenları Al
               const accessToken = await SecureStore.getItemAsync("accessToken");
               const refreshToken = await SecureStore.getItemAsync(
                 "refreshToken"
               );
-
               if (accessToken && refreshToken) {
-                // 2. API İsteği
                 await fetch(`${API_BASE_URL}/api/auth/logout`, {
                   method: "POST",
                   headers: {
@@ -71,15 +175,11 @@ export default function ProfileScreen() {
                 });
               }
             } catch (error) {
-              console.error("Çıkış hatası:", error);
             } finally {
-              // 3. Tokenları Sil
               await SecureStore.deleteItemAsync("accessToken");
               await SecureStore.deleteItemAsync("refreshToken");
-
+              await SecureStore.deleteItemAsync("userFullName"); // Temizlik
               setIsLoggingOut(false);
-
-              // 4. Login Ekranına Yönlendir
               router.replace("/auth/login");
             }
           },
@@ -88,21 +188,20 @@ export default function ProfileScreen() {
     );
   };
 
-  // Menü Kartları Verisi
   const menuItems = [
     {
       title: "Sağlık Bilgilerim",
       icon: <Ionicons name="heart" size={32} color={colors.profile.text1} />,
       bgColor: colors.profile.card1,
       textColor: colors.profile.text1,
-      onPress: () => router.push("/common/health-profile"),
+      onPress: () => router.push("/(worker)/progress"),
     },
     {
       title: "Profili Düzenle",
       icon: <Ionicons name="person" size={32} color={colors.profile.text2} />,
       bgColor: colors.profile.card2,
       textColor: colors.profile.text2,
-      onPress: () => console.log("Profil Düzenle"),
+      onPress: () => setEditProfileVisible(true),
     },
     {
       title: "Geri Bildirim",
@@ -164,7 +263,7 @@ export default function ProfileScreen() {
       ),
       bgColor: colors.neutral.gray[100],
       textColor: colors.text.secondary,
-      onPress: handleLogout, // Fonksiyon bağlandı
+      onPress: handleLogout,
     },
   ];
 
@@ -174,7 +273,7 @@ export default function ProfileScreen() {
         barStyle={theme === "dark" ? "light-content" : "dark-content"}
       />
 
-      {/* --- HEADER --- */}
+      {/* HEADER */}
       <View style={styles.headerBackground}>
         <TouchableOpacity
           style={styles.backButton}
@@ -186,22 +285,29 @@ export default function ProfileScreen() {
 
       <View style={styles.profileHeaderContainer}>
         <View style={styles.avatarContainer}>
-          <Image
-            source={require("../../assets/images/avatar.png")}
-            style={styles.avatar}
-          />
-          <TouchableOpacity style={styles.editIconBtn}>
+         {userInfo.photoUrl ? (
+            <Image source={{ uri: userInfo.photoUrl }} style={styles.avatar} />
+          ) : null}
+
+          <TouchableOpacity
+            style={styles.editIconBtn}
+            onPress={() => setEditProfileVisible(true)}
+          >
             <Ionicons name="pencil" size={14} color="#fff" />
           </TouchableOpacity>
         </View>
 
         <View style={styles.nameBadge}>
-          <Text style={styles.userName}>Hamza Ali Doğan</Text>
+          {loadingUser ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <Text style={styles.userName}>{userInfo.fullName}</Text>
+          )}
         </View>
-        <Text style={styles.userRole}>Mühendis – Üretim Geliştirme</Text>
+        <Text style={styles.userRole}>{userInfo.jobTitle || "Çalışan"}</Text>
       </View>
 
-      {/* --- GRID MENU --- */}
+      {/* MENU */}
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -229,12 +335,129 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           ))}
         </View>
-
-        {/* Bottom Bar Boşluğu */}
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* --- TEMA SEÇİM MODALI --- */}
+      {/* --- PROFİL DÜZENLEME MODALI --- */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editProfileVisible}
+        onRequestClose={() => setEditProfileVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setEditProfileVisible(false)}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ width: "100%" }}
+          >
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContent}>
+                <View style={styles.modalIndicator} />
+                <Text style={styles.modalTitle}>Profili Düzenle</Text>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Ad Soyad</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editForm.fullName}
+                    onChangeText={(t) =>
+                      setEditForm({ ...editForm, fullName: t })
+                    }
+                    placeholder="Ad Soyad"
+                    placeholderTextColor={colors.text.secondary}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Telefon</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editForm.phoneNumber}
+                    onChangeText={(t) =>
+                      setEditForm({ ...editForm, phoneNumber: t })
+                    }
+                    placeholder="Telefon"
+                    keyboardType="phone-pad"
+                    placeholderTextColor={colors.text.secondary}
+                  />
+                </View>
+
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Ünvan</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editForm.jobTitle}
+                    onChangeText={(t) =>
+                      setEditForm({ ...editForm, jobTitle: t })
+                    }
+                    placeholder="Ünvan"
+                    placeholderTextColor={colors.text.secondary}
+                  />
+                </View>
+
+                {/* CİNSİYET SEÇİMİ */}
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Cinsiyet</Text>
+                  <View style={styles.genderContainer}>
+                    {[
+                      { id: 1, label: "Erkek", icon: "male" },
+                      { id: 2, label: "Kadın", icon: "female" },
+                    ].map((g) => (
+                      <TouchableOpacity
+                        key={g.id}
+                        style={[
+                          styles.genderButton,
+                          editForm.gender === g.id && styles.genderButtonActive,
+                        ]}
+                        onPress={() =>
+                          setEditForm({ ...editForm, gender: g.id })
+                        }
+                      >
+                        <Ionicons
+                          name={g.icon as any}
+                          size={18}
+                          color={
+                            editForm.gender === g.id
+                              ? "#FFF"
+                              : colors.text.secondary
+                          }
+                          style={{ marginRight: 6 }}
+                        />
+                        <Text
+                          style={[
+                            styles.genderText,
+                            editForm.gender === g.id && styles.genderTextActive,
+                          ]}
+                        >
+                          {g.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={handleUpdateProfile}
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <Text style={styles.saveButtonText}>Güncelle</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </KeyboardAvoidingView>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* --- TEMA MODALI --- */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -247,7 +470,6 @@ export default function ProfileScreen() {
               <View style={styles.modalContent}>
                 <View style={styles.modalIndicator} />
                 <Text style={styles.modalTitle}>Görünüm Ayarları</Text>
-
                 <TouchableOpacity
                   style={[
                     styles.themeOption,
@@ -272,7 +494,6 @@ export default function ProfileScreen() {
                     />
                   )}
                 </TouchableOpacity>
-
                 <TouchableOpacity
                   style={[
                     styles.themeOption,
@@ -306,15 +527,9 @@ export default function ProfileScreen() {
   );
 }
 
-// --- STYLES ---
 const createStyles = (colors: any, theme: string) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background.default,
-    },
-
-    // Header
+    container: { flex: 1, backgroundColor: colors.background.default },
     headerBackground: {
       height: 140,
       backgroundColor: theme === "light" ? "#E7EFFF" : "#1E1E1E",
@@ -328,17 +543,12 @@ const createStyles = (colors: any, theme: string) =>
       justifyContent: "center",
       alignItems: "center",
     },
-
-    // Profil Bilgileri
     profileHeaderContainer: {
       alignItems: "center",
       marginTop: -50,
       marginBottom: 20,
     },
-    avatarContainer: {
-      position: "relative",
-      marginBottom: 10,
-    },
+    avatarContainer: { position: "relative", marginBottom: 10 },
     avatar: {
       width: 100,
       height: 100,
@@ -366,26 +576,10 @@ const createStyles = (colors: any, theme: string) =>
       borderRadius: 20,
       marginBottom: 6,
     },
-    userName: {
-      color: "#fff",
-      fontSize: 16,
-      fontWeight: "bold",
-    },
-    userRole: {
-      color: colors.text.secondary,
-      fontSize: 14,
-    },
-
-    // Grid Menü
-    scrollContent: {
-      paddingHorizontal: 24,
-      paddingTop: 10,
-    },
-    gridContainer: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: CARD_GAP,
-    },
+    userName: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+    userRole: { color: colors.text.secondary, fontSize: 14 },
+    scrollContent: { paddingHorizontal: 24, paddingTop: 10 },
+    gridContainer: { flexDirection: "row", flexWrap: "wrap", gap: CARD_GAP },
     card: {
       width: CARD_WIDTH,
       height: 110,
@@ -400,16 +594,8 @@ const createStyles = (colors: any, theme: string) =>
       shadowRadius: 5,
       elevation: theme === "light" ? 2 : 0,
     },
-    cardIcon: {
-      marginBottom: 10,
-    },
-    cardTitle: {
-      fontSize: 14,
-      fontWeight: "600",
-      textAlign: "center",
-    },
-
-    // Modal Styles
+    cardIcon: { marginBottom: 10 },
+    cardTitle: { fontSize: 14, fontWeight: "600", textAlign: "center" },
     modalOverlay: {
       flex: 1,
       backgroundColor: "rgba(0,0,0,0.5)",
@@ -453,9 +639,53 @@ const createStyles = (colors: any, theme: string) =>
       backgroundColor:
         theme === "light" ? colors.primary.light : "rgba(72, 112, 255, 0.1)",
     },
-    themeText: {
-      fontSize: 16,
+    themeText: { fontSize: 16, fontWeight: "600", color: colors.text.main },
+    inputContainer: { marginBottom: 15 },
+    label: {
+      fontSize: 14,
       fontWeight: "600",
-      color: colors.text.main,
+      color: colors.text.secondary,
+      marginBottom: 6,
+      marginLeft: 4,
     },
+    input: {
+      backgroundColor: colors.neutral.input,
+      borderRadius: 12,
+      paddingHorizontal: 15,
+      paddingVertical: 12,
+      borderWidth: 1,
+      borderColor: colors.neutral.border,
+      color: colors.text.main,
+      fontSize: 15,
+    },
+    genderContainer: { flexDirection: "row", gap: 10 },
+    genderButton: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 12,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.neutral.border,
+      backgroundColor: colors.neutral.input,
+    },
+    genderButtonActive: {
+      backgroundColor: colors.primary.main,
+      borderColor: colors.primary.main,
+    },
+    genderText: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.text.secondary,
+    },
+    genderTextActive: { color: "#FFF" },
+    saveButton: {
+      backgroundColor: colors.primary.main,
+      borderRadius: 14,
+      paddingVertical: 16,
+      alignItems: "center",
+      marginTop: 10,
+    },
+    saveButtonText: { color: "#FFF", fontSize: 16, fontWeight: "bold" },
   });

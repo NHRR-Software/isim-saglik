@@ -79,14 +79,10 @@ export default function OHSHomeScreen() {
       {/* HEADER */}
       <View style={styles.header}>
         <View style={styles.userInfo}>
-          <Image
-            source={
-              userInfo.photoUrl
-                ? { uri: userInfo.photoUrl }
-                : require("../../assets/images/avatar.png")
-            }
-            style={styles.avatar}
-          />
+          {userInfo.photoUrl ? (
+            <Image source={{ uri: userInfo.photoUrl }} style={styles.avatar} />
+          ) : null}
+
           <View>
             {loading ? (
               <ActivityIndicator size="small" color={colors.text.secondary} />
@@ -98,6 +94,7 @@ export default function OHSHomeScreen() {
             )}
           </View>
         </View>
+
         <TouchableOpacity style={styles.notificationBtn}>
           <Ionicons
             name="notifications"

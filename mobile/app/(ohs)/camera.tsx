@@ -14,17 +14,17 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { useTheme } from "../context/ThemeContext";
 import CustomHeader from "../../components/ui/CustomHeader";
 
-// API URL
+// API URL (Login'dekiyle aynı)
 const API_BASE_URL = "http://10.0.2.2:5187";
 
-// Backend Enum Karşılıkları (Tahmini)
+// Backend Enum Karşılıkları
 const SEVERITY_LEVELS = [
   { id: 0, label: "Düşük", color: "#4CAF50" },
   { id: 1, label: "Orta", color: "#FF9800" },
@@ -32,11 +32,14 @@ const SEVERITY_LEVELS = [
   { id: 3, label: "Kritik", color: "#B71C1C" },
 ];
 
+// Backend FindingType Enum (0-5)
 const FINDING_TYPES = [
-  { id: 0, label: "Güvensiz Davranış", icon: "person-alert" },
-  { id: 1, label: "Güvensiz Durum", icon: "alert-box" },
-  { id: 2, label: "Ramak Kala", icon: "lightning-bolt" },
-  { id: 3, label: "Çevresel", icon: "leaf" },
+  { id: 0, label: "Davranışsal", icon: "person-alert" },
+  { id: 1, label: "Teknik", icon: "settings" },
+  { id: 2, label: "Acil Durum", icon: "medical-bag" },
+  { id: 3, label: "Hijyen/Sağlık", icon: "water" },
+  { id: 4, label: "Çevresel", icon: "leaf" },
+  { id: 5, label: "Dökümantasyon", icon: "file-document" },
 ];
 
 export default function CameraScreen() {
@@ -49,16 +52,19 @@ export default function CameraScreen() {
   const [description, setDescription] = useState("");
   const [severity, setSeverity] = useState(0);
   const [findingType, setFindingType] = useState(0);
+
+  // Resim State'leri
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [base64Image, setBase64Image] = useState<string | null>(null);
 
   // User Search State'leri
   const [searchEmail, setSearchEmail] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [reportedUser, setReportedUser] = useState<any>(null); // Bulunan kullanıcı
+  const [reportedUser, setReportedUser] = useState<any>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // --- 1. FOTOĞRAF İŞLEMLERİ ---
+  // --- 1. FOTOĞRAF İŞLEMLERİ (Optimize Edildi) ---
   const handlePickImage = async () => {
     Alert.alert("Fotoğraf Ekle", "Lütfen bir kaynak seçin", [
       {
@@ -71,9 +77,13 @@ export default function CameraScreen() {
           let result = await ImagePicker.launchCameraAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            quality: 0.7,
+            quality: 0.3, // Kaliteyi düşürdük (Backend limiti için)
+            base64: true, // Backend base64 string istiyor
           });
-          if (!result.canceled) setImageUri(result.assets[0].uri);
+          if (!result.canceled) {
+            setImageUri(result.assets[0].uri);
+            setBase64Image(result.assets[0].base64 || null);
+          }
         },
       },
       {
@@ -87,64 +97,63 @@ export default function CameraScreen() {
           let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            quality: 0.7,
+            quality: 0.3,
+            base64: true,
           });
-          if (!result.canceled) setImageUri(result.assets[0].uri);
+          if (!result.canceled) {
+            setImageUri(result.assets[0].uri);
+            setBase64Image(result.assets[0].base64 || null);
+          }
         },
       },
       { text: "İptal", style: "cancel" },
     ]);
   };
 
-  // --- 2. KULLANICI ARAMA (SİMÜLASYON) ---
+  // --- 2. KULLANICI ARAMA ---
   const handleUserSearch = async () => {
     if (!searchEmail) return;
     setIsSearching(true);
 
     try {
-      // --- GERÇEK ENDPOINT GELDİĞİNDE AÇILACAK KISIM ---
-      /*
-        const token = await SecureStore.getItemAsync("accessToken");
-        const response = await fetch(`${API_BASE_URL}/api/users/search?email=${searchEmail}`, {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        const result = await response.json();
-        if(result.isSuccess) setReportedUser(result.data);
-        */
-
-      // --- MOCK DATA (SİMÜLASYON) ---
-      // Backend hazır olana kadar bunu kullanıyoruz
-      setTimeout(() => {
-        if (searchEmail.toLowerCase().includes("ali")) {
-          setReportedUser({
-            id: "mock-user-id-123",
-            fullName: "Ali Veli",
-            email: searchEmail,
-            jobTitle: "CNC Operatörü",
-            photoUrl: null, // Varsa URL
-          });
-        } else {
-          Alert.alert(
-            "Bulunamadı",
-            "Bu e-posta ile kayıtlı çalışan bulunamadı."
-          );
-          setReportedUser(null);
+      const token = await SecureStore.getItemAsync("accessToken");
+      // GET /api/users/search?email=...
+      const response = await fetch(
+        `${API_BASE_URL}/api/users/search?email=${searchEmail}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
         }
-        setIsSearching(false);
-      }, 1000);
+      );
+
+      const result = await response.json();
+
+      if (result.isSuccess && result.data) {
+        setReportedUser(result.data);
+      } else {
+        Alert.alert("Bulunamadı", "Bu e-posta ile kayıtlı çalışan bulunamadı.");
+        setReportedUser(null);
+      }
     } catch (error) {
-      console.error(error);
+      console.error("Search Error:", error);
+      Alert.alert("Hata", "Arama yapılamadı.");
+    } finally {
       setIsSearching(false);
     }
   };
 
   // --- 3. RAPOR GÖNDERME (POST) ---
   const handleSubmit = async () => {
-    if (!title || !description || !imageUri) {
+    // Validasyonlar
+    if (!title || !description) {
       Alert.alert(
         "Eksik Bilgi",
-        "Lütfen başlık, açıklama ve fotoğraf alanlarını doldurunuz."
+        "Lütfen başlık ve açıklama alanlarını doldurunuz."
       );
+      return;
+    }
+
+    if (!base64Image) {
+      Alert.alert("Eksik Bilgi", "Lütfen bir fotoğraf ekleyiniz.");
       return;
     }
 
@@ -153,48 +162,64 @@ export default function CameraScreen() {
     try {
       const token = await SecureStore.getItemAsync("accessToken");
 
-      // Fotoğraf olduğu için FormData kullanıyoruz
-      const formData = new FormData();
+      // Payload Hazırlığı
+      const payload: any = {
+        title: title,
+        description: description,
+        severity: severity, // 0, 1, 2, 3
+        type: findingType, // 0, 1, 2, 3, 4, 5
+        status: 1, // 1: Open (Backend enum'ına göre)
+        base64Image: base64Image, // ImagePicker'dan gelen string
+        reportedId: reportedUser ? reportedUser.id : null, // Eğer seçili user varsa ID, yoksa null
+      };
 
-      // React Native'de FormData'ya dosya ekleme yöntemi:
-      const filename = imageUri.split("/").pop();
-      const match = /\.(\w+)$/.exec(filename || "");
-      const type = match ? `image/${match[1]}` : `image`;
+      // Debug Log (Resim hariç)
+      const logPayload = { ...payload, base64Image: "HIDDEN_BASE64_STRING" };
+      console.log("Sending Report Payload:", logPayload);
 
-      formData.append("Photo", { uri: imageUri, name: filename, type } as any);
-      formData.append("Title", title);
-      formData.append("Description", description);
-      formData.append("Severity", severity.toString());
-      formData.append("Type", findingType.toString());
-      formData.append("Status", "0"); // 0: Open / New
+      // API İsteği
+      // URL: /api/safety-findings (Çoğul - Dokümana göre)
+      const response = await fetch(`${API_BASE_URL}/api/safety-findings`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
-      // Eğer kullanıcı seçildiyse ID'sini ekle
-      if (reportedUser) {
-        formData.append("ReportedId", reportedUser.id);
+      // Yanıt İşleme
+      const responseText = await response.text();
+      console.log("Server Status:", response.status);
+
+      if (!response.ok) {
+        console.log("Server Error Body:", responseText);
+        // Hata mesajını ayrıştır
+        let errorMessage = `Sunucu Hatası: ${response.status}`;
+        try {
+          const errJson = JSON.parse(responseText);
+          if (errJson.message) errorMessage = errJson.message;
+          if (errJson.error?.message) errorMessage = errJson.error.message;
+        } catch (e) {}
+
+        throw new Error(errorMessage);
       }
 
-      // --- GERÇEK İSTEK (Simüle Ediliyor) ---
-      console.log("SENDING REPORT:", formData);
+      const result = JSON.parse(responseText);
 
-      // const response = await fetch(`${API_BASE_URL}/api/safety-findings`, {
-      //     method: "POST",
-      //     headers: {
-      //         "Content-Type": "multipart/form-data",
-      //         "Authorization": `Bearer ${token}`
-      //     },
-      //     body: formData
-      // });
-
-      // Simülasyon Başarılı
-      setTimeout(() => {
+      if (result.isSuccess) {
         Alert.alert("Başarılı", "İSG bulgusu başarıyla raporlandı.", [
           { text: "Tamam", onPress: () => router.back() },
         ]);
-        setIsSubmitting(false);
-      }, 1500);
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Hata", "Rapor gönderilemedi.");
+      } else {
+        const errorMsg =
+          result.error?.message || result.message || "Rapor gönderilemedi.";
+        Alert.alert("Hata", errorMsg);
+      }
+    } catch (error: any) {
+      console.error("Safety Finding Submit Error:", error);
+      Alert.alert("Hata", error.message || "Bir hata oluştu.");
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -291,14 +316,14 @@ export default function CameraScreen() {
                 <View style={styles.userInfo}>
                   <View style={styles.avatarPlaceholder}>
                     <Text style={styles.avatarText}>
-                      {reportedUser.fullName.charAt(0)}
+                      {reportedUser.fullName
+                        ? reportedUser.fullName.charAt(0)
+                        : "?"}
                     </Text>
                   </View>
                   <View>
                     <Text style={styles.userName}>{reportedUser.fullName}</Text>
-                    <Text style={styles.userEmail}>
-                      {reportedUser.jobTitle}
-                    </Text>
+                    <Text style={styles.userEmail}>{reportedUser.email}</Text>
                   </View>
                 </View>
                 <TouchableOpacity

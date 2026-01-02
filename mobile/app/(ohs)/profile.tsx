@@ -14,6 +14,9 @@ import {
   StatusBar,
   ActivityIndicator,
   Alert,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import {
   Ionicons,
@@ -37,15 +40,28 @@ export default function OHSProfileScreen() {
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
 
   const [themeModalVisible, setThemeModalVisible] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [editProfileVisible, setEditProfileVisible] = useState(false);
 
-  // Kullanıcı Bilgileri State'i
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [loadingUser, setLoadingUser] = useState(true);
+
   const [userInfo, setUserInfo] = useState({
-    fullName: "Yükleniyor...",
-    jobTitle: "...",
+    fullName: "",
+    jobTitle: "",
     photoUrl: null,
+    role: 2, // Expert
+    gender: 0,
+    phoneNumber: "",
+    birthDate: "",
   });
-  const [loading, setLoading] = useState(true);
+
+  const [editForm, setEditForm] = useState({
+    fullName: "",
+    phoneNumber: "",
+    jobTitle: "",
+    gender: 0,
+  });
 
   // --- KULLANICI BİLGİLERİNİ ÇEK ---
   useEffect(() => {
@@ -61,21 +77,67 @@ export default function OHSProfileScreen() {
 
         const result = await response.json();
         if (result.isSuccess && result.data) {
-          setUserInfo({
-            fullName: result.data.fullName || "İsimsiz Uzman",
-            jobTitle: result.data.jobTitle || "İSG Uzmanı",
-            photoUrl: result.data.photoUrl,
+          setUserInfo(result.data);
+          setEditForm({
+            fullName: result.data.fullName || "",
+            phoneNumber: result.data.phoneNumber || "",
+            jobTitle: result.data.jobTitle || "",
+            gender: result.data.gender || 0,
           });
         }
       } catch (error) {
         console.error("OHS User Fetch Error:", error);
       } finally {
-        setLoading(false);
+        setLoadingUser(false);
       }
     };
-
     fetchUserData();
   }, []);
+
+  // --- PROFİL GÜNCELLEME (DÜZELTİLDİ) ---
+  const handleUpdateProfile = async () => {
+    setIsUpdating(true);
+    try {
+      const token = await SecureStore.getItemAsync("accessToken");
+      const payload = {
+        name: editForm.fullName,
+        phoneNumber: editForm.phoneNumber,
+        jobTitle: editForm.jobTitle,
+        gender: editForm.gender,
+        role: userInfo.role,
+        birthDate: userInfo.birthDate || new Date().toISOString(),
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/users`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (result.isSuccess) {
+        // 1. EKRANI GÜNCELLE
+        setUserInfo(result.data);
+        // 2. SECURE STORE GÜNCELLE
+        if (result.data.fullName) {
+          await SecureStore.setItemAsync("userFullName", result.data.fullName);
+        }
+
+        setEditProfileVisible(false);
+        Alert.alert("Başarılı", "Profiliniz güncellendi.");
+      } else {
+        Alert.alert("Hata", result.message || "Güncelleme başarısız.");
+      }
+    } catch (error) {
+      Alert.alert("Hata", "Bir sorun oluştu.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   // --- ÇIKIŞ YAP ---
   const handleLogout = async () => {
@@ -94,7 +156,6 @@ export default function OHSProfileScreen() {
               const refreshToken = await SecureStore.getItemAsync(
                 "refreshToken"
               );
-
               if (accessToken && refreshToken) {
                 await fetch(`${API_BASE_URL}/api/auth/logout`, {
                   method: "POST",
@@ -106,10 +167,10 @@ export default function OHSProfileScreen() {
                 });
               }
             } catch (error) {
-              console.error("Çıkış hatası:", error);
             } finally {
               await SecureStore.deleteItemAsync("accessToken");
               await SecureStore.deleteItemAsync("refreshToken");
+              await SecureStore.deleteItemAsync("userFullName");
               setIsLoggingOut(false);
               router.replace("/auth/login");
             }
@@ -119,7 +180,6 @@ export default function OHSProfileScreen() {
     );
   };
 
-  // --- OHS MENÜ KARTLARI ---
   const menuItems = [
     {
       title: "Raporlarım",
@@ -131,11 +191,11 @@ export default function OHSProfileScreen() {
       onPress: () => router.push("/(ohs)/reports"),
     },
     {
-      title: "Sağlık Bilgilerim", // YENİ EKLENDİ
-      icon: <Ionicons name="heart" size={32} color={colors.profile.text1} />, // Kırmızımsı ikon
-      bgColor: colors.profile.card1, // Kırmızımsı kart
+      title: "Sağlık Bilgilerim",
+      icon: <Ionicons name="heart" size={32} color={colors.profile.text1} />,
+      bgColor: colors.profile.card1,
       textColor: colors.profile.text1,
-      onPress: () => router.push("/common/health-profile"), // Yönlendirme
+      onPress: () => router.push("/common/health-profile"),
     },
     {
       title: "Sertifikalarım",
@@ -196,7 +256,6 @@ export default function OHSProfileScreen() {
         barStyle={theme === "dark" ? "light-content" : "dark-content"}
       />
 
-      {/* --- HEADER --- */}
       <View style={styles.headerBackground}>
         <TouchableOpacity
           style={styles.backButton}
@@ -208,15 +267,16 @@ export default function OHSProfileScreen() {
 
       <View style={styles.profileHeaderContainer}>
         <View style={styles.avatarContainer}>
-          {/* Dinamik Avatar */}
-          <Image
-            source={
-              userInfo.photoUrl
-                ? { uri: userInfo.photoUrl }
-                : require("../../assets/images/avatar.png")
-            }
-            style={styles.avatar}
-          />
+          {userInfo.photoUrl ? (
+            <Image source={{ uri: userInfo.photoUrl }} style={styles.avatar} />
+          ) : null}
+
+          <TouchableOpacity
+            style={styles.editIconBtn}
+            onPress={() => setEditProfileVisible(true)}
+          >
+            <Ionicons name="pencil" size={14} color="#fff" />
+          </TouchableOpacity>
           <View style={styles.verifiedBadge}>
             <MaterialCommunityIcons
               name="shield-check"
@@ -225,23 +285,16 @@ export default function OHSProfileScreen() {
             />
           </View>
         </View>
-
         <View style={styles.nameBadge}>
-          {/* Dinamik İsim */}
-          {loading ? (
+          {loadingUser ? (
             <ActivityIndicator size="small" color="#FFF" />
           ) : (
             <Text style={styles.userName}>{userInfo.fullName}</Text>
           )}
         </View>
-
-        {/* Dinamik Ünvan */}
-        <Text style={styles.userRole}>
-          {loading ? "..." : userInfo.jobTitle} - A Sınıfı
-        </Text>
+        <Text style={styles.userRole}>{userInfo.jobTitle} - A Sınıfı</Text>
       </View>
 
-      {/* --- GRID MENU --- */}
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -270,12 +323,124 @@ export default function OHSProfileScreen() {
             </TouchableOpacity>
           ))}
         </View>
-
-        {/* Bottom Bar Boşluğu */}
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* --- TEMA SEÇİM MODALI --- */}
+      {/* EDİT MODAL */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editProfileVisible}
+        onRequestClose={() => setEditProfileVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setEditProfileVisible(false)}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ width: "100%" }}
+          >
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContent}>
+                <View style={styles.modalIndicator} />
+                <Text style={styles.modalTitle}>Profili Düzenle</Text>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Ad Soyad</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editForm.fullName}
+                    onChangeText={(t) =>
+                      setEditForm({ ...editForm, fullName: t })
+                    }
+                    placeholder="Ad Soyad"
+                    placeholderTextColor={colors.text.secondary}
+                  />
+                </View>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Telefon</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editForm.phoneNumber}
+                    onChangeText={(t) =>
+                      setEditForm({ ...editForm, phoneNumber: t })
+                    }
+                    placeholder="Telefon"
+                    keyboardType="phone-pad"
+                    placeholderTextColor={colors.text.secondary}
+                  />
+                </View>
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Ünvan</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={editForm.jobTitle}
+                    onChangeText={(t) =>
+                      setEditForm({ ...editForm, jobTitle: t })
+                    }
+                    placeholder="Ünvan"
+                    placeholderTextColor={colors.text.secondary}
+                  />
+                </View>
+                {/* CİNSİYET */}
+                <View style={styles.inputContainer}>
+                  <Text style={styles.label}>Cinsiyet</Text>
+                  <View style={styles.genderContainer}>
+                    {[
+                      { id: 1, label: "Erkek", icon: "male" },
+                      { id: 2, label: "Kadın", icon: "female" },
+                    ].map((g) => (
+                      <TouchableOpacity
+                        key={g.id}
+                        style={[
+                          styles.genderButton,
+                          editForm.gender === g.id && styles.genderButtonActive,
+                        ]}
+                        onPress={() =>
+                          setEditForm({ ...editForm, gender: g.id })
+                        }
+                      >
+                        <Ionicons
+                          name={g.icon as any}
+                          size={18}
+                          color={
+                            editForm.gender === g.id
+                              ? "#FFF"
+                              : colors.text.secondary
+                          }
+                          style={{ marginRight: 6 }}
+                        />
+                        <Text
+                          style={[
+                            styles.genderText,
+                            editForm.gender === g.id && styles.genderTextActive,
+                          ]}
+                        >
+                          {g.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={styles.saveButton}
+                  onPress={handleUpdateProfile}
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <Text style={styles.saveButtonText}>Güncelle</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </KeyboardAvoidingView>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* TEMA MODAL */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -288,7 +453,6 @@ export default function OHSProfileScreen() {
               <View style={styles.modalContent}>
                 <View style={styles.modalIndicator} />
                 <Text style={styles.modalTitle}>Görünüm Ayarları</Text>
-
                 <TouchableOpacity
                   style={[
                     styles.themeOption,
@@ -313,7 +477,6 @@ export default function OHSProfileScreen() {
                     />
                   )}
                 </TouchableOpacity>
-
                 <TouchableOpacity
                   style={[
                     styles.themeOption,
@@ -347,13 +510,9 @@ export default function OHSProfileScreen() {
   );
 }
 
-// --- STYLES ---
 const createStyles = (colors: any, theme: string) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background.default,
-    },
+    container: { flex: 1, backgroundColor: colors.background.default },
     headerBackground: {
       height: 140,
       backgroundColor: theme === "light" ? "#E0F2F1" : "#1E1E1E",
@@ -372,10 +531,7 @@ const createStyles = (colors: any, theme: string) =>
       marginTop: -50,
       marginBottom: 20,
     },
-    avatarContainer: {
-      position: "relative",
-      marginBottom: 10,
-    },
+    avatarContainer: { position: "relative", marginBottom: 10 },
     avatar: {
       width: 100,
       height: 100,
@@ -383,11 +539,24 @@ const createStyles = (colors: any, theme: string) =>
       borderWidth: 4,
       borderColor: colors.background.default,
     },
+    editIconBtn: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      backgroundColor: colors.secondary.main,
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 2,
+      borderColor: colors.background.default,
+    },
     verifiedBadge: {
       position: "absolute",
       bottom: 0,
       right: 0,
-      backgroundColor: "#009688", // Teal renk
+      backgroundColor: "#009688",
       width: 28,
       height: 28,
       borderRadius: 14,
@@ -403,27 +572,12 @@ const createStyles = (colors: any, theme: string) =>
       borderRadius: 20,
       marginBottom: 6,
     },
-    userName: {
-      color: "#fff",
-      fontSize: 16,
-      fontWeight: "bold",
-    },
-    userRole: {
-      color: colors.text.secondary,
-      fontSize: 14,
-      fontWeight: "600",
-    },
-    scrollContent: {
-      paddingHorizontal: 24,
-      paddingTop: 10,
-    },
-    gridContainer: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      gap: CARD_GAP,
-    },
+    userName: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+    userRole: { color: colors.text.secondary, fontSize: 14, fontWeight: "600" },
+    scrollContent: { paddingHorizontal: 24, paddingTop: 10 },
+    gridContainer: { flexDirection: "row", flexWrap: "wrap", gap: CARD_GAP },
     card: {
-      // width: CARD_WIDTH, // Inline style'da dinamik veriliyor
+      width: CARD_WIDTH,
       height: 110,
       borderRadius: 16,
       justifyContent: "center",
@@ -436,15 +590,8 @@ const createStyles = (colors: any, theme: string) =>
       shadowRadius: 5,
       elevation: theme === "light" ? 2 : 0,
     },
-    cardIcon: {
-      marginBottom: 10,
-    },
-    cardTitle: {
-      fontSize: 14,
-      fontWeight: "600",
-      textAlign: "center",
-    },
-    // Modal Styles
+    cardIcon: { marginBottom: 10 },
+    cardTitle: { fontSize: 14, fontWeight: "600", textAlign: "center" },
     modalOverlay: {
       flex: 1,
       backgroundColor: "rgba(0,0,0,0.5)",
@@ -488,9 +635,53 @@ const createStyles = (colors: any, theme: string) =>
       backgroundColor:
         theme === "light" ? colors.primary.light : "rgba(72, 112, 255, 0.1)",
     },
-    themeText: {
-      fontSize: 16,
+    themeText: { fontSize: 16, fontWeight: "600", color: colors.text.main },
+    inputContainer: { marginBottom: 15 },
+    label: {
+      fontSize: 14,
       fontWeight: "600",
-      color: colors.text.main,
+      color: colors.text.secondary,
+      marginBottom: 6,
+      marginLeft: 4,
     },
+    input: {
+      backgroundColor: colors.neutral.input,
+      borderRadius: 12,
+      paddingHorizontal: 15,
+      paddingVertical: 12,
+      borderWidth: 1,
+      borderColor: colors.neutral.border,
+      color: colors.text.main,
+      fontSize: 15,
+    },
+    genderContainer: { flexDirection: "row", gap: 10 },
+    genderButton: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 12,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.neutral.border,
+      backgroundColor: colors.neutral.input,
+    },
+    genderButtonActive: {
+      backgroundColor: colors.primary.main,
+      borderColor: colors.primary.main,
+    },
+    genderText: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.text.secondary,
+    },
+    genderTextActive: { color: "#FFF" },
+    saveButton: {
+      backgroundColor: colors.primary.main,
+      borderRadius: 14,
+      paddingVertical: 16,
+      alignItems: "center",
+      marginTop: 10,
+    },
+    saveButtonText: { color: "#FFF", fontSize: 16, fontWeight: "bold" },
   });

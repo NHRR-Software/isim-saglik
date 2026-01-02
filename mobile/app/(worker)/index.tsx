@@ -81,15 +81,10 @@ export default function WorkerHomeScreen() {
       {/* HEADER */}
       <View style={styles.header}>
         <View style={styles.userInfo}>
-          {/* Avatar Kısmı: URL varsa onu kullan, yoksa yerel resmi kullan */}
-          <Image
-            source={
-              userInfo.photoUrl
-                ? { uri: userInfo.photoUrl }
-                : require("../../assets/images/avatar.png")
-            }
-            style={styles.avatar}
-          />
+          {userInfo.photoUrl ? (
+            <Image source={{ uri: userInfo.photoUrl }} style={styles.avatar} />
+          ) : null}
+
           <View>
             {loading ? (
               <ActivityIndicator size="small" color={colors.text.secondary} />

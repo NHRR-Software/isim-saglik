@@ -191,18 +191,12 @@ export default function FounderDashboard() {
         barStyle={theme === "dark" ? "light-content" : "dark-content"}
       />
 
-      {/* --- HEADER --- */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          {/* Logo Kısmı (API'den gelen photoUrl varsa onu kullan) */}
-          <Image
-            source={
-              userInfo.photoUrl
-                ? { uri: userInfo.photoUrl }
-                : require("../../assets/images/company/companylogo.png")
-            }
-            style={styles.logo}
-          />
+          {userInfo.photoUrl ? (
+            <Image source={{ uri: userInfo.photoUrl }} style={styles.logo} />
+          ) : null}
+
           <View style={styles.headerTextContainer}>
             {loading ? (
               <ActivityIndicator size="small" color={colors.text.secondary} />
@@ -216,6 +210,7 @@ export default function FounderDashboard() {
             )}
           </View>
         </View>
+
         <TouchableOpacity>
           <Ionicons
             name="notifications-outline"
