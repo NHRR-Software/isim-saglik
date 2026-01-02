@@ -16,10 +16,12 @@ namespace IsimSaglik.Entity.DTOs.Response
 
         public required Gender Gender { get; init; }
 
+        public required UserRole Role { get; init; }
+
         public required DateTime BirthDate { get; init; }
 
         public required Uri PhotoUrl { get; init; }
 
-        public bool IsSetupCompleted { get; set; }
+        public bool IsSetupCompleted { get; set; } = true;
     }
 }

@@ -9,6 +9,7 @@ namespace IsimSaglik.Service.Concrete
         private readonly ICompanyService _companyService;
         private readonly IHealthProfileService _healthProfileService;
         private readonly IAssignmentService _assignmentService;
+        private readonly ISafetyFindingService _safetyFindingService;
 
 
         public ServiceManager(
@@ -16,13 +17,15 @@ namespace IsimSaglik.Service.Concrete
             IUserService userService,
             ICompanyService companyService,
             IHealthProfileService healthProfileService,
-            IAssignmentService assignmentService)
+            IAssignmentService assignmentService,
+            ISafetyFindingService safetyFindingService)
         {
             _authService = authService;
             _userService = userService;
             _companyService = companyService;
             _healthProfileService = healthProfileService;
             _assignmentService = assignmentService;
+            _safetyFindingService = safetyFindingService;
         }
 
 
@@ -35,5 +38,7 @@ namespace IsimSaglik.Service.Concrete
         public IHealthProfileService HealthProfile => _healthProfileService;  
 
         public IAssignmentService Assignment => _assignmentService;
+
+        public ISafetyFindingService SafetyFinding => _safetyFindingService;
     }
 }

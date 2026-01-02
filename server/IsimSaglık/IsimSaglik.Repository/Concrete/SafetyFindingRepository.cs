@@ -14,47 +14,11 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
-        // REVIEW: GetAllAsync metodu kullanılmayacağı için kaldırılabilir.
         public override async Task<IEnumerable<SafetyFinding>> GetAllAsync()
         {
-            var safetyFindings = new List<SafetyFinding>();
-
-            await using var connection = new Npgsql.NpgsqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            await using var command = new Npgsql.NpgsqlCommand("SELECT * FROM sp_get_all_safety_findings()", connection);
-            await using var reader = await command.ExecuteReaderAsync();
-
-            while (await reader.ReadAsync())
-            {
-                safetyFindings.Add(new SafetyFinding
-                {
-                    Id = reader.GetGuid(reader.GetOrdinal("id")),
-                    CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
-                        ? null
-                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
-                    Title = reader.GetString(reader.GetOrdinal("title")),
-                    Status = (FindingStatus)reader.GetInt16(reader.GetOrdinal("status")),
-                    Severity = (FindingSeverity)reader.GetInt16(reader.GetOrdinal("severity")),
-                    Type = (FindingType)reader.GetInt16(reader.GetOrdinal("type")),
-                    Description = reader.GetString(reader.GetOrdinal("description")),
-                    ClosedDate = reader.IsDBNull(reader.GetOrdinal("closed_date"))
-                        ? null
-                        : reader.GetDateTime(reader.GetOrdinal("closed_date")),
-                    PhotoUrl = reader.IsDBNull(reader.GetOrdinal("photo_url"))
-                        ? null
-                        : new Uri(reader.GetString(reader.GetOrdinal("photo_url"))),
-                    CompanyId = reader.GetGuid(reader.GetOrdinal("company_id")),
-                    ReporterId = reader.GetGuid(reader.GetOrdinal("reporter_id")),
-                    ReportedId = reader.IsDBNull(reader.GetOrdinal("reported_id"))
-                        ? null
-                        : reader.GetGuid(reader.GetOrdinal("reported_id"))
-                });
-            }
-
-            return safetyFindings;
+            throw new NotImplementedException();
         }
+
 
 
         public override async Task<SafetyFinding?> GetByIdAsync(Guid id)
@@ -101,8 +65,8 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
-        // REVIEW: Metodun null değer döndürebilme durumu var. Şirket için belki de hiç bulgu eklenmedi. '?' ekleyerek dönüt tipini güncelleyelim.
-        public async Task<IEnumerable<SafetyFinding>> GetByCompanyIdAsync(Guid companyId)
+
+        public async Task<IEnumerable<SafetyFinding>?> GetByCompanyIdAsync(Guid companyId)
         {
             var findings = new List<SafetyFinding>();
 
@@ -142,13 +106,12 @@ namespace IsimSaglik.Repository.Concrete
                 });
             }
 
-            return findings;
+            return findings.Count > 0 ? findings : null;
         }
 
 
 
-        // REVIEW: Metodun null değer döndürebilme durumu var. Kullanıcı için belki de hiç bulgu eklenmedi. '?' ekleyerek dönüt tipini güncelleyelim.
-        public async Task<IEnumerable<SafetyFinding>> GetByReporterIdAsync(Guid reporterId)
+        public async Task<IEnumerable<SafetyFinding>?> GetByReporterIdAsync(Guid reporterId)
         {
             var findings = new List<SafetyFinding>();
 
@@ -188,8 +151,9 @@ namespace IsimSaglik.Repository.Concrete
                 });
             }
 
-            return findings;
+            return findings.Count > 0 ? findings : null;
         }
+
 
 
         public override async Task CreateAsync(SafetyFinding entity)

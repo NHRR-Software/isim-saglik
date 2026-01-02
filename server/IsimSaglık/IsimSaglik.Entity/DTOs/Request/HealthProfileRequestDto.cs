@@ -15,6 +15,8 @@ namespace IsimSaglik.Entity.DTOs.Request
         [Required(ErrorMessage = "Height is required")]
         public double Height { get; init; }
 
+
+        [Required(ErrorMessage = "ChronicDisease is required")]
         public string ChronicDisease { get; init; } = string.Empty;
     }
 }

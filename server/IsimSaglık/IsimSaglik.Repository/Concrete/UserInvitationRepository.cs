@@ -14,36 +14,9 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
-        // GetAllAsync metodu kullanılmayacağı için kaldırılabilir.
         public override async Task<IEnumerable<UserInvitation>> GetAllAsync()
         {
-            var list = new List<UserInvitation>();
-
-            await using var connection = new NpgsqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            await using var command = new NpgsqlCommand("SELECT * FROM sp_get_all_user_invitations()", connection);
-
-            await using var reader = await command.ExecuteReaderAsync();
-
-            while (await reader.ReadAsync())
-            {
-                list.Add(new UserInvitation
-                {
-                    Id = reader.GetGuid(reader.GetOrdinal("id")),
-                    Email = reader.GetString(reader.GetOrdinal("email")),
-                    Role = (UserRole)reader.GetInt16(reader.GetOrdinal("role")),
-                    CompanyId = reader.GetGuid(reader.GetOrdinal("company_id")),
-                    ExpiresDate = reader.GetDateTime(reader.GetOrdinal("expires_date")),
-                    IsUsed = reader.GetBoolean(reader.GetOrdinal("is_used")),
-                    CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
-                        ? null
-                        : reader.GetDateTime(reader.GetOrdinal("updated_date"))
-                });
-            }
-
-            return list;
+            throw new NotImplementedException();
         }
 
 
@@ -82,8 +55,7 @@ namespace IsimSaglik.Repository.Concrete
 
 
 
-        // REVIEW: Metodun ismi GetByEmailAsync olarak güncellenebilir. Diğerleri ile tutarlı olması için.
-        public async Task<UserInvitation?> GetInvitationByEmailAsync(string email)
+        public async Task<UserInvitation?> GetByEmailAsync(string email)
         {
             UserInvitation? invitation = null;
 
@@ -117,8 +89,7 @@ namespace IsimSaglik.Repository.Concrete
 
 
 
-        // REVIEW: Metodun null değer döndürebilme durumu var. Belki de şirket için hiç davet oluşturulmamıştır. '?' ekleyerek dönüt tipini güncelleyelim.
-        public async Task<IEnumerable<UserInvitation>> GetByCompanyIdAsync(Guid companyId)
+        public async Task<IEnumerable<UserInvitation>?> GetByCompanyIdAsync(Guid companyId)
         {
             var list = new List<UserInvitation>();
 
@@ -147,7 +118,7 @@ namespace IsimSaglik.Repository.Concrete
                 });
             }
 
-            return list;
+            return list.Count > 0 ? list : null;
         }
 
 

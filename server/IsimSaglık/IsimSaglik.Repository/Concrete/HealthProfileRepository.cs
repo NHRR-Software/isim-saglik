@@ -14,8 +14,7 @@ namespace IsimSaglik.Repository.Concrete
 
 
 
-        // REVIEW: Metodun ismi GetByUserIdAsync olarak güncellenebilir. Diğerleri ile tutarlı olması için.
-        public async Task<HealthProfile?> GetHealthProfileByUserIdAsync(Guid userId)
+        public async Task<HealthProfile?> GetByUserIdAsync(Guid userId)
         {
             HealthProfile? healthProfile = null;
 
@@ -51,38 +50,9 @@ namespace IsimSaglik.Repository.Concrete
 
 
 
-        // REVIEW: GetAllAsync metodu kullanılmayacağı için kaldırılabilir.
         public override async Task<IEnumerable<HealthProfile>> GetAllAsync()
         {
-            var profiles = new List<HealthProfile>();
-
-            await using var connection = new NpgsqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            await using var command = new NpgsqlCommand("SELECT * FROM sp_get_all_health_profiles()", connection);
-
-            await using var reader = await command.ExecuteReaderAsync();
-
-            while (await reader.ReadAsync())
-            {
-                profiles.Add(new HealthProfile
-                {
-                    Id = reader.GetGuid(reader.GetOrdinal("id")),
-                    CreatedDate = reader.GetDateTime(reader.GetOrdinal("created_date")),
-                    UpdatedDate = reader.IsDBNull(reader.GetOrdinal("updated_date"))
-                        ? null
-                        : reader.GetDateTime(reader.GetOrdinal("updated_date")),
-                    UserId = reader.GetGuid(reader.GetOrdinal("user_id")),
-                    BloodGroup = reader.GetString(reader.GetOrdinal("blood_group")),
-                    ChronicDisease = reader.IsDBNull(reader.GetOrdinal("chronic_disease"))
-                        ? null
-                        : reader.GetString(reader.GetOrdinal("chronic_disease")),
-                    Height = reader.GetDouble(reader.GetOrdinal("height")),
-                    Weight = reader.GetDouble(reader.GetOrdinal("weight"))
-                });
-            }
-
-            return profiles;
+            throw new NotImplementedException();
         }
 
 
