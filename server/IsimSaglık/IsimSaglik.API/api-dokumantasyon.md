@@ -561,7 +561,75 @@ bilgileri yer almaktadır.
 
 ---
 
-### 2. Kullanıcı Ara (Search User)
+### 2. Kullanıcı Profilini Güncelle (Update User Profile)
+- **Açıklama:** Giriş yapan kullanıcı kendi profilini günceller.
+- **Yöntem & URL:** `PUT /api/users`
+- **Bearer Token:** GEREKLİ
+- **Request Body:**
+    ```json
+    {
+      "name": "Ad Soyad",
+      "email": "user@example.com",
+      "phoneNumber": "5551234567",
+      "jobTitle": "Uzman",
+      "gender": 1, // 0: None, 1: Male, 2: Female
+      "role": 2, // 0: Admin, 1: Company, 2: Expert, 3: Worker
+      "birthDate": "1990-01-01T00:00:00Z"
+    }
+    ```
+- **Response:**
+    ```json
+    {
+      "status": 200,
+      "isSuccess": true,
+      "data": {
+        "id": "b1a7e8c2-1d2f-4c3a-9e2b-123456789abc",
+        "email": "user@example.com",
+        "fullName": "Ad Soyad",
+        "phoneNumber": "5551234567",
+        "jobTitle": "Uzman",
+        "gender": 1, // 0: None, 1: Male, 2: Female
+        "role": 2, // 0: Admin, 1: Company, 2: Expert, 3: Worker
+        "birthDate": "1990-01-01T00:00:00Z",
+        "photoUrl": "https://...",
+        "isSetupCompleted": true
+      },
+      "error": null,
+      "message": "User profile updated successfully.",
+      "timestamp": "2024-01-01T00:00:00Z"
+    }
+    ```
+
+---
+
+### 3. Şirkete Ait Kullanıcıları Listele (Get Users by Company)
+- **Açıklama:** Belirtilen şirkete ait kullanıcıları listeler.
+- **Yöntem & URL:** `GET /api/users/company/{companyId}`
+- **Bearer Token:** GEREKLİ
+- **Request Body:** YOK
+- **Response:**
+    ```json
+    {
+      "status": 200,
+      "isSuccess": true,
+      "data": [
+        {
+          "id": "b1a7e8c2-1d2f-4c3a-9e2b-123456789abc",
+          "fullName": "Ad Soyad",
+          "email": "user@example.com",
+          "role": 2, // 0: Admin, 1: Company, 2: Expert, 3: Worker
+          "photoUrl": "https://..."
+        }
+      ],
+      "error": null,
+      "message": "Company users retrieved successfully.",
+      "timestamp": "2024-01-01T00:00:00Z"
+    }
+    ```
+
+---
+
+### 4. Kullanıcı Ara (Search User)
 - **Açıklama:** E-posta adresine göre kullanıcı arar.
 - **Yöntem & URL:** `GET /api/users/search?email={email}`
 - **Bearer Token:** GEREKLİ
