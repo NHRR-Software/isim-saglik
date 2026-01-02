@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using IsimSaglik.Entity.DTOs.Request;
 using IsimSaglik.Entity.DTOs.Response;
-using IsimSaglik.Entity.Enums;
 using IsimSaglik.Entity.Models;
 using IsimSaglik.Repository.Abstract;
 using IsimSaglik.Service.Abstract;
@@ -28,12 +27,8 @@ namespace IsimSaglik.Service.Concrete
 
         public async Task<IEnumerable<AssignmentResponseDto>> GetAllByUserIdAsync(Guid userId)
         {
-            var assignments = await _repositoryManager.Assignment.GetByUserIdAsync(userId);
-
-            if (assignments is null)
-            {
-                return Enumerable.Empty<AssignmentResponseDto>();
-            }
+            var assignments = await _repositoryManager.Assignment.GetByUserIdAsync(userId)
+                ?? throw new NotFoundException("Assignments not found.", ErrorCodes.ValidationError);
 
             return _mapper.Map<IEnumerable<AssignmentResponseDto>>(assignments);
         }
@@ -52,9 +47,9 @@ namespace IsimSaglik.Service.Concrete
 
 
 
-        public async Task<AssignmentResponseDto> UpdateAsync(Guid userId, Guid id, AssignmentRequestDto dto)
+        public async Task<AssignmentResponseDto> UpdateAsync(Guid userId, Guid assignmentId, AssignmentRequestDto dto)
         {
-            var assignment = await _repositoryManager.Assignment.GetByIdAsync(id)
+            var assignment = await _repositoryManager.Assignment.GetByIdAsync(assignmentId)
                 ?? throw new NotFoundException("Assignment not found.", ErrorCodes.ValidationError);
 
             if (!assignment.UserId.Equals(userId))
@@ -76,9 +71,9 @@ namespace IsimSaglik.Service.Concrete
 
 
 
-        public async Task DeleteAsync(Guid userId, Guid id)
+        public async Task DeleteAsync(Guid userId, Guid assignmentId)
         {
-            var assignment = await _repositoryManager.Assignment.GetByIdAsync(id)
+            var assignment = await _repositoryManager.Assignment.GetByIdAsync(assignmentId)
                 ?? throw new NotFoundException("Assignment not found.", ErrorCodes.ValidationError);
 
             if (!assignment.UserId.Equals(userId))
@@ -86,7 +81,7 @@ namespace IsimSaglik.Service.Concrete
                 throw new BadRequestException("You are not authorized to delete this assignment.", ErrorCodes.ValidationError);
             }
 
-            await _repositoryManager.Assignment.DeleteAsync(id);
+            await _repositoryManager.Assignment.DeleteAsync(assignmentId);
         }
     }
 }
