@@ -41,6 +41,7 @@ namespace IsimSaglik.Service.Mapping
             // User -> UserInfoResponseDto
             CreateMap<User, UserInfoResponseDto>();
 
+
             // UserRequestDto -> User 
             CreateMap<UserRequestDto, User>()
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.Name))
@@ -65,14 +66,14 @@ namespace IsimSaglik.Service.Mapping
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => StatusType.Pending));
 
 
-            // HealthProfile -> HealthProfileResponseDto
-            CreateMap<HealthProfile, HealthProfileResponseDto>()
-                .ForMember(dest => dest.ChronicDisease, opt => opt.MapFrom(src => src.ChronicDisease ?? string.Empty));
-
-
             // HealthProfileRequestDto -> HealthProfile 
             CreateMap<HealthProfileRequestDto, HealthProfile>()
               .ForMember(dest => dest.ChronicDisease, opt => opt.MapFrom(src => src.ChronicDisease ?? string.Empty));
+
+
+            // HealthProfile -> HealthProfileResponseDto
+            CreateMap<HealthProfile, HealthProfileResponseDto>()
+                .ForMember(dest => dest.ChronicDisease, opt => opt.MapFrom(src => src.ChronicDisease ?? string.Empty));
 
 
             // SafetyFinding -> SafetyFindingResponseDto
