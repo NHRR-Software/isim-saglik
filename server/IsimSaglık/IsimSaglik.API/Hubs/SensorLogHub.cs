@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace IsimSaglik.API.Hubs
 {
-    public sealed class SensorHub : Hub
+    public sealed class SensorLogHub : Hub
     {
         public async Task SendSensorData(LiveSensorLogDto dto)
         {
@@ -20,7 +20,7 @@ namespace IsimSaglik.API.Hubs
 
         public async Task SubscribeToUser(Guid userId)
         {
-            if (userId == Guid.Empty)
+            if (userId.Equals(Guid.Empty))
             {
                 throw new HubException("Invalid Target User ID.");
             }

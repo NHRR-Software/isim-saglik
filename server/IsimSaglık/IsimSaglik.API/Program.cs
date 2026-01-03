@@ -1,4 +1,5 @@
 using IsimSaglik.API.Extensions;
+using IsimSaglik.API.Hubs;
 using IsimSaglik.API.Middleware;
 using IsimSaglik.Service.Mapping;
 
@@ -44,6 +45,10 @@ builder.Services.ConfigureCors();
 
 
 // SignalR
+builder.Services.AddSignalR(options =>
+{
+    options.MaximumReceiveMessageSize = 41943040; // 5 MB
+});
 
 
 // Swagger
@@ -65,7 +70,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
+// SignalR Hubs
+app.MapHub<SensorLogHub>("hub/sensor-log");
+
 app.Run();
-
-
-// TODO: Push Notifications
