@@ -79,7 +79,7 @@ namespace IsimSaglik.Repository.Concrete
         }
 
 
-        public async Task<IEnumerable<Notification>> GetNotificationsByUserIdAsync(Guid userId)
+        public async Task<IEnumerable<Notification>?> GetNotificationsByUserIdAsync(Guid userId)
         {
             var notifications = new List<Notification>();
 
@@ -108,7 +108,7 @@ namespace IsimSaglik.Repository.Concrete
                 });
             }
 
-            return notifications;
+            return notifications.Count > 0 ? notifications : null ;
         }
 
 

@@ -64,5 +64,18 @@ namespace IsimSaglik.Service.Concrete
 
             await _repositoryManager.Notification.UpdateAsync(notification);
         }
+
+        public async Task DeleteAsync(Guid userId, Guid notificationId)
+        {
+            var notification = await _repositoryManager.Notification.GetByIdAsync(notificationId)
+                ?? throw new NotFoundException("Notification not found.", ErrorCodes.ValidationError);
+
+            if (!notification.UserId.Equals(userId))
+            {
+                throw new BadRequestException("You are not authorized to delete this notification.", ErrorCodes.ValidationError);
+            }
+
+            await _repositoryManager.Notification.DeleteAsync(notificationId);
+        }
     }
 }
