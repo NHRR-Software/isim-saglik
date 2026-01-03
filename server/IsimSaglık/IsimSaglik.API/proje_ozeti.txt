@@ -1,0 +1,245 @@
+# Proje Genel Özeti
+
+## Genel Bilgi
+- Proje .NET 8 ile geliþtirilmiþ, çok katmanlý bir mimariye sahip bir web API uygulamasýdýr.
+- Katmanlar: API, Service, Repository, Infrastructure, Entity (Model/DTO/Enum).
+- Ana iþlevler: Kullanýcý yönetimi, þirket yönetimi, görev (assignment) yönetimi, saðlýk profili yönetimi, iþ saðlýðý/güvenliði bulgularý (safety finding), bildirimler, kimlik doðrulama ve yetkilendirme.
+
+---
+
+## Katmanlar ve Dosyalar
+
+### 1. IsimSaglik.Entity
+- **Enums**: StatusType, FindingStatus, UserRole, FindingType, Gender, NotificationType, FindingSeverity, SeverityType
+- **Models**: User, Assignment, HealthProfile, SafetyFinding, Notification, UserInvitation, RefreshToken, Hint, BaseEntity
+- **DTOs**:
+  - **Request**: LogInRequestDto, RegisterCompanyRequestDto, RegisterWithInviteRequestDto, ForgotPasswordRequestDto, ResetPasswordRequestDto, AssignmentRequestDto, HealthProfileRequestDto, SafetyFindingRequestDto, UserRequestDto, InviteUserRequestDto, RefreshTokenRequestDto
+  - **Response**: UserResponseDto, UserInfoResponseDto, AssignmentResponseDto, HealthProfileResponseDto, SafetyFindingResponseDto, StatusSummaryResponseDto, TokenResponseDto, EmployeeListResponseDto
+  - **Common**: ApiResponseDto, ApiErrorDto
+
+### 2. IsimSaglik.API
+- **Controllers**: AuthController, UserController, CompanyController, AssignmentController, HealthProfileController, SafetyFindingController, BaseController
+- **Middleware**: GlobalExceptionMiddleware
+- **Extensions**: ServicesExtensions (servis, repo, JWT, Swagger, CORS, ayar kayýtlarý)
+- **Program.cs**: Uygulama baþlangýcý, servislerin eklenmesi, middleware, swagger, authentication, authorization, CORS, controller mapping
+
+### 3. IsimSaglik.Service
+- **Abstract**: IServiceManager, IAuthService, IUserService, ICompanyService, IHealthProfileService, IAssignmentService, ISafetyFindingService
+- **Concrete**: ServiceManager, AuthService, UserService, CompanyService, HealthProfileService, AssignmentService, SafetyFindingService
+- **Utilities**: FileValidator, AvatarResolver
+- **Mapping**: MappingProfile (AutoMapper)
+- **Exceptions**: ErrorCodes, NotFoundException, BadRequestException, UnauthorizedException, ForbiddenException
+
+### 4. IsimSaglik.Repository
+- **Abstract**: IRepositoryManager, IRepositoryBase<T>, IAssignmentRepository, IHealthProfileRepository, INotificationRepository, ISafetyFindingRepository, IRefreshTokenRepository, IUserRepository, IUserInvitationRepository
+- **Concrete**: RepositoryManager, RepositoryBase<T>, AssignmentRepository, HealthProfileRepository, NotificationRepository, SafetyFindingRepository, RefreshTokenRepository, UserRepository, UserInvitationRepository
+
+### 5. IsimSaglik.Infrastructure
+- **Abstract**: ISupabaseClient, IFirebaseClient, ITokenGenerator
+- **Concrete**: SupabaseClient, FirebaseClient, TokenGenerator
+- **Settings**: JwtSettings, SupabaseSettings, FirebaseSettings
+
+---
+
+## Temel Sýnýflar, Metotlar ve Akýþlar
+
+### Entity Katmaný
+- **BaseEntity**: Tüm modellerin temel sýnýfý (Id, CreatedDate, UpdatedDate)
+- **User**: Kullanýcý bilgileri (Email, FullName, PhoneNumber, JobTitle, Gender, Role, BirthDate, PhotoUrl, IsActive, CompanyId)
+- **Assignment**: Görevler (Status, Severity, Description, UserId)
+- **HealthProfile**: Saðlýk profili (UserId, BloodGroup, ChronicDisease, Height, Weight)
+- **SafetyFinding**: Ýþ saðlýðý/güvenliði bulgularý (Title, Status, Severity, Type, Description, ClosedDate, PhotoUrl, CompanyId, ReporterId, ReportedId)
+- **Notification**: Bildirimler (Title, Description, IsRead, Type, UserId)
+- **UserInvitation**: Davetler (Email, Role, CompanyId, ExpiresDate, IsUsed)
+
+### DTO Katmaný
+- **Request DTO'larý**: API'ye gelen isteklerin veri yapýlarý (ör. RegisterCompanyRequestDto, AssignmentRequestDto, HealthProfileRequestDto, SafetyFindingRequestDto)
+- **Response DTO'larý**: API'den dönen yanýtlarýn veri yapýlarý (ör. UserResponseDto, AssignmentResponseDto, HealthProfileResponseDto, SafetyFindingResponseDto)
+- **ApiResponseDto**: Tüm yanýtlar için standart sarmalayýcý (Status, IsSuccess, Data, Error, Message, Timestamp)
+- **ApiErrorDto**: Hata detaylarý (Code, Message, Details)
+
+### Enum Katmaný
+- Kullanýcý rolleri, bildirim türleri, bulgu durumlarý, þiddet seviyeleri vb. için enum'lar
+
+### Service Katmaný
+- **ServiceManager**: Tüm servislerin merkezi yöneticisi
+- **AuthService**: Kimlik doðrulama, token üretimi, þifre iþlemleri
+- **UserService**: Kullanýcý profili iþlemleri (getir, güncelle, þirket kullanýcýlarý, kullanýcý arama)
+- **CompanyService**: Þirket iþlemleri, kullanýcý daveti
+- **HealthProfileService**: Saðlýk profili oluþturma, güncelleme, getirme
+- **AssignmentService**: Görev oluþturma, güncelleme, silme, listeleme
+- **SafetyFindingService**: Ýþ saðlýðý/güvenliði bulgularý oluþturma, tamamlama, silme, listeleme
+- **Utilities**: Dosya doðrulama (base64), avatar url çözümleme
+- **MappingProfile**: AutoMapper eþlemeleri
+- **Exception Types**: NotFound, BadRequest, Unauthorized, Forbidden
+
+### Repository Katmaný
+- **RepositoryManager**: Tüm repository'lerin merkezi yöneticisi
+- **RepositoryBase<T>**: Temel repository (CRUD þablonu)
+- **AssignmentRepository**: Görevler için veritabaný iþlemleri (GetByUserIdAsync, CreateAsync, UpdateAsync, DeleteAsync)
+- **HealthProfileRepository**: Saðlýk profili iþlemleri (GetByUserIdAsync, CreateAsync, UpdateAsync, DeleteAsync)
+- **NotificationRepository**: Bildirim iþlemleri (GetNotificationsByUserIdAsync, CreateAsync, UpdateAsync, DeleteAsync)
+- **SafetyFindingRepository**: Ýþ saðlýðý/güvenliði bulgularý iþlemleri (GetByCompanyIdAsync, GetByReporterIdAsync, CreateAsync, UpdateAsync, DeleteAsync)
+
+### Infrastructure Katmaný
+- **SupabaseClient**: Supabase ile kimlik doðrulama, dosya yükleme/silme
+- **TokenGenerator**: JWT ve refresh token üretimi, doðrulama
+- **Settings**: JWT, Supabase, Firebase ayarlarý
+
+### API Katmaný
+- **Controllers**: Her ana iþlev için controller (Auth, User, Company, Assignment, HealthProfile, SafetyFinding)
+- **BaseController**: Ortak yanýt metotlarý (OkResponse, CreatedResponse, NoContentResponse)
+- **GlobalExceptionMiddleware**: Hata yönetimi ve standart hata yanýtý
+- **ServicesExtensions**: Servislerin, repo'larýn, altyapýlarýn, JWT, Swagger, CORS ayarlarýnýn DI'a eklenmesi
+- **Program.cs**: Uygulama baþlangýcý, middleware, servis kayýtlarý, swagger, authentication, authorization, CORS
+
+---
+
+## Akýþlar ve Önemli Detaylar
+- Kimlik doðrulama JWT ile yapýlýr, refresh token desteði vardýr.
+- Kullanýcýlar þirketlere baðlý olabilir, roller (Company, Expert, Worker) ile ayrýlýr.
+- Görevler ve bulgular kullanýcýya ve þirkete göre filtrelenebilir.
+- Saðlýk profili her kullanýcý için bir kez oluþturulabilir ve güncellenebilir.
+- Supabase ile dosya (fotoðraf) yükleme ve kimlik doðrulama iþlemleri yapýlýr.
+- Exception handling için özel middleware ve exception tipleri kullanýlýr.
+- Tüm yanýtlar ApiResponseDto ile standartlaþtýrýlmýþtýr.
+- Enum'lar ile sistemdeki sabitler yönetilir.
+- Repository katmaný Npgsql ile PostgreSQL'e baðlanýr, çoðu iþlem stored procedure ile yapýlýr.
+
+---
+
+## Özet
+Bu proje, iþ saðlýðý ve güvenliði süreçlerini dijitalleþtirmek için kullanýcý, þirket, görev, saðlýk profili ve bulgu yönetimi sunan, modern .NET 8 tabanlý, çok katmanlý bir web API mimarisine sahiptir. Tüm veri transferleri DTO'lar ile yapýlýr, hata yönetimi ve yanýtlar standartlaþtýrýlmýþtýr. Kimlik doðrulama JWT ve Supabase ile saðlanýr. Her katman sorumluluklarýna göre ayrýlmýþtýr ve geniþletilebilir bir yapýdadýr.
+
+---
+
+## Klasör/Dosya Mimarisi
+
+```
+IsimSaglik.Entity/
+  ??? DTOs/
+  ?     ??? Common/
+  ?     ?     ??? ApiErrorDto.cs
+  ?     ?     ??? ApiResponseDto.cs
+  ?     ??? Request/
+  ?     ?     ??? AssignmentRequestDto.cs
+  ?     ?     ??? ForgotPasswordRequest.Dto.cs
+  ?     ?     ??? HealthProfileRequestDto.cs
+  ?     ?     ??? InviteUserRequestDto.cs
+  ?     ?     ??? LogInRequestDto.cs
+  ?     ?     ??? RefreshTokenRequestDto.cs
+  ?     ?     ??? RegisterCompanyRequestDto.cs
+  ?     ?     ??? RegisterWithInviteRequestDto.cs
+  ?     ?     ??? ResetPasswordRequestDto.cs
+  ?     ?     ??? SafetyFindingRequestDto.cs
+  ?     ?     ??? UserRequestDto.cs
+  ?     ??? Response/
+  ?           ??? AssignmentResponseDto.cs
+  ?           ??? EmployeeListResponseDto.cs
+  ?           ??? HealthProfileResponseDto.cs
+  ?           ??? SafetyFindingResponseDto.cs
+  ?           ??? StatusSummaryResponseDto.cs
+  ?           ??? TokenResponseDto.cs
+  ?           ??? UserInfoResponseDto.cs
+  ?           ??? UserResponseDto.cs
+  ??? Enums/
+  ?     ??? FindingSeverity.cs
+  ?     ??? FindingStatus.cs
+  ?     ??? FindingType.cs
+  ?     ??? Gender.cs
+  ?     ??? NotificationType.cs
+  ?     ??? SeverityType.cs
+  ?     ??? StatusType.cs
+  ?     ??? UserRole.cs
+  ??? Models/
+        ??? Assignment.cs
+        ??? BaseEntity.cs
+        ??? HealthProfile.cs
+        ??? Hint.cs
+        ??? Notification.cs
+        ??? RefreshToken.cs
+        ??? SafetyFinding.cs
+        ??? User.cs
+        ??? UserInvitation.cs
+
+IsimSaglik.API/
+  ??? Controllers/
+  ?     ??? AssignmentController.cs
+  ?     ??? AuthController.cs
+  ?     ??? BaseController.cs
+  ?     ??? CompanyController.cs
+  ?     ??? HealthProfileController.cs
+  ?     ??? SafetyFindingController.cs
+  ?     ??? UserController.cs
+  ??? Extensions/
+  ?     ??? ServicesExtensions.cs
+  ??? Middleware/
+  ?     ??? GlobalExceptionMiddleware.cs
+  ??? Program.cs
+  ??? proje_ozeti.txt
+
+IsimSaglik.Infrastructure/
+  ??? Abstract/
+  ?     ??? IFirebaseClient.cs
+  ?     ??? ISupabaseClient.cs
+  ?     ??? ITokenGenerator.cs
+  ??? Concrete/
+  ?     ??? FirebaseClient.cs
+  ?     ??? SupabaseClient.cs
+  ?     ??? TokenGenerator.cs
+  ??? Settings/
+        ??? FirebaseSettings.cs
+        ??? JwtSettings.cs
+        ??? SupabaseSettings.cs
+
+IsimSaglik.Repository/
+  ??? Abstract/
+  ?     ??? IAssignmentRepository.cs
+  ?     ??? IHealthProfileRepository.cs
+  ?     ??? INotificationRepository.cs
+  ?     ??? IRepositoryBase.cs
+  ?     ??? IRepositoryManager.cs
+  ?     ??? IRefreshTokenRepository.cs
+  ?     ??? ISafetyFindingRepository.cs
+  ?     ??? IUserInvitationRepository.cs
+  ?     ??? IUserRepository.cs
+  ??? Concrete/
+        ??? AssignmentRepository.cs
+        ??? HealthProfileRepository.cs
+        ??? NotificationRepository.cs
+        ??? RefreshTokenRepository.cs
+        ??? RepositoryBase.cs
+        ??? RepositoryManager.cs
+        ??? SafetyFindingRepository.cs
+        ??? UserInvitationRepository.cs
+        ??? UserRepository.cs
+
+IsimSaglik.Service/
+  ??? Abstract/
+  ?     ??? IAssignmentService.cs
+  ?     ??? IAuthService.cs
+  ?     ??? ICompanyService.cs
+  ?     ??? IHealthProfileService.cs
+  ?     ??? IServiceManager.cs
+  ?     ??? ISafetyFindingService.cs
+  ?     ??? IUserService.cs
+  ??? Concrete/
+  ?     ??? AssignmentService.cs
+  ?     ??? AuthService.cs
+  ?     ??? CompanyService.cs
+  ?     ??? HealthProfileService.cs
+  ?     ??? SafetyFindingService.cs
+  ?     ??? ServiceManager.cs
+  ?     ??? UserService.cs
+  ??? Exceptions/
+  ?     ??? ErrorCodes.cs
+  ?     ??? Types/
+  ?           ??? BadRequestException.cs
+  ?           ??? ForbiddenException.cs
+  ?           ??? NotFoundException.cs
+  ?           ??? UnauthorizedException.cs
+  ??? Mapping/
+  ?     ??? MappingProfile.cs
+  ??? Utilities/
+        ??? AvatarResolver.cs
+        ??? FileValidator.cs

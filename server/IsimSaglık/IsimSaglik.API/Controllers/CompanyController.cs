@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IsimSaglik.API.Controllers
 {
-    [Route("api/company")]
+    [Route("api/companies")]
     [ApiController]
     public class CompanyController : BaseController
     {
@@ -19,7 +19,7 @@ namespace IsimSaglik.API.Controllers
         }
 
 
-        // POST: api/company/invite-user
+        // POST: api/companies/invite-user
         [HttpPost("invite-user")]
         public async Task<IActionResult> InviteUser([FromBody] InviteUserRequestDto dto) 
         {

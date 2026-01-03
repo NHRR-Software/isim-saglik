@@ -13,5 +13,7 @@
         IAssignmentService Assignment { get; }
 
         ISafetyFindingService SafetyFinding { get; }
+
+        ISensorLogService SensorLog { get; }
     }
 }

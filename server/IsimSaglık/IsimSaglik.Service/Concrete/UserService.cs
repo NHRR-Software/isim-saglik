@@ -6,6 +6,7 @@ using IsimSaglik.Repository.Abstract;
 using IsimSaglik.Service.Abstract;
 using IsimSaglik.Service.Exceptions;
 using IsimSaglik.Service.Exceptions.Types;
+using IsimSaglik.Service.Utilities;
 
 namespace IsimSaglik.Service.Concrete
 {
@@ -39,23 +40,23 @@ namespace IsimSaglik.Service.Concrete
             return responseDto;
         }
 
+
         public async Task<UserResponseDto> UpdateAsync(Guid userId, UserRequestDto dto)
         {
             var user = await _repositoryManager.User.GetByIdAsync(userId)
                 ?? throw new NotFoundException("User not found.", ErrorCodes.UserNotFound);
 
             _mapper.Map(dto, user);
-
             user.UpdatedDate = DateTime.UtcNow;
+            user.PhotoUrl = AvatarResolver.GetDefaultUri(user.Role, user.Gender);
 
             await _repositoryManager.User.UpdateAsync(user);
 
             return _mapper.Map<UserResponseDto>(user);
-
         }
 
 
-        // TODO: Profil fotoğrafı güncelleme işlemi eklenecek.
+        // TODO: Profil fotoğrafı güncelleme işlemi eklenecek. Şimdilik bu işlem iptal edildi.
 
 
         public async Task<IEnumerable<UserInfoResponseDto>> GetByCompanyIdAsync(Guid companyId)

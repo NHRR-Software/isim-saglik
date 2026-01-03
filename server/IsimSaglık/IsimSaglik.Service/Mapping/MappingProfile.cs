@@ -78,6 +78,10 @@ namespace IsimSaglik.Service.Mapping
 
             // SafetyFinding -> SafetyFindingResponseDto
             CreateMap<SafetyFinding, SafetyFindingResponseDto>();
+
+
+            // SensorLogRequestDto -> SensorLog
+            CreateMap<SensorLogRequestDto, SensorLog>();
         }
     }
 }

@@ -15,5 +15,7 @@
         IUserRepository User { get; }
 
         IUserInvitationRepository UserInvitation { get; }
+
+        ISensorLogRepository SensorLog { get; }
     }
 }
