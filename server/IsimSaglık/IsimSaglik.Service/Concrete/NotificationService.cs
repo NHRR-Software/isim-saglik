@@ -14,11 +14,13 @@ namespace IsimSaglik.Service.Concrete
         private readonly IRepositoryManager _repositoryManager;
         private readonly IMapper _mapper;
 
+
         public NotificationService(IRepositoryManager repositoryManager, IMapper mapper)
         {
             _repositoryManager = repositoryManager;
             _mapper = mapper;
         }
+
 
         public async Task<NotificationResponseDto> CreateAsync(Guid userId, NotificationRequestDto dto)
         {
@@ -32,17 +34,15 @@ namespace IsimSaglik.Service.Concrete
             return _mapper.Map<NotificationResponseDto>(notification);
         }
 
+
         public async Task<IEnumerable<NotificationResponseDto>> GetAllByUserIdAsync(Guid userId)
         {
-            var notifications = await _repositoryManager.Notification.GetNotificationsByUserIdAsync(userId);
-
-            if (notifications is null)
-            {
-                return Enumerable.Empty<NotificationResponseDto>();
-            }
+            var notifications = await _repositoryManager.Notification.GetNotificationsByUserIdAsync(userId)
+                ?? throw new NotFoundException("No notifications found for this user.", ErrorCodes.ValidationError);
 
             return _mapper.Map<IEnumerable<NotificationResponseDto>>(notifications);
         }
+
 
         public async Task MarkAsReadAsync(Guid userId, Guid id)
         {
@@ -64,6 +64,5 @@ namespace IsimSaglik.Service.Concrete
 
             await _repositoryManager.Notification.UpdateAsync(notification);
         }
-
     }
 }
