@@ -82,6 +82,10 @@ namespace IsimSaglik.Service.Mapping
 
             // SensorLogRequestDto -> SensorLog
             CreateMap<SensorLogRequestDto, SensorLog>();
+
+
+            // SensorLog -> SensorDataDto
+            CreateMap<SensorLog, SensorDataDto>();
         }
     }
 }
