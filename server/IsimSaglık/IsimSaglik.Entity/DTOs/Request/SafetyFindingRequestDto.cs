@@ -5,7 +5,7 @@ namespace IsimSaglik.Entity.DTOs.Request
 {
     public sealed record SafetyFindingRequestDto
     {
-
+        [Required(ErrorMessage = "Title is required")]
         public string Title { get; init; } = string.Empty;
 
         [Required(ErrorMessage = "Status is required")]

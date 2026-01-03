@@ -21,6 +21,7 @@ namespace IsimSaglik.API.Extensions
         {
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
             services.Configure<SupabaseSettings>(configuration.GetSection("SupabaseSettings"));
+            services.Configure<FirebaseSettings>(configuration.GetSection("FirebaseSettings"));
         }
 
 
@@ -54,6 +55,7 @@ namespace IsimSaglik.API.Extensions
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserInvitationRepository, UserInvitationRepository>();
+            services.AddScoped<ISensorLogRepository, SensorLogRepository>();
         }
 
 
@@ -65,12 +67,15 @@ namespace IsimSaglik.API.Extensions
             services.AddScoped<IHealthProfileService, HealthProfileService>();
             services.AddScoped<IAssignmentService, AssignmentService>();
             services.AddScoped<ISafetyFindingService, SafetyFindingService>();
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<ISensorLogService, SensorLogService>();
         }
 
 
         public static void RegisterInfrastructures(this IServiceCollection services)
         {
             services.AddScoped<ITokenGenerator, TokenGenerator>();
+            services.AddScoped<IFirebaseClient, FirebaseClient>();
         }
 
 

@@ -11,10 +11,14 @@ namespace IsimSaglik.Entity.DTOs.Request
         public string Name { get; init; } = string.Empty;
 
 
+        // Bu özellik şimdilik devre dışı bırakıldı.
+        // Çünkü email güncellemesi yapılduğında Supabase Authentication ile senkronize edilmesi gerekecek.
+        /*
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid email format")]
         [MaxLength(255, ErrorMessage = "Email address cannot exceed 255 characters.")]
         public string Email { get; init; } = string.Empty;
+        */
 
 
         [Required(ErrorMessage = "PhoneNumber is required")]
@@ -28,11 +32,6 @@ namespace IsimSaglik.Entity.DTOs.Request
         [Required(ErrorMessage = "Gender is required")]
         [EnumDataType(typeof(Gender), ErrorMessage = "Invalid gender selected.")]
         public required Gender Gender { get; init; }
-
-
-        [Required(ErrorMessage = "Role is required")]
-        [EnumDataType(typeof(UserRole), ErrorMessage = "Invalid role selected.")]
-        public required UserRole Role { get; init; }
 
 
         [Required(ErrorMessage = "BirthDate is required")]

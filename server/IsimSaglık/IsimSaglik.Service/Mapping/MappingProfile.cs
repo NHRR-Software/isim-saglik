@@ -61,23 +61,33 @@ namespace IsimSaglik.Service.Mapping
 
 
             // AssignmentRequestDto -> Assignment
-            CreateMap<AssignmentRequestDto, Assignment>()
-                .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTime.UtcNow))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => StatusType.Pending));
+            CreateMap<AssignmentRequestDto, Assignment>();
 
 
             // HealthProfileRequestDto -> HealthProfile 
-            CreateMap<HealthProfileRequestDto, HealthProfile>()
-              .ForMember(dest => dest.ChronicDisease, opt => opt.MapFrom(src => src.ChronicDisease ?? string.Empty));
+            CreateMap<HealthProfileRequestDto, HealthProfile>();
 
 
             // HealthProfile -> HealthProfileResponseDto
-            CreateMap<HealthProfile, HealthProfileResponseDto>()
-                .ForMember(dest => dest.ChronicDisease, opt => opt.MapFrom(src => src.ChronicDisease ?? string.Empty));
+            CreateMap<HealthProfile, HealthProfileResponseDto>();
 
 
             // SafetyFinding -> SafetyFindingResponseDto
             CreateMap<SafetyFinding, SafetyFindingResponseDto>();
+
+            // NotificationRequestDto -> Notification
+            CreateMap<NotificationRequestDto, Notification>();
+
+            // Notification -> NotificationResponseDto
+            CreateMap<Notification, NotificationResponseDto>();
+
+
+            // SensorLogRequestDto -> SensorLog
+            CreateMap<SensorLogRequestDto, SensorLog>();
+
+
+            // SensorLog -> SensorDataDto
+            CreateMap<SensorLog, SensorDataDto>();
         }
     }
 }

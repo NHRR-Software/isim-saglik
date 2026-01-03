@@ -4,7 +4,7 @@ namespace IsimSaglik.Entity.DTOs.Response
 {
     public sealed record EmployeeListResponseDto
     {
-        public required string Id { get; init; }
+        public required Guid Id { get; init; }
 
         public required Uri Photo { get; init; }
 

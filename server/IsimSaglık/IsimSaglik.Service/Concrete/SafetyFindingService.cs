@@ -115,6 +115,11 @@ namespace IsimSaglik.Service.Concrete
                 safetyFindings = await _repositoryManager.SafetyFinding.GetByReporterIdAsync(userId);
             }
 
+            if (safetyFindings is null)
+            {
+                throw new NotFoundException("No safety findings found for this user.", ErrorCodes.UnexpectedError);
+            }
+
             return _mapper.Map<IEnumerable<SafetyFindingResponseDto>>(safetyFindings);
         }
     }
