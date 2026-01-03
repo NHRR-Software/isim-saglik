@@ -14,6 +14,8 @@
 
         ISafetyFindingService SafetyFinding { get; }
 
+        INotificationService Notification { get; }
+
         ISensorLogService SensorLog { get; }
     }
 }
