@@ -24,7 +24,6 @@ namespace IsimSaglik.Service.Concrete
         }
 
 
-
         public async Task<IEnumerable<AssignmentResponseDto>> GetAllByUserIdAsync(Guid userId)
         {
             var assignments = await _repositoryManager.Assignment.GetByUserIdAsync(userId)
@@ -34,17 +33,16 @@ namespace IsimSaglik.Service.Concrete
         }
 
 
-
         public async Task<AssignmentResponseDto> CreateAsync(Guid userId, AssignmentRequestDto dto)
         {
             var assignment = _mapper.Map<Assignment>(dto);
             assignment.UserId = userId;
+            assignment.CreatedDate = DateTime.UtcNow;
 
             await _repositoryManager.Assignment.CreateAsync(assignment);
 
             return _mapper.Map<AssignmentResponseDto>(assignment);
         }
-
 
 
         public async Task<AssignmentResponseDto> UpdateAsync(Guid userId, Guid assignmentId, AssignmentRequestDto dto)
@@ -57,18 +55,14 @@ namespace IsimSaglik.Service.Concrete
                 throw new BadRequestException("You are not authorized to update this assignment.", ErrorCodes.ValidationError);
             }
 
-            assignment.Description = dto.Description;
-            assignment.Severity = dto.Severity;
-            assignment.Status = dto.Status;
+            _mapper.Map(dto, assignment);
             assignment.UpdatedDate = DateTime.UtcNow;
 
             await _repositoryManager.Assignment.UpdateAsync(assignment);
 
             var responseDto = _mapper.Map<AssignmentResponseDto>(assignment);
-
             return responseDto;
         }
-
 
 
         public async Task DeleteAsync(Guid userId, Guid assignmentId)

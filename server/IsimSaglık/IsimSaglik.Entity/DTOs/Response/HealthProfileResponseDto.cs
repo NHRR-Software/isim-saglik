@@ -8,6 +8,6 @@
 
         public required double Height { get; init; }
 
-        public required string ChronicDisease { get; init; }
+        public string? ChronicDisease { get; init; }
     }
 }

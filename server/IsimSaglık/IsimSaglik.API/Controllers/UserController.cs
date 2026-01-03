@@ -2,6 +2,7 @@
 using IsimSaglik.Service.Abstract;
 using IsimSaglik.Service.Exceptions;
 using IsimSaglik.Service.Exceptions.Types;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IsimSaglik.API.Controllers
@@ -29,12 +30,23 @@ namespace IsimSaglik.API.Controllers
             return OkResponse(response, "User profile retrieved successfully.");
         }
 
+
         // PUT: api/users
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] UserRequestDto dto)
         {
             var response = await _serviceManager.User.UpdateAsync(UserId, dto);
             return OkResponse(response, "User profile updated successfully.");
+        }
+
+
+        // GET: api/users/{id}
+        [HttpGet("{id:guid}")]
+        [Authorize(Roles = "Company, Expert, Admin")]
+        public async Task<IActionResult> GetUserDetails([FromRoute] Guid id)
+        {
+            var response = await _serviceManager.User.GetByIdAsync(id);
+            return OkResponse(response, "User details retrieved successfully.");
         }
 
 

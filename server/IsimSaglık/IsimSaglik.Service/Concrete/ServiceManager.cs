@@ -20,8 +20,7 @@ namespace IsimSaglik.Service.Concrete
             IHealthProfileService healthProfileService,
             IAssignmentService assignmentService,
             ISafetyFindingService safetyFindingService,
-            INotificationService notificationService)
-            ISafetyFindingService safetyFindingService,
+            INotificationService notificationService,
             ISensorLogService sensorLogService)
         {
             _authService = authService;
