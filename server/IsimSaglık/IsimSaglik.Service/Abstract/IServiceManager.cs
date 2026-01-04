@@ -17,5 +17,7 @@
         INotificationService Notification { get; }
 
         ISensorLogService SensorLog { get; }
+
+        IDeviceTokenService DeviceToken { get; }
     }
 }

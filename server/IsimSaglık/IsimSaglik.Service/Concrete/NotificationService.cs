@@ -2,6 +2,7 @@
 using IsimSaglik.Entity.DTOs.Request;
 using IsimSaglik.Entity.DTOs.Response;
 using IsimSaglik.Entity.Models;
+using IsimSaglik.Infrastructure.Abstract;
 using IsimSaglik.Repository.Abstract;
 using IsimSaglik.Service.Abstract;
 using IsimSaglik.Service.Exceptions;
@@ -12,17 +13,22 @@ namespace IsimSaglik.Service.Concrete
     public class NotificationService : INotificationService
     {
         private readonly IRepositoryManager _repositoryManager;
+        private readonly IFirebaseClient _firebaseClient;
         private readonly IMapper _mapper;
 
 
-        public NotificationService(IRepositoryManager repositoryManager, IMapper mapper)
+        public NotificationService(
+            IRepositoryManager repositoryManager,
+            IFirebaseClient firebaseClient,
+            IMapper mapper)
         {
             _repositoryManager = repositoryManager;
+            _firebaseClient = firebaseClient;
             _mapper = mapper;
         }
 
 
-        public async Task<NotificationResponseDto> CreateAsync(Guid userId, NotificationRequestDto dto)
+        public async Task CreateAsync(Guid userId, NotificationRequestDto dto)
         {
             var notification = _mapper.Map<Notification>(dto);
 
@@ -31,7 +37,23 @@ namespace IsimSaglik.Service.Concrete
 
             await _repositoryManager.Notification.CreateAsync(notification);
 
-            return _mapper.Map<NotificationResponseDto>(notification);
+            var users = await _repositoryManager.User.GetByCompanyIdAsync(userId)
+                ?? throw new NotFoundException("No users found in the company.", ErrorCodes.ValidationError);
+
+            foreach (var user in users)
+            {
+                var deviceTokens = await _repositoryManager.DeviceToken.GetTokensByUserIdAsync(user.Id);
+
+                if (deviceTokens is not null)
+                {
+                    var tokens = deviceTokens.Select(dt => dt.Token).ToList();
+
+                    await _firebaseClient.SendMulticastNotificationAsync(
+                        tokens,
+                        dto.Title,
+                        dto.Description);
+                }
+            }
         }
 
 
@@ -44,7 +66,7 @@ namespace IsimSaglik.Service.Concrete
         }
 
 
-        public async Task MarkAsReadAsync(Guid userId, Guid id)
+        public async Task<NotificationResponseDto> MarkAsReadAsync(Guid userId, Guid id)
         {
             var notification = await _repositoryManager.Notification.GetByIdAsync(id)
                 ?? throw new NotFoundException("Notification not found.", ErrorCodes.UnexpectedError);
@@ -63,7 +85,10 @@ namespace IsimSaglik.Service.Concrete
             notification.UpdatedDate = DateTime.UtcNow;
 
             await _repositoryManager.Notification.UpdateAsync(notification);
+
+            return _mapper.Map<NotificationResponseDto>(notification);
         }
+
 
         public async Task DeleteAsync(Guid userId, Guid notificationId)
         {

@@ -17,5 +17,7 @@
         IUserInvitationRepository UserInvitation { get; }
 
         ISensorLogRepository SensorLog { get; }
+
+        IDeviceTokenRepository DeviceToken { get; }
     }
 }

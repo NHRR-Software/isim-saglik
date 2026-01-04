@@ -12,6 +12,7 @@ namespace IsimSaglik.Repository.Concrete
         private readonly IUserRepository _userRepository;
         private readonly IUserInvitationRepository _userInvitationRepository;
         private readonly ISensorLogRepository _sensorLogRepository;
+        private readonly IDeviceTokenRepository _deviceTokenRepository;
 
 
         public RepositoryManager(
@@ -22,7 +23,8 @@ namespace IsimSaglik.Repository.Concrete
             IRefreshTokenRepository refreshTokenRepository,
             IUserRepository userRepository,
             IUserInvitationRepository userInvitationRepository,
-            ISensorLogRepository sensorLogRepository)
+            ISensorLogRepository sensorLogRepository,
+            IDeviceTokenRepository deviceTokenRepository)
         {
             _assignmentRepository = assignmentRepository;
             _healthProfileRepository = healthProfileRepository;
@@ -32,6 +34,7 @@ namespace IsimSaglik.Repository.Concrete
             _userRepository = userRepository;
             _userInvitationRepository = userInvitationRepository;
             _sensorLogRepository = sensorLogRepository;
+            _deviceTokenRepository = deviceTokenRepository;
         }
 
 
@@ -50,5 +53,7 @@ namespace IsimSaglik.Repository.Concrete
         public IUserInvitationRepository UserInvitation => _userInvitationRepository;
 
         public ISensorLogRepository SensorLog => _sensorLogRepository;
+
+        public IDeviceTokenRepository DeviceToken => _deviceTokenRepository;
     }
 }

@@ -23,6 +23,7 @@ namespace IsimSaglik.Infrastructure.Concrete
 
                 var credentialParameters = new Dictionary<string, string>
                 {
+                    { "type", "service_account" },
                     { "project_id", config.ProjectId },
                     { "private_key", privateKey },
                     { "client_email", config.ClientEmail }

@@ -56,6 +56,7 @@ namespace IsimSaglik.API.Extensions
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserInvitationRepository, UserInvitationRepository>();
             services.AddScoped<ISensorLogRepository, SensorLogRepository>();
+            services.AddScoped<IDeviceTokenRepository, DeviceTokenRepository>();
         }
 
 
@@ -69,6 +70,7 @@ namespace IsimSaglik.API.Extensions
             services.AddScoped<ISafetyFindingService, SafetyFindingService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<ISensorLogService, SensorLogService>();
+            services.AddScoped<IDeviceTokenService, DeviceTokenService>();
         }
 
 

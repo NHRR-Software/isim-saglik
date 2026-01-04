@@ -15,6 +15,7 @@ namespace IsimSaglik.API.Controllers
             _serviceManager = serviceManager;
         }
 
+
         // GET: api/notifications
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -23,13 +24,15 @@ namespace IsimSaglik.API.Controllers
             return OkResponse(response, "Notifications retrieved successfully.");
         }
 
+
         // POST: api/notifications
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] NotificationRequestDto requestDto)
         {
-            var response = await _serviceManager.Notification.CreateAsync(UserId, requestDto);
-            return OkResponse(response, "Notification created successfully.");
+            await _serviceManager.Notification.CreateAsync(UserId, requestDto);
+            return OkResponse("Notification created successfully.");
         }
+
 
         // PATCH: api/notifications/{id}/read
         [HttpPatch("{id:guid}/read")]
@@ -38,6 +41,7 @@ namespace IsimSaglik.API.Controllers
             await _serviceManager.Notification.MarkAsReadAsync(UserId, id);
             return OkResponse("Notification marked as read.");
         }
+
 
         // DELETE: api/notifications/{id}
         [HttpDelete("{id:guid}")]

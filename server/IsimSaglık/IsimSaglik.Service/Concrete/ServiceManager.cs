@@ -12,6 +12,7 @@ namespace IsimSaglik.Service.Concrete
         private readonly ISafetyFindingService _safetyFindingService;
         private readonly INotificationService  _notificationService;
         private readonly ISensorLogService _sensorLogService;
+        private readonly IDeviceTokenService _deviceTokenService;
 
         public ServiceManager(
             IAuthService authService,
@@ -21,7 +22,8 @@ namespace IsimSaglik.Service.Concrete
             IAssignmentService assignmentService,
             ISafetyFindingService safetyFindingService,
             INotificationService notificationService,
-            ISensorLogService sensorLogService)
+            ISensorLogService sensorLogService,
+            IDeviceTokenService deviceTokenService)
         {
             _authService = authService;
             _userService = userService;
@@ -31,6 +33,7 @@ namespace IsimSaglik.Service.Concrete
             _safetyFindingService = safetyFindingService;
             _notificationService = notificationService;
             _sensorLogService = sensorLogService;
+            _deviceTokenService = deviceTokenService;
         }
 
 
@@ -49,5 +52,7 @@ namespace IsimSaglik.Service.Concrete
         public INotificationService Notification => _notificationService;
 
         public ISensorLogService SensorLog => _sensorLogService;
+
+        public IDeviceTokenService DeviceToken => _deviceTokenService;
     }
 }
