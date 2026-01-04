@@ -6,6 +6,7 @@ using IsimSaglik.Repository.Abstract;
 using IsimSaglik.Service.Abstract;
 using IsimSaglik.Service.Exceptions;
 using IsimSaglik.Service.Exceptions.Types;
+using IsimSaglik.Service.Utilities;
 
 namespace IsimSaglik.Service.Concrete
 {
@@ -24,13 +25,32 @@ namespace IsimSaglik.Service.Concrete
         }
 
 
-        public async Task CreateAsync(Guid userId, SensorLogRequestDto dto) 
+        public async Task<IEnumerable<AnalysisResult>> CreateAsync(Guid userId, SensorLogRequestDto dto)
         {
-            var sensorLog = _mapper.Map<SensorLog>(dto);
-            sensorLog.UserId = userId;
-            sensorLog.CreatedDate = DateTime.UtcNow;
+            foreach (var logDto in dto.SensorLogs)
+            {
+                var sensorLog = _mapper.Map<SensorLog>(logDto);
+                sensorLog.UserId = userId;
+                sensorLog.CreatedDate = DateTime.UtcNow;
 
-            await _repositoryManager.SensorLog.CreateAsync(sensorLog);
+                await _repositoryManager.SensorLog.CreateAsync(sensorLog);
+            }
+
+            var analysisResults = new List<AnalysisResult>();
+            var latestLog = await _repositoryManager.SensorLog.GetLatestByUserIdAsync(userId);
+
+            if (latestLog != null)
+            {
+                var historyLogs = await _repositoryManager.SensorLog.GetHistoryByUserIdAsync(userId, DateTime.UtcNow.AddDays(-1), DateTime.UtcNow);
+
+                if (historyLogs is not null && historyLogs.Any())
+                {
+                    var results = HealthAnalyzer.Analyze(historyLogs, latestLog);
+                    analysisResults.AddRange(results);
+                }
+            }
+
+            return analysisResults;
         }
 
 

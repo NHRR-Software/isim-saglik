@@ -5,7 +5,7 @@ namespace IsimSaglik.Service.Abstract
 {
     public interface ISensorLogService
     {
-        Task CreateAsync(Guid userId, SensorLogRequestDto dto);
+        Task<IEnumerable<AnalysisResult>> CreateAsync(Guid userId, SensorLogRequestDto dto);
         Task<SensorLogResponseDto> GetByUserIdAsync(Guid userId);
     }
 }
