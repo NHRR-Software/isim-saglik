@@ -22,8 +22,22 @@ namespace IsimSaglik.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] SensorLogRequestDto dto)
         {
-            await _serviceManager.SensorLog.CreateAsync(UserId, dto);
-            return OkResponse("Sensor log created successfully.");
+            var analysisResults = await _serviceManager.SensorLog.CreateAsync(UserId, dto);
+
+            if (analysisResults != null && analysisResults.Any())
+            {
+                foreach (var result in analysisResults)
+                {
+                    await _serviceManager.Notification.CreateAsync(UserId, new NotificationRequestDto
+                    {
+                        Title = result.Title,
+                        Description = result.Description,
+                        Type = result.Type
+                    });
+                }
+            }
+
+            return OkResponse("Sensor data recorded and analyzed successfully.");
         }
 
 

@@ -2,7 +2,7 @@
 
 namespace IsimSaglik.Service.Utilities
 {
-    public static class AvatarResolver
+    internal static class AvatarResolver
     {
         private const string CompanyUrl = "https://tvzbvqnfzadsunopzkts.supabase.co/storage/v1/object/public/images/profiles/company.webp";
         private const string MaleUrl = "https://tvzbvqnfzadsunopzkts.supabase.co/storage/v1/object/public/images/profiles/male.webp";
