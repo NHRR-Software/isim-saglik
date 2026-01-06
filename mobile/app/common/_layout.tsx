@@ -5,7 +5,6 @@ import { Stack } from "expo-router";
 export default function CommonLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="tasks" />
       <Stack.Screen name="heart-detail" />
       <Stack.Screen name="spo2-detail" />
       <Stack.Screen name="stress-detail" />
@@ -13,6 +12,9 @@ export default function CommonLayout() {
       <Stack.Screen name="taskScreen/index" />
       <Stack.Screen name="health-profile" />
       <Stack.Screen name="aboutScreen/index" />
+      <Stack.Screen name="temp-detail" />
+      <Stack.Screen name="humidity-detail" />
+      <Stack.Screen name="noise-detail" />
     </Stack>
   );
 }

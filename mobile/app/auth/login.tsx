@@ -19,9 +19,8 @@ import { useTheme } from "../context/ThemeContext";
 
 const { height } = Dimensions.get("window");
 
-// API URL (Lokal veya Canlı)
-const API_BASE_URL = "http://10.0.2.2:5187";
-// const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
+const API_BASE_URL =
+  "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -52,21 +51,12 @@ export default function LoginScreen() {
         body: JSON.stringify({ email, password }),
       });
 
-      // Cevabı önce text olarak alalım hata ayıklamak için
-      const loginText = await loginResponse.text();
-      console.log("Login Response Status:", loginResponse.status);
-      console.log("Login Response Body:", loginText);
-
-      if (!loginResponse.ok) {
-        throw new Error(`Login Hatası: ${loginResponse.status} - ${loginText}`);
-      }
-
-      // Text'i JSON'a çeviriyoruz (Eğer boşsa burada patlamaz, kontrol etmiş oluruz)
-      const loginResult = loginText ? JSON.parse(loginText) : {};
+      const loginResult = await loginResponse.json();
 
       if (loginResult.isSuccess && loginResult.data) {
         const { accessToken, refreshToken } = loginResult.data;
 
+        // Tokenları Kaydet
         await SecureStore.setItemAsync("accessToken", accessToken);
         await SecureStore.setItemAsync("refreshToken", refreshToken);
 
@@ -84,28 +74,28 @@ export default function LoginScreen() {
           },
         });
 
-        const userText = await userResponse.text();
-        console.log("User Response Status:", userResponse.status);
-        console.log("User Response Body:", userText);
-
-        if (!userResponse.ok) {
-          // Eğer 401 ise token geçersizdir, 404 ise endpoint yanlıştır.
-          throw new Error(
-            `User Info Hatası: ${userResponse.status} - ${userText}`
-          );
-        }
-
-        const userResult = userText ? JSON.parse(userText) : {};
+        const userResult = await userResponse.json();
 
         if (userResult.isSuccess && userResult.data) {
           const userData = userResult.data;
-          console.log("Yönlendirme Yapılıyor, Rol:", userData.role);
+          console.log("Giriş Başarılı. Rol:", userData.role);
 
+          // UserId'yi sakla (Diğer sayfalarda lazım oluyor)
+          if (userData.id) {
+            await SecureStore.setItemAsync("userId", userData.id);
+          }
+          // İsim bilgisini de saklayalım (Profilde hızlı göstermek için)
+          if (userData.fullName) {
+            await SecureStore.setItemAsync("userFullName", userData.fullName);
+          }
+
+          // 3. YÖNLENDİRME MANTIĞI
           if (!userData.isSetupCompleted) {
             router.replace("/setup/user-info");
             return;
           }
 
+          // 0: Admin, 1: Company, 2: Expert, 3: Worker
           switch (userData.role) {
             case 1:
               router.replace("/(founder)");
@@ -117,8 +107,7 @@ export default function LoginScreen() {
               router.replace("/(worker)");
               break;
             default:
-              // Admin (0) veya diğerleri için varsayılan
-              router.replace("/(worker)"); //şimdişil
+              router.replace("/(worker)"); // Varsayılan
               break;
           }
         } else {
@@ -132,8 +121,8 @@ export default function LoginScreen() {
         Alert.alert("Hata", errorMessage);
       }
     } catch (error: any) {
-      console.error("Login Try-Catch Error:", error);
-      Alert.alert("Bağlantı Hatası", error.message || "Bir hata oluştu.");
+      console.error("Login Error:", error);
+      Alert.alert("Bağlantı Hatası", "Sunucuya bağlanılamadı.");
     } finally {
       setIsLoading(false);
     }
@@ -183,7 +172,6 @@ export default function LoginScreen() {
             onChangeText={setPassword}
           />
 
-          {/* Şifremi Unuttum Linki */}
           <TouchableOpacity
             style={styles.forgotPasswordContainer}
             onPress={handleForgotPassword}
@@ -198,7 +186,6 @@ export default function LoginScreen() {
             </Text>
           </TouchableOpacity>
 
-          {/* Giriş Butonu */}
           <TouchableOpacity
             style={[styles.button, { backgroundColor: colors.primary.main }]}
             onPress={handleLogin}
@@ -269,6 +256,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
+    marginTop: 10,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 5,

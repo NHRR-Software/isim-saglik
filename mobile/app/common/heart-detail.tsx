@@ -1,6 +1,6 @@
 // app/common/heart-detail.tsx
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,11 +13,12 @@ import { LineChart } from "react-native-gifted-charts";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import CustomHeader from "../../components/ui/CustomHeader";
+import { useLocalSearchParams } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
-// DUMMY DATA
-const heartRateData = [
+// FALLBACK DUMMY DATA
+const defaultHeartRateData = [
   { value: 55, label: "00:00" },
   { value: 58 },
   { value: 54 },
@@ -26,14 +27,6 @@ const heartRateData = [
   { value: 110 },
   { value: 85 },
   { value: 70, label: "12:00" },
-  { value: 75 },
-  { value: 80 },
-  { value: 95 },
-  { value: 88, label: "18:00" },
-  { value: 105 },
-  { value: 122 },
-  { value: 90 },
-  { value: 65, label: "24:00" },
 ];
 
 const restingHeartRateData = [
@@ -49,10 +42,46 @@ const restingHeartRateData = [
 export default function HeartDetailScreen() {
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
+  const { history, currentValue } = useLocalSearchParams();
 
   // Tab State'leri
   const [periodTab, setPeriodTab] = useState("Gün");
   const [metricTab, setMetricTab] = useState("Kalp Atış Hızı");
+
+  // Chart Data State
+  const [heartRateData, setHeartRateData] =
+    useState<any[]>(defaultHeartRateData);
+  const [lastValue, setLastValue] = useState(0);
+
+  // Parse history data from params
+  useEffect(() => {
+    if (currentValue) {
+      setLastValue(Number(currentValue));
+    }
+
+    if (history) {
+      try {
+        const parsedData = JSON.parse(history as string);
+        if (parsedData && parsedData.length > 0) {
+          const formattedData = parsedData.map((item: any, index: number) => ({
+            value: item.value || 0,
+            label:
+              index === 0
+                ? "Eski"
+                : index === parsedData.length - 1
+                ? "Yeni"
+                : "",
+          }));
+          setHeartRateData(formattedData);
+          if (!currentValue && formattedData.length > 0) {
+            setLastValue(formattedData[formattedData.length - 1].value);
+          }
+        }
+      } catch (e) {
+        console.error("Heart data parse error:", e);
+      }
+    }
+  }, [history, currentValue]);
 
   // --- ÜST TAB SELECTOR (Gün/Hafta/Ay/Yıl) ---
   const PeriodSelector = () => (
@@ -119,15 +148,15 @@ export default function HeartDetailScreen() {
         <View style={styles.summaryContainer}>
           <View>
             <Text style={styles.bigValue}>
-              52-122 <Text style={styles.unit}>nbz/dk</Text>
+              60-120 <Text style={styles.unit}>nbz/dk</Text>
             </Text>
-            <Text style={styles.label}>Kalp atış hızı</Text>
+            <Text style={styles.label}>Normal aralık</Text>
           </View>
           <View>
             <Text style={styles.currentValue}>
-              97 <Text style={styles.unitSmall}>nbz/dk</Text>
+              {lastValue || 0} <Text style={styles.unitSmall}>nbz/dk</Text>
             </Text>
-            <Text style={styles.lastUpdate}>Son güncelleme: 22:10</Text>
+            <Text style={styles.lastUpdate}>Son ölçüm</Text>
           </View>
         </View>
 

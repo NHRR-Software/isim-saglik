@@ -1,44 +1,54 @@
 {
-  "expo": {
-    "name": "İsim Sağlık",
-    "slug": "isim-saglik",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
-    "scheme": "isim-saglik",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    
-
-    "splash": {
-      "backgroundColor": "#ffffff",
-      "resizeMode": "contain",
-      "image": null
-    },
-    
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.sirket.isimsaglik"
-    },
-    "android": {
-      "package": "com.sirket.isimsaglik",
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/logo.png"
-    },
-    "plugins": [
-      "expo-router"
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    }
-  }
+"expo": {
+"name": "İsim Sağlık",
+"slug": "isim-saglik",
+"version": "1.0.0",
+"orientation": "portrait",
+"icon": "./assets/images/logo.png",
+"scheme": "isim-saglik",
+"userInterfaceStyle": "automatic",
+"newArchEnabled": true,
+"splash": {
+"image": "./assets/images/logo.png",
+"resizeMode": "contain",
+"backgroundColor": "#ffffff"
+},
+"ios": {
+"supportsTablet": true,
+"bundleIdentifier": "com.sirket.isimsaglik"
+},
+"android": {
+"package": "com.sirket.isimsaglik",
+"googleServicesFile": "./google-services.json",
+"adaptiveIcon": {
+"foregroundImage": "./assets/images/logo.png",
+"backgroundColor": "#ffffff"
+},
+"edgeToEdgeEnabled": true,
+"predictiveBackGestureEnabled": false,
+"permissions": [
+"android.permission.BLUETOOTH",
+"android.permission.BLUETOOTH_ADMIN",
+"android.permission.BLUETOOTH_CONNECT"
+]
+},
+"web": {
+"output": "static",
+"favicon": "./assets/images/logo.png"
+},
+"plugins": [
+"expo-router",
+"react-native-ble-plx"
+],
+"experiments": {
+"typedRoutes": true,
+"reactCompiler": true
+},
+"extra": {
+"router": {},
+"eas": {
+"projectId": "74e0a0e5-b31b-4ffe-be06-c292fee7f0cb"
+}
+}
+}
 }

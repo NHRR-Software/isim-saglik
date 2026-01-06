@@ -20,8 +20,8 @@ import CustomHeader from "../../components/ui/CustomHeader";
 import AuthInput from "../../components/ui/AuthInput";
 
 // API URL
-const API_BASE_URL = "http://10.0.2.2:5187";
-// const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
+const API_BASE_URL =
+  "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 
 // SADELEŞTİRİLMİŞ ROLLER
 // Sadece Çalışan (3) ve İSG Uzmanı (2) davet edilebilir.

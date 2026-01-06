@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "769149387060",
+    "project_id": "isim-saglik",
+    "storage_bucket": "isim-saglik.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:769149387060:android:ebb9367481325b76032561",
+        "android_client_info": {
+          "package_name": "com.sirket.isimsaglik"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVRg8LN2AFAJt4DKdzuiQtCAw3EFVloV4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

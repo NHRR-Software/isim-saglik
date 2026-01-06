@@ -24,7 +24,7 @@ import * as SecureStore from "expo-secure-store";
 const { width } = Dimensions.get("window");
 
 // API URL (Login'dekiyle aynı olmalı)
-const API_BASE_URL = "http://10.0.2.2:5187";
+const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 
 export default function OHSHomeScreen() {
   const router = useRouter();

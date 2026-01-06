@@ -19,7 +19,7 @@ import { useTheme } from '../../context/ThemeContext';
 import createCompanyStyles from './styles';
 
 // API URL (Login sayfasında kullandığınla aynı olmalı)
-const API_BASE_URL = "http://10.0.2.2:5187"; 
+const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 
 const CompanyScreen = () => {
     const { colors, theme, toggleTheme } = useTheme();

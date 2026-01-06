@@ -1,6 +1,6 @@
 // app/(worker)/progress.tsx
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,73 +8,93 @@ import {
   ScrollView,
   Dimensions,
   TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { useTheme } from "../context/ThemeContext";
 import CustomHeader from "../../components/ui/CustomHeader";
 import { BarChart, LineChart } from "react-native-gifted-charts";
 import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+
 const { width } = Dimensions.get("window");
 const CARD_GAP = 16;
-// Kart genişliği hesaplama (Paddingler düşüldükten sonra 2'ye böl)
 const CARD_WIDTH = (width - 48 - CARD_GAP) / 2;
-// Grafiğin kart içine sığması için genişlik (Karttan biraz daha dar)
-// CHART_WIDTH'i CARD_WIDTH'ten daha da küçük yapıp yanlara boşluk vererek daha iyi durmasını sağlayabiliriz.
-const CHART_WIDTH = CARD_WIDTH - 30; // Yanlardan daha fazla boşluk
+const CHART_WIDTH = CARD_WIDTH - 30;
+
+// API URL
+const API_BASE_URL =
+  "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 
 export default function ProgressScreen() {
   const { colors, theme } = useTheme();
   const styles = useMemo(() => createStyles(colors, theme), [colors, theme]);
   const router = useRouter();
-  // --- MOCK DATA ---
 
-  // Renk Güvenliği: Eğer dashboard.green yoksa status.success kullan (önceki düzeltmeden)
-  const greenColor = colors.dashboard.green || colors.status.success;
+  // State
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [dashboardData, setDashboardData] = useState<any>(null);
 
-  // 1. Stres Verisi (Bar Chart) - Karışık renkli çubuklar
-  const stressData = [
-    { value: 40, frontColor: colors.primary.main },
-    { value: 60, frontColor: colors.secondary.main },
-    { value: 30, frontColor: colors.primary.main },
-    { value: 80, frontColor: greenColor },
-    { value: 50, frontColor: colors.secondary.main },
-    { value: 70, frontColor: colors.primary.main },
-    { value: 90, frontColor: greenColor },
-  ];
+  // Renk Güvenliği
+  const greenColor = colors.status.success;
 
-  // 2. Kalp Atışı (Line Chart) - Dalgalı Çizgi
-  const heartData = [
-    { value: 60 },
-    { value: 65 },
-    { value: 62 },
-    { value: 78 },
-    { value: 70 },
-    { value: 85 },
-    { value: 75 },
-    { value: 68 },
-    { value: 72 },
-    { value: 69 },
-  ];
+  // --- API'DEN VERİ ÇEKME ---
+  const fetchDashboardData = async (showRefresh = false) => {
+    try {
+      if (showRefresh) setIsRefreshing(true);
 
-  // 3. SpO2 (Bar Chart) - Tek renk yeşil tonları
-  const spo2Data = [
-    { value: 98 },
-    { value: 97 },
-    { value: 99 },
-    { value: 96 },
-    { value: 98 },
-    { value: 99 },
-    { value: 97 },
-  ];
+      const token = await SecureStore.getItemAsync("accessToken");
 
-  // 4. Çalışma Saati (Bar Chart) - Mavi ve Gri
-  const workData = [
-    { value: 8, frontColor: colors.primary.main },
-    { value: 8, frontColor: colors.primary.main },
-    { value: 9, frontColor: colors.secondary.main },
-    { value: 8, frontColor: colors.primary.main },
-    { value: 4, frontColor: colors.neutral.gray[300] },
-    { value: 0, frontColor: colors.neutral.gray[300] },
-  ];
+      const response = await fetch(
+        `${API_BASE_URL}/api/sensor-logs/dashboard`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.isSuccess && result.data) {
+        setDashboardData(result.data);
+      }
+    } catch (error) {
+      console.error("Dashboard Fetch Error:", error);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  // --- CHART DATA HAZIRLAMA (historyData'dan) ---
+  const getChartData = (key: string, color: string) => {
+    if (!dashboardData?.historyData || dashboardData.historyData.length === 0) {
+      return [{ value: 0, frontColor: color }];
+    }
+    return dashboardData.historyData.map((item: any) => ({
+      value: item[key] || 0,
+      frontColor: color,
+    }));
+  };
+
+  const getLineChartData = (key: string) => {
+    if (!dashboardData?.historyData || dashboardData.historyData.length === 0) {
+      return [{ value: 0 }];
+    }
+    return dashboardData.historyData.map((item: any) => ({
+      value: item[key] || 0,
+    }));
+  };
+
+  // --- CURRENT DATA (Anlık Değerler) ---
+  const current = dashboardData?.currentData || {};
 
   // --- ORTAK GRAFİK AYARLARI ---
   const commonProps = {
@@ -83,11 +103,25 @@ export default function ProgressScreen() {
     hideAxesAndRules: true,
     xAxisThickness: 0,
     yAxisThickness: 0,
-    initialSpacing: 5, // Çubukların ilk boşluğu
-    spacing: 8, // Çubuklar arası boşluk
-    barWidth: 8, // Çubuk genişliği
+    initialSpacing: 5,
+    spacing: 8,
+    barWidth: 8,
     height: 80,
   };
+
+  // Yükleniyor Durumu
+  if (isLoading) {
+    return (
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color={colors.primary.main} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -96,29 +130,47 @@ export default function ProgressScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={() => fetchDashboardData(true)}
+            colors={[colors.primary.main]}
+            tintColor={colors.primary.main}
+          />
+        }
       >
         <View style={styles.gridContainer}>
           {/* --- KART 1: STRES --- */}
           <TouchableOpacity
             style={styles.card}
             activeOpacity={0.9}
-            onPress={() => router.push("/common/stress-detail")} // <--- YÖNLENDİRME
+            onPress={() =>
+              router.push({
+                pathname: "/common/stress-detail",
+                params: {
+                  history: JSON.stringify(
+                    getChartData("stressLevel", colors.secondary.main)
+                  ),
+                  currentValue: (current.stressLevel || 0).toString(),
+                },
+              })
+            }
           >
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>Stres</Text>
               <Text style={styles.cardSubtitle}>
                 Stres{" "}
                 <Text
-                  style={{ color: greenColor, fontWeight: "bold" }} // Stres için yeşil vurgu
+                  style={{ color: colors.secondary.main, fontWeight: "bold" }}
                 >
-                  62
+                  {current.stressLevel || 0}
                 </Text>{" "}
-                orta
+                seviye
               </Text>
             </View>
             <View style={styles.chartContainer}>
               <BarChart
-                data={stressData}
+                data={getChartData("stressLevel", colors.secondary.main)}
                 roundedTop
                 roundedBottom
                 {...commonProps}
@@ -126,10 +178,19 @@ export default function ProgressScreen() {
             </View>
           </TouchableOpacity>
 
+          {/* --- KART 2: KALP ATIŞI --- */}
           <TouchableOpacity
             style={styles.card}
             activeOpacity={0.9}
-            onPress={() => router.push("/common/heart-detail")} // <--- YÖNLENDİRME
+            onPress={() =>
+              router.push({
+                pathname: "/common/heart-detail",
+                params: {
+                  history: JSON.stringify(getLineChartData("heartRate")),
+                  currentValue: (current.heartRate || 0).toString(),
+                },
+              })
+            }
           >
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>Kalp</Text>
@@ -138,14 +199,14 @@ export default function ProgressScreen() {
                 <Text
                   style={{ color: colors.dashboard.red, fontWeight: "bold" }}
                 >
-                  69
+                  {current.heartRate || 0}
                 </Text>{" "}
                 nbz/dk
               </Text>
             </View>
             <View style={styles.chartContainer}>
               <LineChart
-                data={heartData}
+                data={getLineChartData("heartRate")}
                 color={colors.dashboard.red}
                 thickness={3}
                 curved
@@ -160,7 +221,15 @@ export default function ProgressScreen() {
           <TouchableOpacity
             style={styles.card}
             activeOpacity={0.9}
-            onPress={() => router.push("/common/spo2-detail")} // <--- YÖNLENDİRME
+            onPress={() =>
+              router.push({
+                pathname: "/common/spo2-detail",
+                params: {
+                  history: JSON.stringify(getChartData("spO2", greenColor)),
+                  currentValue: (current.spO2 || 0).toString(),
+                },
+              })
+            }
           >
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>SpO₂</Text>
@@ -168,46 +237,135 @@ export default function ProgressScreen() {
                 style={[
                   styles.cardSubtitle,
                   {
-                    color: greenColor, // SpO2 için yeşil vurgu
+                    color: greenColor,
                     fontWeight: "bold",
-                    fontSize: 24, // Büyütüldü
-                    marginTop: 8, // Boşluk arttı
+                    fontSize: 24,
+                    marginTop: 8,
                   },
                 ]}
               >
-                %99
+                %{current.spO2 || 0}
               </Text>
             </View>
             <View style={styles.chartContainer}>
               <BarChart
-                data={spo2Data}
-                frontColor={greenColor} // SpO2 için yeşil vurgu
+                data={getChartData("spO2", greenColor)}
+                frontColor={greenColor}
                 roundedTop
                 {...commonProps}
               />
             </View>
           </TouchableOpacity>
 
-          {/* --- KART 4: ÇALIŞMA SAATİ --- */}
-         <TouchableOpacity 
+          {/* --- KART 4: SICAKLIK --- */}
+          <TouchableOpacity
             style={styles.card}
             activeOpacity={0.9}
-            onPress={() => router.push('/common/work-hours-detail')} // <--- YÖNLENDİRME
+            onPress={() =>
+              router.push({
+                pathname: "/common/temp-detail" as any,
+                params: {
+                  history: JSON.stringify(getLineChartData("temperature")),
+                  currentValue: (current.temperature || 0).toString(),
+                },
+              })
+            }
           >
             <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>Çalışma Saati</Text>
+              <Text style={styles.cardTitle}>Sıcaklık</Text>
               <Text style={styles.cardSubtitle}>
-                Ortalama{" "}
-                <Text
-                  style={{ color: colors.primary.main, fontWeight: "bold" }}
-                >
-                  50
-                </Text>{" "}
-                saat
+                Ortam{" "}
+                <Text style={{ color: "#FF9800", fontWeight: "bold" }}>
+                  {current.temperature || 0}°C
+                </Text>
               </Text>
             </View>
             <View style={styles.chartContainer}>
-              <BarChart data={workData} roundedTop {...commonProps} />
+              <LineChart
+                data={getLineChartData("temperature")}
+                color={"#FF9800"}
+                thickness={3}
+                curved
+                curvature={0.3}
+                hideDataPoints
+                {...commonProps}
+              />
+            </View>
+          </TouchableOpacity>
+
+          {/* --- KART 5: NEM --- */}
+          <TouchableOpacity
+            style={styles.card}
+            activeOpacity={0.9}
+            onPress={() =>
+              router.push({
+                pathname: "/common/humidity-detail" as any,
+                params: {
+                  history: JSON.stringify(getChartData("humidity", "#29B6F6")),
+                  currentValue: (current.humidity || 0).toString(),
+                },
+              })
+            }
+          >
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>Nem</Text>
+              <Text
+                style={[
+                  styles.cardSubtitle,
+                  {
+                    color: "#29B6F6",
+                    fontWeight: "bold",
+                    fontSize: 24,
+                    marginTop: 8,
+                  },
+                ]}
+              >
+                %{current.humidity || 0}
+              </Text>
+            </View>
+            <View style={styles.chartContainer}>
+              <BarChart
+                data={getChartData("humidity", "#29B6F6")}
+                frontColor={"#29B6F6"}
+                roundedTop
+                {...commonProps}
+              />
+            </View>
+          </TouchableOpacity>
+
+          {/* --- KART 6: GÜRÜLTÜ --- */}
+          <TouchableOpacity
+            style={styles.card}
+            activeOpacity={0.9}
+            onPress={() =>
+              router.push({
+                pathname: "/common/noise-detail" as any,
+                params: {
+                  history: JSON.stringify(
+                    getChartData("noiseLevel", "#9C27B0")
+                  ),
+                  currentValue: (current.noiseLevel || 0).toString(),
+                },
+              })
+            }
+          >
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>Gürültü</Text>
+              <Text style={styles.cardSubtitle}>
+                Seviye{" "}
+                <Text style={{ color: "#9C27B0", fontWeight: "bold" }}>
+                  {current.noiseLevel || 0}
+                </Text>{" "}
+                dB
+              </Text>
+            </View>
+            <View style={styles.chartContainer}>
+              <BarChart
+                data={getChartData("noiseLevel", "#9C27B0")}
+                frontColor={"#9C27B0"}
+                roundedTop
+                {...commonProps}
+              />
             </View>
           </TouchableOpacity>
         </View>

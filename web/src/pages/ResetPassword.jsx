@@ -10,8 +10,7 @@ import bannerCenter from '../assets/img2.png';
 import bannerRight from '../assets/img3.png';
 
 // --- API AYARLARI ---
-// const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
-const API_BASE_URL = "http://localhost:5187";
+const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 const ResetPassword = () => {
   const location = useLocation();
   const [accessToken, setAccessToken] = useState(null);

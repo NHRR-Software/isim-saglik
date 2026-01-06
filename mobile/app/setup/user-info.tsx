@@ -21,7 +21,7 @@ import * as SecureStore from "expo-secure-store"; // Token için
 import { useTheme } from "../../app/context/ThemeContext";
 
 // API URL (Login sayfasında kullandığınla aynı olmalı)
-const API_BASE_URL = "http://10.0.2.2:5187";
+const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 
 const BLOOD_TYPES = [
   "A Rh+",

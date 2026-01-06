@@ -2,19 +2,25 @@
 
 import React from "react";
 import { Tabs } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import CustomTabBar from "../../components/navigation/CustomTabBar";
-// DÜZELTME 1: Kendi yazdığımız Context'ten import ediyoruz
 import { useTheme } from "../context/ThemeContext";
 
+const TAB_BAR_HEIGHT = 80;
 const alertIcon = require("../../assets/images/navigation/alert_icon.png");
 
 export default function WorkerLayout() {
-  // colors objesi, o anki tema (Dark veya Light) renklerini barındırır
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
-      screenOptions={{ headerShown: false }}
+      screenOptions={{
+        headerShown: false,
+        sceneStyle: {
+          paddingBottom: TAB_BAR_HEIGHT + insets.bottom,
+        },
+      }}
       tabBar={(props) => (
         <CustomTabBar
           {...props}
@@ -28,9 +34,7 @@ export default function WorkerLayout() {
     >
       <Tabs.Screen name="index" options={{ title: "Ana Sayfa" }} />
       <Tabs.Screen name="tips" options={{ title: "İpuçları" }} />
-
       <Tabs.Screen name="alert" options={{ title: "" }} />
-
       <Tabs.Screen name="progress" options={{ title: "İstatistikler" }} />
       <Tabs.Screen name="profile" options={{ title: "Hesabım" }} />
     </Tabs>

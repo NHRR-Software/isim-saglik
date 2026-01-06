@@ -1,5 +1,3 @@
-// app/index.tsx
-
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Image, Animated } from "react-native";
 import OnboardingScreen from "./screens/onboardingPages";

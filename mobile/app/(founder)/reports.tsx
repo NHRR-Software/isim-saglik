@@ -25,7 +25,7 @@ import CustomHeader from "../../components/ui/CustomHeader";
 const { width, height } = Dimensions.get("window");
 
 // API URL
-const API_BASE_URL = "http://10.0.2.2:5187";
+const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 
 // HELPER FONKSİYONLAR
 const formatDate = (dateString: string) => {

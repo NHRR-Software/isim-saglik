@@ -20,7 +20,8 @@ import { useTheme } from "../context/ThemeContext";
 import CustomHeader from "../../components/ui/CustomHeader";
 
 // API URL
-const API_BASE_URL = "http://10.0.2.2:5187";
+const API_BASE_URL =
+  "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 
 // Helper: Role Göre Stil (Renk ve Etiket)
 const getRoleInfo = (role: number) => {

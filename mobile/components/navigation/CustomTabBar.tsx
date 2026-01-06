@@ -5,6 +5,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useTheme } from "../../app/context/ThemeContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // --- CONFIG VE PROPS ---
 interface TabBarConfig {
@@ -18,14 +19,22 @@ interface CustomTabBarProps extends BottomTabBarProps {
   config: TabBarConfig;
 }
 
+const TAB_BAR_BASE_HEIGHT = 80;
+const CENTER_BUTTON_OFFSET = 50; // 🔽 AŞAĞI ALINDI (ÖNEMLİ)
+
 const CustomTabBar: React.FC<CustomTabBarProps> = ({
   state,
   descriptors,
   navigation,
   config,
 }) => {
-  const { colors, theme } = useTheme(); // Temayı çekiyoruz
-  const styles = useMemo(() => createStyles(colors, theme), [colors, theme]); // Stilleri oluşturuyoruz
+  const { colors, theme } = useTheme();
+  const insets = useSafeAreaInsets();
+
+  const styles = useMemo(
+    () => createStyles(colors, theme, insets.bottom),
+    [colors, theme, insets.bottom]
+  );
 
   return (
     <View style={styles.container}>
@@ -46,7 +55,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
           }
         };
 
-        // --- ORTA BUTON (Center) ---
+        // --- ORTA BUTON ---
         if (route.name === config.centerButtonRouteName) {
           return (
             <TouchableOpacity
@@ -59,7 +68,7 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
                 <View
                   style={[
                     styles.centerButton,
-                    { backgroundColor: config.centerButtonColor }, // Config'den gelen renk
+                    { backgroundColor: config.centerButtonColor },
                   ]}
                 >
                   {config.centerButtonIcon ? (
@@ -80,18 +89,15 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
           );
         }
 
-        // --- NORMAL TABLAR ---
+        // --- ICON MAPPING ---
         let iconName: keyof typeof Ionicons.glyphMap = "square";
 
-        // 1. Ana Sayfa (Ortak)
         if (route.name === "index")
           iconName = isFocused ? "home" : "home-outline";
-        // 2. OHS Rotaları (YENİ EKLENDİ)
         else if (route.name === "personnel")
           iconName = isFocused ? "people" : "people-outline";
         else if (route.name === "reports")
           iconName = isFocused ? "document-text" : "document-text-outline";
-        // 3. Worker Rotaları
         else if (route.name.includes("tips"))
           iconName = isFocused ? "bulb" : "bulb-outline";
         else if (
@@ -99,16 +105,13 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
           route.name.includes("stats")
         )
           iconName = isFocused ? "stats-chart" : "stats-chart-outline";
-        // 4. Profil (Ortak)
         else if (route.name.includes("profile"))
           iconName = isFocused ? "person" : "person-outline";
-        // 5. Diğer (Founder vs.)
         else if (route.name.includes("employees"))
           iconName = isFocused ? "people" : "people-outline";
-        // 6. Founder Rotaları (YENİ)
         else if (route.name === "company")
-          iconName = isFocused ? "business" : "business-outline"; // Firma İkonu (Bina)
-        // Dinamik İkon Renkleri
+          iconName = isFocused ? "business" : "business-outline";
+
         const iconColor = isFocused
           ? colors.primary.main
           : colors.text.secondary;
@@ -116,10 +119,10 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
         return (
           <TouchableOpacity
             key={index}
-            accessibilityRole="button"
-            accessibilityState={isFocused ? { selected: true } : {}}
             onPress={onPress}
             style={styles.tabButton}
+            accessibilityRole="button"
+            accessibilityState={isFocused ? { selected: true } : {}}
           >
             <Ionicons
               name={iconName}
@@ -130,7 +133,10 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
             <Text
               style={[
                 styles.tabLabel,
-                { color: iconColor, fontWeight: isFocused ? "600" : "400" },
+                {
+                  color: iconColor,
+                  fontWeight: isFocused ? "600" : "400",
+                },
               ]}
             >
               {label}
@@ -142,20 +148,23 @@ const CustomTabBar: React.FC<CustomTabBarProps> = ({
   );
 };
 
-// --- STİLLERİ DİNAMİK HALE GETİRİYORUZ ---
-const createStyles = (colors: any, theme: string) =>
+// --- STYLES ---
+const createStyles = (colors: any, theme: string, bottomInset: number) =>
   StyleSheet.create({
     container: {
       flexDirection: "row",
-      height: 80,
-      backgroundColor: colors.background.card, // Light: Beyaz, Dark: Koyu Gri
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
       position: "absolute",
-      bottom: 0,
       left: 0,
       right: 0,
-      // Gölge ayarları
+      bottom: 0,
+
+      height: TAB_BAR_BASE_HEIGHT + bottomInset,
+      paddingBottom: bottomInset,
+
+      backgroundColor: colors.background.card,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+
       elevation: theme === "light" ? 10 : 0,
       shadowColor: "#000",
       shadowOffset: { width: 0, height: -5 },
@@ -163,32 +172,31 @@ const createStyles = (colors: any, theme: string) =>
       shadowRadius: 10,
 
       borderTopWidth: 1,
-      borderTopColor: colors.neutral.border, // Dinamik border
-      paddingBottom: 15,
+      borderTopColor: colors.neutral.border,
     },
+
     tabButton: {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
       paddingTop: 10,
     },
+
     tabLabel: {
       fontSize: 12,
     },
 
-    // ORTA BUTON
+    // CENTER BUTTON
     centerButtonWrapper: {
       flex: 1,
-      justifyContent: "center",
       alignItems: "center",
-      zIndex: 10,
     },
+
     centerButtonPositioner: {
       position: "absolute",
-      bottom: 30,
-      justifyContent: "center",
-      alignItems: "center",
+      bottom: TAB_BAR_BASE_HEIGHT / 2 + bottomInset - CENTER_BUTTON_OFFSET,
     },
+
     centerButton: {
       width: 70,
       height: 70,
@@ -196,7 +204,6 @@ const createStyles = (colors: any, theme: string) =>
       justifyContent: "center",
       alignItems: "center",
 
-      // Border rengi: Arka plan (Screen Background) ile aynı olmalı ki "Kesik" gibi dursun
       borderWidth: 5,
       borderColor: colors.background.default,
 
@@ -206,11 +213,12 @@ const createStyles = (colors: any, theme: string) =>
       shadowOpacity: 0.3,
       shadowRadius: 5,
     },
+
     centerIcon: {
       width: 36,
       height: 36,
       resizeMode: "contain",
-      tintColor: "#fff", // İkon hep beyaz kalsın
+      tintColor: "#fff",
     },
   });
 

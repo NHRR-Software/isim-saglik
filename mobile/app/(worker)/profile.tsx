@@ -32,7 +32,7 @@ const CARD_GAP = 16;
 const CARD_WIDTH = (width - 48 - CARD_GAP) / 2;
 
 // API URL
-const API_BASE_URL = "http://10.0.2.2:5187";
+const API_BASE_URL = "http://isim-saglik-server-env.eba-dyawubcm.us-west-2.elasticbeanstalk.com";
 
 export default function ProfileScreen() {
   const router = useRouter();
